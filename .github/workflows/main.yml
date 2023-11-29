@@ -1,0 +1,14 @@
+name: Configure and run workflow
+
+on: [push, pull_request]
+
+jobs:
+  build-deploy:
+    uses: ./.github/workflows/workflow.yml
+    permissions:
+      packages: 'write'
+      contents: 'read'
+    secrets: inherit
+    with:
+      DEPLOY_APP: sf-skjerming
+      DEPLOY_CLUSTER: dev-gcp
