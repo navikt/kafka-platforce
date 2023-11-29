@@ -10,5 +10,5 @@ jobs:
       contents: 'read'
     secrets: inherit
     with:
-      DEPLOY_APP: sf-skjerming
+      DEPLOY_APP: sf-pdl-kafka
       DEPLOY_CLUSTER: dev-gcp
