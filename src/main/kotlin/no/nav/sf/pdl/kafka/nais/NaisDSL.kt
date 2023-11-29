@@ -1,9 +1,9 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka.nais
 
 import io.prometheus.client.Gauge
 import io.prometheus.client.exporter.common.TextFormat
 import mu.KotlinLogging
-import no.nav.kafka.crm.metrics.Metrics.cRegistry
+import no.nav.sf.pdl.kafka.metrics.Metrics.cRegistry
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response

@@ -1,8 +1,14 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka
 
 import mu.KotlinLogging
-import no.nav.kafka.crm.metrics.kCommonMetrics
-import no.nav.kafka.crm.metrics.numberOfWorkSessionsWithoutEvents
+import no.nav.sf.pdl.kafka.kafka.AKafkaConsumer
+import no.nav.sf.pdl.kafka.kafka.KafkaConsumerStates
+import no.nav.sf.pdl.kafka.metrics.kCommonMetrics
+import no.nav.sf.pdl.kafka.metrics.numberOfWorkSessionsWithoutEvents
+import no.nav.sf.pdl.kafka.salesforce.KafkaMessage
+import no.nav.sf.pdl.kafka.salesforce.SFsObjectRest
+import no.nav.sf.pdl.kafka.salesforce.SalesforceClient
+import no.nav.sf.pdl.kafka.salesforce.isSuccess
 import org.apache.avro.generic.GenericRecord
 import java.io.File
 

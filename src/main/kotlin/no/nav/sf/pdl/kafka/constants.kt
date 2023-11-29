@@ -1,4 +1,4 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka
 
 const val env_DEPLOY_APP = "DEPLOY_APP"
 const val env_DEPLOY_CLUSTER = "DEPLOY_CLUSTER"

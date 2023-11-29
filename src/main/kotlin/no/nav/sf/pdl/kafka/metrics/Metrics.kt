@@ -1,4 +1,4 @@
-package no.nav.kafka.crm.metrics
+package no.nav.sf.pdl.kafka.metrics
 
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Gauge

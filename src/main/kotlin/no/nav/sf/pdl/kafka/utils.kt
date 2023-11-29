@@ -1,4 +1,4 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -9,6 +9,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.nais.PrestopHook
+import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import org.apache.http.HttpHost
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.config.RequestConfig

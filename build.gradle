@@ -31,7 +31,7 @@ version '0.1'
 
 jar {
     manifest {
-        attributes 'Main-Class': 'no.nav.kafka.crm.BootstrapKt'
+        attributes 'Main-Class': 'no.nav.sf.pdl.kafka.BootstrapKt'
     }
 }
 
@@ -41,7 +41,7 @@ shadowJar {
 }
 
 application {
-    mainClassName = 'no.nav.kafka.crm.BootstrapKt'
+    mainClassName = 'no.nav.sf.pdl.kafka.BootstrapKt'
 }
 
 run {

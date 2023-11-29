@@ -1,4 +1,4 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

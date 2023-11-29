@@ -1,6 +1,9 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka
 
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.nais.PrestopHook
+import no.nav.sf.pdl.kafka.nais.ShutdownHook
+import no.nav.sf.pdl.kafka.nais.enableNAISAPI
 
 class KafkaPosterApplication<K, V>(
     /**

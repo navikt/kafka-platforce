@@ -1,7 +1,8 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka.salesforce
 
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.gson
 import org.http4k.core.Response
 import org.http4k.core.Status
 import java.lang.reflect.Type

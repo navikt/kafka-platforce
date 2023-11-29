@@ -1,4 +1,4 @@
-package no.nav.kafka.crm
+package no.nav.sf.pdl.kafka
 
 val application = KafkaPosterApplication<String, String>(envAsSettings(env_POSTER_SETTINGS))
 
