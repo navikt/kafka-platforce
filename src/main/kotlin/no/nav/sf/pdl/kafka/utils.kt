@@ -150,6 +150,8 @@ fun filterTiltakstypeMidlertidigLonnstilskudd(input: String, offset: Long): Bool
  */
 fun env(env: String): String { return System.getenv(env) }
 
+fun envOrNull(env: String): String? { return System.getenv(env) }
+
 fun envAsLong(env: String): Long { return System.getenv(env).toLong() }
 
 fun envAsInt(env: String): Int { return System.getenv(env).toInt() }
