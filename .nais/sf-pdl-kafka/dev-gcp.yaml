@@ -48,7 +48,7 @@ spec:
     - name: KAFKA_CLIENTID
       value: sf-pdl-kafka
     - name: KAFKA_TOPIC
-      value: pdl.pdl-persondokument-v1 # Should use pdl.pdl-persondokument-tagged-v1, plus pdl.geografisktilknytning-v1
+      value: pdl.pdl-persondokument-tagged-v1 # Should use pdl.pdl-persondokument-tagged-v1, plus pdl.geografisktilknytning-v1
     - name: MS_BETWEEN_WORK
       value: '240000'
     - name: SF_TOKENHOST
