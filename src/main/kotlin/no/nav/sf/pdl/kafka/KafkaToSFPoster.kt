@@ -80,7 +80,7 @@ class KafkaToSFPoster<K, V>(
                     consumedInCurrentRun += cRecords.count()
                     if (sample && samples > 0) {
                         cRecords.forEach {
-                            if (samples > 0) {
+                            if (samples > 0 && it.value().toString().contains("SALESFORCE")) {
                                 File("/tmp/samples").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
                                 if (modifier != null) {
                                     File("/tmp/samplesAfterModifier").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")

@@ -102,6 +102,10 @@ fun offsetMapsToText(firstOffset: MutableMap<Int, Long>, lastOffset: MutableMap<
     }.joinToString(",")
 }
 
+fun subsetByWhiteList(input: String, offset: Long): String {
+    return input
+}
+
 fun removeAdTextProperty(input: String, offset: Long): String {
     try {
         val obj = JsonParser.parseString(input) as JsonObject
