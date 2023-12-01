@@ -37,9 +37,7 @@ spec:
         - host: navdialog--preprod.my.salesforce.com
         - host: navdialog--uat.my.salesforce.com
   envFrom:
-    - secret: sf-skjerming-secret
-  filesFrom:
-    - secret: sf-skjerming-secret
+    - secret: sf-pdl-kafka
   kafka:
     pool: nav-dev # enum of nav-dev, nav-prod
   env:
@@ -48,9 +46,9 @@ spec:
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: KAFKA_CLIENTID
-      value: sf-skjerming-client-crm
+      value: sf-pdl-kafka
     - name: KAFKA_TOPIC
-      value: nom.skjermede-personer-v1
+      value: pdl-persondokument-v1 # Should use pdl.pdl-persondokument-tagged-v1, plus pdl.geografisktilknytning-v1
     - name: MS_BETWEEN_WORK
       value: '240000'
     - name: SF_TOKENHOST

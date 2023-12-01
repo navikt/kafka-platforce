@@ -36,20 +36,18 @@ spec:
         - host: login.salesforce.com
         - host: navdialog.my.salesforce.com
   envFrom:
-    - secret: sf-skjerming-secret
-  filesFrom:
-    - secret: sf-skjerming-secret
+    - secret: sf-pdl-kafka
   kafka:
     pool: nav-prod # enum of nav-dev, nav-prod
   env:
     - name: POSTER_SETTINGS # DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE, ENCODE_KEY, AVRO_KEY_VALUE, AVRO_VALUE
-      value: SAMPLE
+      value: SAMPLE, NO_POST
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: KAFKA_CLIENTID
-      value: sf-skjerming-client-crm
+      value: sf-pdl-kafka
     - name: KAFKA_TOPIC
-      value: nom.skjermede-personer-v1
+      value: pdl-persondokument-v1 #plus pdl.geografisktilknytning-v1
     - name: MS_BETWEEN_WORK
       value: '240000'
     - name: SF_TOKENHOST
