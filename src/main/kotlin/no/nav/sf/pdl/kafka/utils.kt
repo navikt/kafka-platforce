@@ -107,11 +107,15 @@ fun offsetMapsToText(firstOffset: MutableMap<Int, Long>, lastOffset: MutableMap<
 
 fun filterOnSalesforceTag(input: String, offset: Long): Boolean {
     try {
+        if (input == "null") {
+            log.warn { "Encountered null event on topic in filterOnSalesforceTag (DEV specific)" }
+            return false
+        }
         val obj = JsonParser.parseString(input) as JsonObject
         if (obj["tags"] == null || obj["tags"] is JsonNull) return false
         return (obj["tags"] as JsonArray).any { it.asString == "SALESFORCE" }
     } catch (e: Exception) {
-        File("/tmp/filtercontainssalesforcetagfail").appendText("OFFSET $offset\n${input}\n\n${e.message}")
+        File("/tmp/filtercontainssalesforcetagfail").appendText("OFFSET $offset\nINPUT\n${input}\n\nMESSAGE ${e.message}\n")
         throw RuntimeException("Unable to parse input for salesforce tag filter ${e.message}")
     }
 }
