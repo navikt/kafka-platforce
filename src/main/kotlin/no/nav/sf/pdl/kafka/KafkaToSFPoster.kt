@@ -90,15 +90,23 @@ class KafkaToSFPoster<K, V>(
                             }
                         }
                     }
+
+                    val kafkaMessages = cRecords.map {
+                        KafkaMessage(
+                            CRM_Topic__c = it.topic(),
+                            CRM_Key__c = if (encodeKey) it.key().toString().encodeB64() else it.key().toString(),
+                            CRM_Value__c = it.value().toString()
+                                .let { value -> if (modifier == null) value.toString().encodeB64() else modifier.invoke(value.toString(), it.offset()).encodeB64() }
+                        )
+                    }
+
+                    val uniqueValueCount = kafkaMessages.toSet().count()
+                    if (kafkaMessages.size != uniqueValueCount) {
+                        log.info { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in batch" }
+                    }
+
                     val body = SFsObjectRest(
-                        records = cRecords.map {
-                            KafkaMessage(
-                                CRM_Topic__c = it.topic(),
-                                CRM_Key__c = if (encodeKey) it.key().toString().encodeB64() else it.key().toString(),
-                                CRM_Value__c = it.value().toString()
-                                    .let { value -> if (modifier == null) value.toString().encodeB64() else modifier.invoke(value.toString(), it.offset()).encodeB64() }
-                            )
-                        }
+                        records = kafkaMessages
                     ).toJson()
                     if (noPost) {
                         KafkaConsumerStates.IsOk
