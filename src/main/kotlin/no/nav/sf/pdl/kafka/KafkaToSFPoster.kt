@@ -80,7 +80,7 @@ class KafkaToSFPoster<K, V>(
                     consumedInCurrentRun += cRecords.count()
                     if (sample && samples > 0) {
                         cRecords.forEach {
-                            if (samples > 0 && it.value().toString().contains("SALESFORCE")) {
+                            if (samples > 0) {
                                 File("/tmp/samples").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
                                 if (modifier != null) {
                                     File("/tmp/samplesAfterModifier").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
@@ -95,7 +95,7 @@ class KafkaToSFPoster<K, V>(
                             KafkaMessage(
                                 CRM_Topic__c = it.topic(),
                                 CRM_Key__c = if (encodeKey) it.key().toString().encodeB64() else it.key().toString(),
-                                CRM_Value__c = /*(if (bytesAvroValue) (deserializer.deserialize(it.topic(), it.value() as ByteArray) as V).toString() else */ it.value().toString()
+                                CRM_Value__c = it.value().toString()
                                     .let { value -> if (modifier == null) value.toString().encodeB64() else modifier.invoke(value.toString(), it.offset()).encodeB64() }
                             )
                         }

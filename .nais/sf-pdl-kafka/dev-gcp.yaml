@@ -41,6 +41,8 @@ spec:
   kafka:
     pool: nav-dev # enum of nav-dev, nav-prod
   env:
+    - name: CONTEXT
+      value: DEV
     - name: POSTER_SETTINGS # DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE, ENCODE_KEY, AVRO_KEY_VALUE, AVRO_VALUE
       value: SAMPLE, FROM_BEGINNING, NO_POST
     - name: KAFKA_POLL_DURATION
@@ -55,3 +57,5 @@ spec:
       value: https://test.salesforce.com
     - name: DEPLOY_APP
       value: {{ DEPLOY_APP }}
+    - name: WHITELIST_FILE
+      value: '/whitelist/dev.json'

@@ -44,15 +44,6 @@ application {
     mainClassName = 'no.nav.sf.pdl.kafka.BootstrapKt'
 }
 
-run {
-    environment "KAFKA_BROKERS", "localhost:9092"
-    environment "KAFKA_CLIENTID", "sf-stilling"
-    environment "KAFKA_SECURITY", "FALSE"
-    environment "KAFKA_TOPIC", "aapen-oppgave-endret-v1-dev-syntetisk"
-    environment "SF_INSTTYPE", "SCRATCH"
-    environment "MS_BETWEEN_WORK", "120000"
-}
-
 repositories {
     mavenCentral()
     jcenter()
@@ -118,6 +109,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    systemProperty "CONTEXT", "TEST"
 }
 
 sourceSets {

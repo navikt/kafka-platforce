@@ -19,12 +19,15 @@ const val env_KAFKA_SCHEMA_REGISTRY = "KAFKA_SCHEMA_REGISTRY"
 const val env_KAFKA_SCHEMA_REGISTRY_USER = "KAFKA_SCHEMA_REGISTRY_USER"
 const val env_KAFKA_SCHEMA_REGISTRY_PASSWORD = "KAFKA_SCHEMA_REGISTRY_PASSWORD"
 
+const val env_WHITELIST_FILE = "WHITELIST_FILE"
+
 const val SF_PATH_oAuth = "/services/oauth2/token"
 
 // Salesforce environment dependencies
 const val env_SF_TOKENHOST = "SF_TOKENHOST"
 const val env_SF_VERSION = "SF_VERSION"
 const val env_HTTPS_PROXY = "HTTPS_PROXY" // Not in use (needed on prem?)
+const val env_CONTEXT = "CONTEXT" // To check for dev context
 
 // Salesforce required secrets
 const val secret_SFClientID = "SFClientID"
@@ -37,4 +40,4 @@ const val secret_PrivateKeyAlias = "PrivateKeyAlias"
 const val secret_PrivateKeyPassword = "PrivateKeyPassword"
 
 const val numberOfSamplesInSampleRun = 3
-const val SALESFORCE_VERSION = "v56.0"
+const val SALESFORCE_VERSION = "v57.0"

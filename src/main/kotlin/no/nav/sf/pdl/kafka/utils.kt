@@ -1,6 +1,9 @@
 package no.nav.sf.pdl.kafka
 
 import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
@@ -21,12 +24,13 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import java.io.File
 import java.net.URI
-import java.time.Instant
 import kotlin.streams.toList
 
 private val log = KotlinLogging.logger { }
 
 val gson = Gson()
+
+val devContext = envOrNull(env_CONTEXT) == "DEV"
 
 fun ApacheClient.supportProxy(httpsProxy: String): HttpHandler = httpsProxy.let { p ->
     when {
@@ -85,7 +89,6 @@ fun conditionalWait(ms: Long) =
                 loop()
             }
         }
-
         loop()
         cr.join()
     }
@@ -102,52 +105,118 @@ fun offsetMapsToText(firstOffset: MutableMap<Int, Long>, lastOffset: MutableMap<
     }.joinToString(",")
 }
 
-fun subsetByWhiteList(input: String, offset: Long): String {
-    return input
-}
-
-fun removeAdTextProperty(input: String, offset: Long): String {
+fun filterOnSalesforceTag(input: String, offset: Long): Boolean {
     try {
         val obj = JsonParser.parseString(input) as JsonObject
-        if (obj.has("properties")) {
-            val array = obj["properties"].asJsonArray
-            array.removeAll { (it as JsonObject)["key"].asString == "adtext" }
-            obj.add("properties", array)
-        }
-        return obj.toString()
+        if (obj["tags"] == null || obj["tags"] is JsonNull) return false
+        return (obj["tags"] as JsonArray).any { it.asString == "SALESFORCE" }
     } catch (e: Exception) {
-        File("/tmp/removepropertyfail").appendText("OFFSET $offset\n${input}\n\n")
-        throw RuntimeException("Unable to parse event to remove adtext property")
+        File("/tmp/filtercontainssalesforcetagfail").appendText("OFFSET $offset\n${input}\n\n${e.message}")
+        throw RuntimeException("Unable to parse input for salesforce tag filter ${e.message}")
     }
 }
 
-// Note: Only replaces numbers on first level of json (not nested values):
-fun replaceNumbersWithInstants(input: String, offset: Long): String {
+fun reduceByWhitelist(
+    input: String,
+    offset: Long,
+    whitelist: String =
+        KafkaPosterApplication::class.java.getResource(env("WHITELIST_FILE")).readText()
+): String {
     try {
-        val obj = JsonParser.parseString(input) as JsonObject
-        obj.keySet().forEach {
-            if (obj[it].isJsonPrimitive) {
-                if ((obj[it] as JsonPrimitive).isNumber) {
-                    obj.addProperty(it, Instant.ofEpochMilli(obj.get(it).asLong).toString())
+        val whitelistObject = JsonParser.parseString(whitelist) as JsonObject
+        val messageObject = JsonParser.parseString(input) as JsonObject
+
+        val result: MutableList<List<String>> = mutableListOf()
+        findNonWhitelistedFields(whitelistObject, messageObject, result)
+
+        result.forEach {
+            // println("Will attempt remove of $it")
+            messageObject.removeFieldRecurse(it)
+            // println("Status: $messageObject")
+        }
+
+        return messageObject.toString()
+    } catch (e: Exception) {
+        File("/tmp/reducebywhitelistfail").appendText("OFFSET $offset\n${input}\n\n")
+        throw RuntimeException("Unable to parse event and filter to reduce by whitelist")
+    }
+}
+
+fun findNonWhitelistedFields(
+    whitelistNode: JsonElement,
+    messageNode: JsonElement,
+    resultHolder: MutableList<List<String>>,
+    parents: List<String> = listOf()
+) {
+    val whitelistEntrySet = (whitelistNode as JsonObject).entrySet()
+
+    val messageEntrySet = if (messageNode is JsonArray) {
+        messageNode.map { it as JsonObject }.flatMap { it.entrySet() }
+    } else { (messageNode as JsonObject).entrySet() }
+
+    // Whitelist field with primitive value (typically "ALL") means allow field plus any subfields
+    val whitelistPrimitives = whitelistEntrySet.filter { it.value is JsonPrimitive }.map { it.key }.toList()
+
+    // Whitelist fields that contains another json object, means allow top field and the subobject will
+    // describe what parts to allow for any subfields
+    val whitelistObjects = whitelistEntrySet.filter { it.value is JsonObject }.map { it.key }.toList()
+
+    val removeList = messageEntrySet.filter { entry ->
+        // Never remove if fields is whitelisted as "ALL"
+        if (whitelistPrimitives.contains(entry.key)) return@filter false
+
+        // If not whitelisted as "ALL", remove any primitives and null
+        if (entry.value is JsonPrimitive || entry.value is JsonNull) return@filter true
+
+        // If field is object or array, only keep it if member of object whitelist
+        !whitelistObjects.contains(entry.key)
+    }.map { parents + it.key }
+
+    resultHolder.addAll(removeList)
+
+    // Apply recursively on any whitelist subnodes, given that the message node has corresponding array or object subnode
+    whitelistEntrySet
+        .filter { it.value is JsonObject }
+        .forEach { whitelistEntry ->
+            messageEntrySet
+                .firstOrNull { it.key == whitelistEntry.key && (it.value is JsonObject || it.value is JsonArray) }
+                ?.let { messageEntry ->
+                    findNonWhitelistedFields(
+                        whitelistEntry.value,
+                        messageEntry.value,
+                        resultHolder,
+                        parents.toList() + whitelistEntry.key,
+                    )
                 }
-            }
         }
-        return obj.toString()
-    } catch (e: Exception) {
-        File("/tmp/replacewithinstantsfail").appendText("OFFSET $offset\n${input}\n\n")
-        throw RuntimeException("Unable to replace longs to instants in modifier")
+}
+
+fun JsonElement.removeFieldRecurse(fieldTree: List<String>) {
+    if (fieldTree.size == 1) {
+        // println("remove ${fieldTree.first()}")
+        if (this is JsonObject) {
+            this.remove(fieldTree.first())
+        } else if (this is JsonArray) {
+            this.forEach {
+                (it as JsonObject).remove(fieldTree.first())
+            }
+        } else {
+            throw IllegalStateException("JsonElement.removeFieldRecurse attempted removing on primitive or null")
+        }
+    } else {
+        if (this is JsonObject) {
+            this.get(fieldTree.first()).removeFieldRecurse(fieldTree.subList(1, fieldTree.size))
+        } else if (this is JsonArray) {
+            this.forEach {
+                (it as JsonObject).get(fieldTree.first()).removeFieldRecurse(fieldTree.subList(1, fieldTree.size))
+            }
+        } else {
+            throw IllegalStateException("JsonElement.removeFieldRecurse attempted stepping into on primitive or null")
+        }
     }
 }
 
-fun filterTiltakstypeMidlertidigLonnstilskudd(input: String, offset: Long): Boolean {
-    try {
-        val obj = JsonParser.parseString(input) as JsonObject
-        return obj["tiltakstype"].asString == "MIDLERTIDIG_LONNSTILSKUDD"
-    } catch (e: Exception) {
-        File("/tmp/filtertiltakstypefail").appendText("OFFSET $offset\n${input}\n\n")
-        throw RuntimeException("Unable to parse input for tiltakstype filter")
-    }
-}
+fun readResourceFile(path: String) = KafkaPosterApplication::class.java.getResource(path).readText()
 
 /**
  * Shortcuts for fetching environment variables
