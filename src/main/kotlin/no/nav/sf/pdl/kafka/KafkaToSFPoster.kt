@@ -84,9 +84,9 @@ class KafkaToSFPoster<K, V>(
                     if (sample && samples > 0) {
                         cRecords.forEach {
                             if (samples > 0) {
-                                File("/tmp/samples$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
+                                File("/tmp/samples-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
                                 if (modifier != null) {
-                                    File("/tmp/samplesAfterModifier$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
+                                    File("/tmp/samplesAfterModifier-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
                                 }
                                 samples--
                                 log.info { "Saved sample. Samples left: $samples" }
