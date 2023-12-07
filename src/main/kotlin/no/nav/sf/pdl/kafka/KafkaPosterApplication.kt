@@ -5,19 +5,20 @@ import no.nav.sf.pdl.kafka.nais.PrestopHook
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.nais.enableNAISAPI
 
+/**
+ * KafkaPosterApplication
+ * This is the top level of the integration. Its function is to setup a server with the required
+ * endpoints for the kubernetes environement (see enableNAISAPI)
+ * and create a work loop that alternatives between work sessions (i.e polling from kafka until we are in sync) and
+ * an interruptable pause (configured with MS_BETWEEN_WORK).
+ */
 class KafkaPosterApplication<K, V>(
-    /**
-     * KafkaPosterApplication
-     * This is the top level of the integration. Its function is to setup a server with the required
-     * endpoints for the kubernetes environement (see enableNAISAPI)
-     * and create a work loop that alternatives between work sessions (i.e polling from kafka until we are in sync) and
-     * an interruptable pause (configured with MS_BETWEEN_WORK).
-     */
     val settings: List<KafkaToSFPoster.Settings> = listOf(),
-    modifier: ((String, Long) -> String)? = null,
-    filter: ((String, Long) -> Boolean)? = null
+    filter: ((String, Long) -> Boolean)? = null,
+    modifier: ((String, Long) -> String)? = null
 ) {
     val poster = KafkaToSFPoster<K, V>(settings, modifier, filter)
+    val posterPlain = KafkaToSFPoster<K, V>(settings)
 
     private val bootstrapWaitTime = envAsLong(env_MS_BETWEEN_WORK)
 
@@ -35,7 +36,8 @@ class KafkaPosterApplication<K, V>(
         when {
             stop -> Unit.also { log.info { "Stopped" } }
             !stop -> {
-                poster.runWorkSession()
+                poster.runWorkSession(env(env_KAFKA_TOPIC_PERSONDOKUMENT))
+                posterPlain.runWorkSession(env(env_KAFKA_TOPIC_GEOGRAFISKTILKNYTNING))
                 conditionalWait(bootstrapWaitTime)
                 loop()
             }

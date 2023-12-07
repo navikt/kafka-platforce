@@ -1,12 +1,6 @@
 package no.nav.sf.pdl.kafka
 
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonNull
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.google.gson.JsonPrimitive
 import io.prometheus.client.Histogram
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -103,121 +97,6 @@ fun offsetMapsToText(firstOffset: MutableMap<Int, Long>, lastOffset: MutableMap<
     return firstOffset.keys.sorted().map {
         "$it:[${firstOffset[it]}-${lastOffset[it]}]"
     }.joinToString(",")
-}
-
-fun filterOnSalesforceTag(input: String, offset: Long): Boolean {
-    try {
-        if (input == "null") {
-            log.warn { "Encountered null event on topic in filterOnSalesforceTag (DEV specific)" }
-            return false
-        }
-        val obj = JsonParser.parseString(input) as JsonObject
-        if (obj["tags"] == null || obj["tags"] is JsonNull) return false
-        return (obj["tags"] as JsonArray).any { it.asString == "SALESFORCE" }
-    } catch (e: Exception) {
-        File("/tmp/filtercontainssalesforcetagfail").appendText("OFFSET $offset\nINPUT\n${input}\n\nMESSAGE ${e.message}\n")
-        throw RuntimeException("Unable to parse input for salesforce tag filter ${e.message}")
-    }
-}
-
-fun reduceByWhitelist(
-    input: String,
-    offset: Long,
-    whitelist: String =
-        KafkaPosterApplication::class.java.getResource(env("WHITELIST_FILE")).readText()
-): String {
-    try {
-        val whitelistObject = JsonParser.parseString(whitelist) as JsonObject
-        val messageObject = JsonParser.parseString(input) as JsonObject
-
-        val result: MutableList<List<String>> = mutableListOf()
-        findNonWhitelistedFields(whitelistObject, messageObject, result)
-
-        result.forEach {
-            // println("Will attempt remove of $it")
-            messageObject.removeFieldRecurse(it)
-            // println("Status: $messageObject")
-        }
-
-        return messageObject.toString()
-    } catch (e: Exception) {
-        File("/tmp/reducebywhitelistfail").appendText("OFFSET $offset\n${input}\n\n")
-        throw RuntimeException("Unable to parse event and filter to reduce by whitelist")
-    }
-}
-
-fun findNonWhitelistedFields(
-    whitelistNode: JsonElement,
-    messageNode: JsonElement,
-    resultHolder: MutableList<List<String>>,
-    parents: List<String> = listOf()
-) {
-    val whitelistEntrySet = (whitelistNode as JsonObject).entrySet()
-
-    val messageEntrySet = if (messageNode is JsonArray) {
-        messageNode.map { it as JsonObject }.flatMap { it.entrySet() }
-    } else { (messageNode as JsonObject).entrySet() }
-
-    // Whitelist field with primitive value (typically "ALL") means allow field plus any subfields
-    val whitelistPrimitives = whitelistEntrySet.filter { it.value is JsonPrimitive }.map { it.key }.toList()
-
-    // Whitelist fields that contains another json object, means allow top field and the subobject will
-    // describe what parts to allow for any subfields
-    val whitelistObjects = whitelistEntrySet.filter { it.value is JsonObject }.map { it.key }.toList()
-
-    val removeList = messageEntrySet.filter { entry ->
-        // Never remove if fields is whitelisted as "ALL"
-        if (whitelistPrimitives.contains(entry.key)) return@filter false
-
-        // If not whitelisted as "ALL", remove any primitives and null
-        if (entry.value is JsonPrimitive || entry.value is JsonNull) return@filter true
-
-        // If field is object or array, only keep it if member of object whitelist
-        !whitelistObjects.contains(entry.key)
-    }.map { parents + it.key }
-
-    resultHolder.addAll(removeList)
-
-    // Apply recursively on any whitelist subnodes, given that the message node has corresponding array or object subnode
-    whitelistEntrySet
-        .filter { it.value is JsonObject }
-        .forEach { whitelistEntry ->
-            messageEntrySet
-                .firstOrNull { it.key == whitelistEntry.key && (it.value is JsonObject || it.value is JsonArray) }
-                ?.let { messageEntry ->
-                    findNonWhitelistedFields(
-                        whitelistEntry.value,
-                        messageEntry.value,
-                        resultHolder,
-                        parents.toList() + whitelistEntry.key,
-                    )
-                }
-        }
-}
-
-fun JsonElement.removeFieldRecurse(fieldTree: List<String>) {
-    if (fieldTree.size == 1) {
-        // println("remove ${fieldTree.first()}")
-        if (this is JsonObject) {
-            this.remove(fieldTree.first())
-        } else if (this is JsonArray) {
-            this.forEach {
-                (it as JsonObject).remove(fieldTree.first())
-            }
-        } else {
-            throw IllegalStateException("JsonElement.removeFieldRecurse attempted removing on primitive or null")
-        }
-    } else {
-        if (this is JsonObject) {
-            this.get(fieldTree.first()).removeFieldRecurse(fieldTree.subList(1, fieldTree.size))
-        } else if (this is JsonArray) {
-            this.forEach {
-                (it as JsonObject).get(fieldTree.first()).removeFieldRecurse(fieldTree.subList(1, fieldTree.size))
-            }
-        } else {
-            throw IllegalStateException("JsonElement.removeFieldRecurse attempted stepping into on primitive or null")
-        }
-    }
 }
 
 fun readResourceFile(path: String) = KafkaPosterApplication::class.java.getResource(path).readText()

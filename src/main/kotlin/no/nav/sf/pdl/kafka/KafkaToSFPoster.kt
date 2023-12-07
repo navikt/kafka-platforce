@@ -41,7 +41,7 @@ class KafkaToSFPoster<K, V>(
 
     var samples = numberOfSamplesInSampleRun
     var hasRunOnce = false
-    fun runWorkSession() {
+    fun runWorkSession(kafkaTopic: String) {
         if (runOnce && hasRunOnce) {
             log.info { "Work session skipped due to setting Only Run Once, and has consumed once" }
             return
@@ -50,16 +50,17 @@ class KafkaToSFPoster<K, V>(
         var firstOffsetPosted: MutableMap<Int, Long> = mutableMapOf() /** First offset posted per kafka partition **/
         var lastOffsetPosted: MutableMap<Int, Long> = mutableMapOf() /** Last offset posted per kafka partition **/
         var consumedInCurrentRun = 0
+        var pastFilterInCurrentRun = 0
 
         val kafkaConsumerConfig = if (avroKeyValue) AKafkaConsumer.configAvro else if (avroValue) AKafkaConsumer.configAvroValueOnly else AKafkaConsumer.configPlain
         // Instansiate each time to fetch config from current state of environment (fetch injected updates of credentials etc):
 
         val consumer = if (avroKeyValue) {
-            AKafkaConsumer<GenericRecord, GenericRecord>(kafkaConsumerConfig, env(env_KAFKA_TOPIC), envAsLong(env_KAFKA_POLL_DURATION), fromBeginning, hasRunOnce)
+            AKafkaConsumer<GenericRecord, GenericRecord>(kafkaConsumerConfig, kafkaTopic, envAsLong(env_KAFKA_POLL_DURATION), fromBeginning, hasRunOnce)
         } else if (avroValue) {
-            AKafkaConsumer<K, GenericRecord>(kafkaConsumerConfig, env(env_KAFKA_TOPIC), envAsLong(env_KAFKA_POLL_DURATION), fromBeginning, hasRunOnce)
+            AKafkaConsumer<K, GenericRecord>(kafkaConsumerConfig, kafkaTopic, envAsLong(env_KAFKA_POLL_DURATION), fromBeginning, hasRunOnce)
         } else {
-            AKafkaConsumer<K, V>(kafkaConsumerConfig, env(env_KAFKA_TOPIC), envAsLong(env_KAFKA_POLL_DURATION), fromBeginning, hasRunOnce)
+            AKafkaConsumer<K, V>(kafkaConsumerConfig, kafkaTopic, envAsLong(env_KAFKA_POLL_DURATION), fromBeginning, hasRunOnce)
         }
 
         sfClient.enablesObjectPost { postActivities ->
@@ -69,7 +70,7 @@ class KafkaToSFPoster<K, V>(
                     if (consumedInCurrentRun == 0) {
                         log.info { "Work: Finished session without consuming. Number if work sessions without event during lifetime of app: $numberOfWorkSessionsWithoutEvents" }
                     } else {
-                        log.info { "Work: Finished session with activity. $consumedInCurrentRun consumed records, posted offset range: ${offsetMapsToText(firstOffsetPosted, lastOffsetPosted)}" }
+                        log.info { "Work: Finished session with activity. $consumedInCurrentRun consumed $kafkaTopic records- past filter $pastFilterInCurrentRun, posted offset range: ${offsetMapsToText(firstOffsetPosted, lastOffsetPosted)}" }
                     }
                     KafkaConsumerStates.IsFinished
                 } else {
@@ -77,13 +78,14 @@ class KafkaToSFPoster<K, V>(
                     kCommonMetrics.noOfConsumedEvents.inc(cRecordsPreFilter.count().toDouble())
                     val cRecords = if (filter == null) cRecordsPreFilter else cRecordsPreFilter.filter { filter!!(it.value().toString(), it.offset()) }
                     kCommonMetrics.noOfEventsBlockedByFilter.inc((cRecordsPreFilter.count() - cRecords.count()).toDouble())
-                    consumedInCurrentRun += cRecords.count()
+                    consumedInCurrentRun += cRecordsPreFilter.count()
+                    pastFilterInCurrentRun += cRecords.count()
                     if (sample && samples > 0) {
                         cRecords.forEach {
                             if (samples > 0) {
-                                File("/tmp/samples").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
+                                File("/tmp/samples$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
                                 if (modifier != null) {
-                                    File("/tmp/samplesAfterModifier").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
+                                    File("/tmp/samplesAfterModifier$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
                                 }
                                 samples--
                                 log.info { "Saved sample. Samples left: $samples" }

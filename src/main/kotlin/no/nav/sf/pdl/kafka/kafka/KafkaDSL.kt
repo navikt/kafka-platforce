@@ -16,7 +16,6 @@ import no.nav.sf.pdl.kafka.env_KAFKA_POLL_DURATION
 import no.nav.sf.pdl.kafka.env_KAFKA_SCHEMA_REGISTRY
 import no.nav.sf.pdl.kafka.env_KAFKA_SCHEMA_REGISTRY_PASSWORD
 import no.nav.sf.pdl.kafka.env_KAFKA_SCHEMA_REGISTRY_USER
-import no.nav.sf.pdl.kafka.env_KAFKA_TOPIC
 import no.nav.sf.pdl.kafka.env_KAFKA_TRUSTSTORE_PATH
 import no.nav.sf.pdl.kafka.metrics.ErrorState
 import no.nav.sf.pdl.kafka.metrics.KConsumerMetrics
@@ -71,7 +70,7 @@ sealed class KafkaConsumerStates {
  **/
 open class AKafkaConsumer<K, V>(
     val config: Map<String, Any>,
-    val topic: String = env(env_KAFKA_TOPIC),
+    val topic: String,
     val pollDuration: Long = envAsLong(env_KAFKA_POLL_DURATION),
     val fromBeginning: Boolean = false,
     val hasCompletedAWorkSession: Boolean = false

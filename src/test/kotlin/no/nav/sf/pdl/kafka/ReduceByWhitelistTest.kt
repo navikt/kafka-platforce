@@ -5,6 +5,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser.parseString
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import reduceByWhitelist
 
 class ReduceByWhitelistTest {
     val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json")
@@ -16,6 +17,18 @@ class ReduceByWhitelistTest {
     }
 
     @Test
+    fun make_sure_we_let_null_value_through() {
+        val whitelist = """
+            {
+              "hentPerson": {
+                "foedsel": "ALL"
+              }
+            }
+        """
+        assertEquals("null", reduceByWhitelist("null", 0L, whitelist))
+    }
+
+    @Test
     fun make_sure_filter_on_hentPerson_level_only_returns_desired_fields() {
         val whitelist = """
             {
@@ -23,7 +36,7 @@ class ReduceByWhitelistTest {
                 "foedsel": "ALL"
               }
             }
-        """.trimIndent()
+        """
 
         assertEquals(
             """
@@ -85,7 +98,7 @@ class ReduceByWhitelistTest {
                   }
               }
             }
-        """.trimIndent()
+        """
 
         assertEquals(
             """
@@ -123,7 +136,7 @@ class ReduceByWhitelistTest {
                   }
               }
             }
-        """.trimIndent()
+        """
 
         assertEquals(
             """
