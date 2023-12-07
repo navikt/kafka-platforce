@@ -22,7 +22,7 @@ fun reduceByWhitelist(
         val removeList = findNonWhitelistedFields(whitelistObject, messageObject)
 
         File("/tmp/latestDroppedPdlFields").writeText(
-            removeList.map { it.joinToString { "." } }.joinToString { "\n" }
+            removeList.map { it.joinToString(".") }.joinToString("\n")
         )
 
         removeList.forEach {

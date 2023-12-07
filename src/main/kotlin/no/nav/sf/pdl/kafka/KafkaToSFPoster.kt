@@ -51,6 +51,7 @@ class KafkaToSFPoster<K, V>(
         var lastOffsetPosted: MutableMap<Int, Long> = mutableMapOf() /** Last offset posted per kafka partition **/
         var consumedInCurrentRun = 0
         var pastFilterInCurrentRun = 0
+        var uniqueToPost = 0
 
         val kafkaConsumerConfig = if (avroKeyValue) AKafkaConsumer.configAvro else if (avroValue) AKafkaConsumer.configAvroValueOnly else AKafkaConsumer.configPlain
         // Instansiate each time to fetch config from current state of environment (fetch injected updates of credentials etc):
@@ -70,7 +71,7 @@ class KafkaToSFPoster<K, V>(
                     if (consumedInCurrentRun == 0) {
                         log.info { "Work: Finished session without consuming. Number if work sessions without event during lifetime of app: $numberOfWorkSessionsWithoutEvents" }
                     } else {
-                        log.info { "Work: Finished session with activity. $consumedInCurrentRun consumed $kafkaTopic records- past filter $pastFilterInCurrentRun, posted offset range: ${offsetMapsToText(firstOffsetPosted, lastOffsetPosted)}" }
+                        log.info { "Work: Finished session with activity. $consumedInCurrentRun consumed $kafkaTopic records - past filter $pastFilterInCurrentRun - unique $uniqueToPost, posted offset range: ${offsetMapsToText(firstOffsetPosted, lastOffsetPosted)}" }
                     }
                     KafkaConsumerStates.IsFinished
                 } else {
@@ -104,8 +105,10 @@ class KafkaToSFPoster<K, V>(
 
                     val uniqueValueCount = kafkaMessages.toSet().count()
                     if (kafkaMessages.size != uniqueValueCount) {
-                        log.info { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in batch" }
+                        log.info { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in $kafkaTopic batch" }
                     }
+
+                    uniqueToPost += uniqueValueCount
 
                     val body = SFsObjectRest(
                         records = kafkaMessages
