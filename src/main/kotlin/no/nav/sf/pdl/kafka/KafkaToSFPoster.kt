@@ -111,13 +111,14 @@ class KafkaToSFPoster<K, V>(
                     uniqueToPost += uniqueValueCount
 
                     val body = SFsObjectRest(
-                        records = kafkaMessages
+                        records = kafkaMessages.toSet().toList()
                     ).toJson()
-                    if (noPost) {
+                    if (cRecords.count() == 0 || noPost || (kafkaTopic == "pdl.pdl-persondokument-tagged-v1" && pastFilterInCurrentRun < 1204) || (kafkaTopic == "pdl.geografisktilknytning-v1" && consumedInCurrentRun < 5296258)) {
                         KafkaConsumerStates.IsOk
                     } else {
                         when (postActivities(body).isSuccess()) {
                             true -> {
+                                File("/tmp/sentfrom-$kafkaTopic").appendText(body + "\n\n")
                                 kCommonMetrics.noOfPostedEvents.inc(cRecords.count().toDouble())
                                 if (!firstOffsetPosted.containsKey(cRecords.first().partition())) firstOffsetPosted[cRecords.first().partition()] = cRecords.first().offset()
                                 lastOffsetPosted[cRecords.last().partition()] = cRecords.last().offset()
