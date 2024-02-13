@@ -3,15 +3,19 @@ package no.nav.sf.pdl.kafka
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser.parseString
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import reduceByWhitelist
 
 class ReduceByWhitelistTest {
-    val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json")
+    private val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
+    private val exampleTombstone = "null".asRecordValue()
 
-    fun String.toPrettyFormat(): String {
-        val json: JsonObject = parseString(this).getAsJsonObject()
+    private fun String.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)
+
+    private fun String.toPrettyFormat(): String {
+        val json: JsonObject = parseString(this).asJsonObject
         val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
         return gson.toJson(json)
     }
@@ -25,7 +29,7 @@ class ReduceByWhitelistTest {
               }
             }
         """
-        assertEquals("null", reduceByWhitelist("null", 0L, whitelist))
+        assertEquals("null", reduceByWhitelist(exampleTombstone, whitelist))
     }
 
     @Test
@@ -76,7 +80,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, 0L, whitelist).toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTag, whitelist).toPrettyFormat()
         )
     }
 
@@ -122,7 +126,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, 0L, whitelist).toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTag, whitelist).toPrettyFormat()
         )
     }
 
@@ -153,7 +157,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, 0L, whitelist).toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTag, whitelist).toPrettyFormat()
         )
     }
 }

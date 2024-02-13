@@ -1,22 +1,26 @@
 package no.nav.sf.pdl.kafka
 
 import isTombstoneOrSalesforceTagged
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class IsTombstoneOrSalesforceTaggedTest {
-    val exampleWithoutTagElement = readResourceFile("/exampleWithoutTagElement.json")
-    val exampleWithoutTag = readResourceFile("/exampleWithoutTag.json")
-    val exampleWithoutSalesforceTag = readResourceFile("/exampleWithoutSalesforceTag.json")
-    val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json")
+    private val exampleWithoutTagElement = readResourceFile("/exampleWithoutTagElement.json").asRecordValue()
+    private val exampleWithoutTag = readResourceFile("/exampleWithoutTag.json").asRecordValue()
+    private val exampleWithoutSalesforceTag = readResourceFile("/exampleWithoutSalesforceTag.json").asRecordValue()
+    private val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
+    private val exampleTombstone = "null".asRecordValue()
+
+    private fun String.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)
 
     @Test
     fun should_only_allow_message_with_salesforce_tag_or_tombstone() {
-        assertEquals(false, isTombstoneOrSalesforceTagged(exampleWithoutTagElement, 0L))
-        assertEquals(false, isTombstoneOrSalesforceTagged(exampleWithoutTag, 0L))
-        assertEquals(false, isTombstoneOrSalesforceTagged(exampleWithoutSalesforceTag, 0L))
+        assertEquals(false, isTombstoneOrSalesforceTagged(exampleWithoutTagElement))
+        assertEquals(false, isTombstoneOrSalesforceTagged(exampleWithoutTag))
+        assertEquals(false, isTombstoneOrSalesforceTagged(exampleWithoutSalesforceTag))
 
-        assertEquals(true, isTombstoneOrSalesforceTagged(exampleWithSalesforceTag, 0L))
-        assertEquals(true, isTombstoneOrSalesforceTagged("null", 0L))
+        assertEquals(true, isTombstoneOrSalesforceTagged(exampleWithSalesforceTag))
+        assertEquals(true, isTombstoneOrSalesforceTagged(exampleTombstone))
     }
 }

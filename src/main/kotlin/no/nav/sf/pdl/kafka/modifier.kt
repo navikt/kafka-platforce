@@ -6,18 +6,19 @@ import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 import no.nav.sf.pdl.kafka.KafkaPosterApplication
 import no.nav.sf.pdl.kafka.env
+import no.nav.sf.pdl.kafka.env_WHITELIST_FILE
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 
 fun reduceByWhitelist(
-    input: String,
-    offset: Long,
+    record: ConsumerRecord<String, String>,
     whitelist: String =
-        KafkaPosterApplication::class.java.getResource(env("WHITELIST_FILE")).readText()
+        KafkaPosterApplication::class.java.getResource(env(env_WHITELIST_FILE)).readText()
 ): String {
-    if (input == "null") return input // Tombstone - no reduction to be made
+    if (record.value() == "null") return "null" // Tombstone - no reduction to be made
     try {
         val whitelistObject = JsonParser.parseString(whitelist) as JsonObject
-        val messageObject = JsonParser.parseString(input) as JsonObject
+        val messageObject = JsonParser.parseString(record.value()) as JsonObject
 
         val removeList = findNonWhitelistedFields(whitelistObject, messageObject)
 
@@ -31,7 +32,7 @@ fun reduceByWhitelist(
 
         return messageObject.toString()
     } catch (e: Exception) {
-        File("/tmp/reducebywhitelistfail").appendText("OFFSET $offset\n${input}\n\n")
+        File("/tmp/reducebywhitelistfail").appendText("$record\n\n")
         throw RuntimeException("Unable to parse event and filter to reduce by whitelist")
     }
 }
