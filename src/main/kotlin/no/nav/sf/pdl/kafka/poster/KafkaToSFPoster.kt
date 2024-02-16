@@ -85,10 +85,10 @@ class KafkaToSFPoster<K, V>(
                 numberOfWorkSessionsWithoutEvents = 0
                 kCommonMetrics.noOfConsumedEvents.inc(recordsFromTopic.count().toDouble())
                 val recordsPostFilter = filter?.let { filter -> recordsFromTopic.filter { filter(it) } } ?: recordsFromTopic
-
-                kCommonMetrics.noOfEventsBlockedByFilter.inc((recordsFromTopic.count() - recordsPostFilter.count()).toDouble())
-                stats.consumedInCurrentRun += recordsFromTopic.count()
-                stats.pastFilterInCurrentRun += recordsPostFilter.count()
+                val blockedByFilterInBatch = recordsFromTopic.count() - recordsPostFilter.count()
+                stats.blockedByFilter += blockedByFilterInBatch
+                kCommonMetrics.noOfEventsBlockedByFilter.inc(blockedByFilterInBatch.toDouble())
+                stats.consumed += recordsFromTopic.count()
 
                 if (hasFlagSample) sample(recordsPostFilter)
 
@@ -99,7 +99,7 @@ class KafkaToSFPoster<K, V>(
                         KafkaMessage(
                             CRM_Topic__c = it.topic(),
                             CRM_Key__c = it.key().toString(),
-                            CRM_Value__c = (modifier?.let { modifier -> modifier(it) } ?: it.value()).encodeB64()
+                            CRM_Value__c = (modifier?.let { modifier -> modifier(it) } ?: it.value()?.toString()?.encodeB64() ?: "")
                         )
                     }
 
@@ -107,7 +107,7 @@ class KafkaToSFPoster<K, V>(
                     if (kafkaMessages.size != uniqueValueCount) {
                         log.warn { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in $kafkaTopic batch" }
                     }
-                    stats.uniqueRecords += uniqueValueCount
+                    stats.postedUniqueRecords += uniqueValueCount
 
                     val requestBody = SFsObjectRest(
                         records = kafkaMessages.toSet().toList()
