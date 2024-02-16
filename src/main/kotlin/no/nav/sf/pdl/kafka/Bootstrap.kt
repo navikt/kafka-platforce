@@ -4,7 +4,7 @@ import isTombstoneOrSalesforceTagged
 import reduceByWhitelist
 
 val application = KafkaPosterApplication<String, String>(
-    filter = if (devContext) ::isTombstoneOrSalesforceTagged else null,
+    filter = ::isTombstoneOrSalesforceTagged, // if (devContext) ::isTombstoneOrSalesforceTagged else null,
     modifier = ::reduceByWhitelist
 )
 
