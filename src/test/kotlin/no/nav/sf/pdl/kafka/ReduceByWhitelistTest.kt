@@ -10,9 +10,9 @@ import reduceByWhitelist
 
 class ReduceByWhitelistTest {
     private val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
-    private val exampleTombstone = "null".asRecordValue()
+    private val exampleTombstone = null.asRecordValue()
 
-    private fun String.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)
+    private fun String?.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)
 
     private fun String.toPrettyFormat(): String {
         val json: JsonObject = parseString(this).asJsonObject
@@ -29,7 +29,7 @@ class ReduceByWhitelistTest {
               }
             }
         """
-        assertEquals("null", reduceByWhitelist(exampleTombstone, whitelist))
+        assertEquals(null, reduceByWhitelist(exampleTombstone, whitelist))
     }
 
     @Test
@@ -80,7 +80,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, whitelist).toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTag, whitelist)?.toPrettyFormat()
         )
     }
 
@@ -126,7 +126,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, whitelist).toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTag, whitelist)?.toPrettyFormat()
         )
     }
 
@@ -157,7 +157,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, whitelist).toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTag, whitelist)?.toPrettyFormat()
         )
     }
 }

@@ -10,9 +10,9 @@ class IsTombstoneOrSalesforceTaggedTest {
     private val exampleWithoutTag = readResourceFile("/exampleWithoutTag.json").asRecordValue()
     private val exampleWithoutSalesforceTag = readResourceFile("/exampleWithoutSalesforceTag.json").asRecordValue()
     private val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
-    private val exampleTombstone = "null".asRecordValue()
+    private val exampleTombstone = null.asRecordValue()
 
-    private fun String.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)
+    private fun String?.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)
 
     @Test
     fun should_only_allow_message_with_salesforce_tag_or_tombstone() {

@@ -11,11 +11,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 
 fun reduceByWhitelist(
-    record: ConsumerRecord<String, String>,
+    record: ConsumerRecord<String, String?>,
     whitelist: String =
         KafkaPosterApplication::class.java.getResource(env(env_WHITELIST_FILE)).readText()
-): String {
-    if (record.value() == "null") return "null" // Tombstone - no reduction to be made
+): String? {
+    if (record.value() == null) return null // Tombstone - no reduction to be made
     try {
         val whitelistObject = JsonParser.parseString(whitelist) as JsonObject
         val messageObject = JsonParser.parseString(record.value()) as JsonObject

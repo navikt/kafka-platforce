@@ -37,7 +37,7 @@ data class KafkaMessage(
     val attributes: SFsObjectRestAttributes = SFsObjectRestAttributes(),
     val CRM_Topic__c: String,
     val CRM_Key__c: String,
-    val CRM_Value__c: String
+    val CRM_Value__c: String?
 )
 
 data class SFsObjectRestAttributes(

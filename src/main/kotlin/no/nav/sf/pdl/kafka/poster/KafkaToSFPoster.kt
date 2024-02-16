@@ -29,8 +29,8 @@ import java.time.Duration
  * Makes use of SalesforceClient to setup connection to salesforce
  */
 class KafkaToSFPoster<K, V>(
-    val modifier: ((ConsumerRecord<String, String>) -> String)? = null,
-    val filter: ((ConsumerRecord<String, String>) -> Boolean)? = null,
+    val filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
+    val modifier: ((ConsumerRecord<String, String?>) -> String?)? = null,
     kafkaTopic: String = env(env_KAFKA_TOPIC_PERSONDOKUMENT),
     settings: List<Settings> = envAsSettings(env_POSTER_SETTINGS)
 ) {
@@ -93,13 +93,31 @@ class KafkaToSFPoster<K, V>(
                 if (hasFlagSample) sample(recordsPostFilter)
 
                 if (recordsPostFilter.count() == 0 || hasFlagNoPost) {
+                    if (recordsFromTopic.count() > 0 && recordsFromTopic.any { it.value() == null }) {
+                        val kafkaMessages = recordsPostFilter.map {
+                            KafkaMessage(
+                                CRM_Topic__c = it.topic(),
+                                CRM_Key__c = it.key().toString(),
+                                CRM_Value__c = (
+                                    modifier?.let { modifier -> modifier(it) } ?: it.value()?.toString()
+                                        ?.encodeB64()
+                                    )
+                            )
+                        }
+
+                        val requestBody = SFsObjectRest(
+                            records = kafkaMessages.toSet().toList()
+                        ).toJson()
+
+                        File("/tmp/exampleBatchWithTombstone").writeText(requestBody)
+                    }
                     ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
                 } else {
                     val kafkaMessages = recordsPostFilter.map {
                         KafkaMessage(
                             CRM_Topic__c = it.topic(),
                             CRM_Key__c = it.key().toString(),
-                            CRM_Value__c = (modifier?.let { modifier -> modifier(it) } ?: it.value()?.toString()?.encodeB64() ?: "")
+                            CRM_Value__c = (modifier?.let { modifier -> modifier(it) } ?: it.value()?.toString()?.encodeB64())
                         )
                     }
 
@@ -131,7 +149,7 @@ class KafkaToSFPoster<K, V>(
         }
     }
 
-    fun sample(records: Iterable<ConsumerRecord<String, String>>) {
+    fun sample(records: Iterable<ConsumerRecord<String, String?>>) {
         if (samplesLeft > 0) {
             records.forEach {
                 if (samplesLeft-- > 0) {
