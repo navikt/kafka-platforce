@@ -3,6 +3,7 @@ package no.nav.sf.pdl.kafka
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.nais.naisAPI
+import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.http4k.server.ApacheServer
 import org.http4k.server.asServer

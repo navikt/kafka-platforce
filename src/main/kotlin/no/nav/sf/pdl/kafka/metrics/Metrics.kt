@@ -1,6 +1,7 @@
 package no.nav.sf.pdl.kafka.metrics
 
 import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.Counter
 import io.prometheus.client.Gauge
 import io.prometheus.client.hotspot.DefaultExports
 import mu.KotlinLogging
@@ -14,6 +15,9 @@ object Metrics {
     }
     fun registerLabelGauge(name: String, label: String): Gauge {
         return Gauge.build().name(name).help(name).labelNames(label).register()
+    }
+    fun registerCounter(name: String): Counter {
+        return Counter.build().name(name).help(name).register()
     }
     init {
         DefaultExports.initialize()
@@ -30,6 +34,7 @@ data class KCommonMetrics(
     val unknownErrorConsume: Gauge = Metrics.registerGauge("unknownErrorConsume"),
     val unknownErrorPoll: Gauge = Metrics.registerGauge("unknownErrorPoll"),
     val unknownErrorCommit: Gauge = Metrics.registerGauge("unknownErrorCommit"),
+
     val noOfConsumedEvents: Gauge = Metrics.registerGauge("kafka_consumed_event_gauge"),
     val noOfEventsBlockedByFilter: Gauge = Metrics.registerGauge("kafka_blocked_by_filter_gauge"),
     val noOfPostedEvents: Gauge = Metrics.registerGauge("sf_posted_event_gauge"),
@@ -44,9 +49,6 @@ fun KCommonMetrics.clearWorkSessionMetrics() {
 }
 
 val kCommonMetrics = KCommonMetrics()
-var kErrorState = ErrorState.NONE
-var currentConsumerMessageHost = "DEFAULT"
-var kafkaConsumerOffsetRangeBoard: MutableMap<String, Pair<Long, Long>> = mutableMapOf()
 var numberOfWorkSessionsWithoutEvents = 0
 
 const val POSTFIX_FAIL = "-FAIL"

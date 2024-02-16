@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
-import kotlin.streams.toList
+import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
 
 private val log = KotlinLogging.logger { }
 
@@ -42,18 +42,6 @@ fun conditionalWait(ms: Long) =
         loop()
         cr.join()
     }
-
-/**
- * offsetMapsToText
- * Create a string to represent the spans of offsets that has been posted
- * Example: 0:[12034-16035],1:[11240-15273]
- */
-fun offsetMapsToText(firstOffset: MutableMap<Int, Long>, lastOffset: MutableMap<Int, Long>): String {
-    if (firstOffset.isEmpty()) return "NONE"
-    return firstOffset.keys.sorted().map {
-        "$it:[${firstOffset[it]}-${lastOffset[it]}]"
-    }.joinToString(",")
-}
 
 fun readResourceFile(path: String) = KafkaPosterApplication::class.java.getResource(path).readText()
 

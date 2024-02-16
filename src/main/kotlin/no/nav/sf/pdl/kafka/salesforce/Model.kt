@@ -62,7 +62,7 @@ fun Response.isSuccess(): Boolean = when (status) {
             val listOfStatusObject: Type = object : TypeToken<ArrayList<SFsObjectStatus>>() {}.getType()
             val parsedResult = gson.fromJson(bodyString(), listOfStatusObject) as List<SFsObjectStatus>
             // Salesforce gives 200 OK independent of successful posting of records or not, need to check response value
-            if (parsedResult.count() == 0) {
+            if (parsedResult.isEmpty()) {
                 log.error { "Posting response has no status object successes" }
                 false
             } else if (parsedResult.all { it.success }) {
