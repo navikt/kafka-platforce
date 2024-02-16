@@ -8,9 +8,12 @@ import java.io.File
 
 private val log = KotlinLogging.logger { }
 
+var stringNull = 0
+var nullNull = 0
 fun isTombstoneOrSalesforceTagged(record: ConsumerRecord<String, String>): Boolean {
     try {
-        if (record.value() == "null") return true // Allow tombstone signal
+        if (record.value() == "null") return true.also { stringNull++ } // Allow tombstone signal
+        if (record.value() == null) return true.also { nullNull++ } // Allow tombstone signal
         val obj = JsonParser.parseString(record.value()) as JsonObject
         if (obj["tags"] == null || obj["tags"] is JsonNull) return false
         return (obj["tags"] as JsonArray).any { it.asString == "SALESFORCE" }
