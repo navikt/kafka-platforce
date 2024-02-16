@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
+import java.util.Base64
 
 private val log = KotlinLogging.logger { }
 
@@ -14,7 +15,7 @@ val gson = Gson()
 
 val devContext = envOrNull(env_CONTEXT) == "DEV"
 
-fun String.encodeB64(): String = org.apache.commons.codec.binary.Base64.encodeBase64String(this.toByteArray())
+fun String.encodeB64(): String = Base64.getEncoder().encodeToString(this.toByteArray())
 
 /**
  * conditionalWait
