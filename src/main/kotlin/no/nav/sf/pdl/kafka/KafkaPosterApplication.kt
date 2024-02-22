@@ -1,6 +1,8 @@
 package no.nav.sf.pdl.kafka
 
+import io.prometheus.client.hotspot.DefaultExports
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.nais.naisAPI
 import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
@@ -15,36 +17,29 @@ import org.http4k.server.asServer
  * and create a work loop that alternatives between work sessions (i.e polling from kafka until we are in sync) and
  * an interruptable pause (configured with MS_BETWEEN_WORK).
  */
-class KafkaPosterApplication<K, V>(
+class KafkaPosterApplication(
     filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
-    modifier: ((ConsumerRecord<String, String?>) -> String?)? = null
+    modifier: ((ConsumerRecord<String, String?>) -> String?)? = null,
 ) {
-    val poster = KafkaToSFPoster<K, V>(filter, modifier)
+    private val poster = KafkaToSFPoster(filter, modifier)
 
-    private val bootstrapWaitTime = envAsLong(env_MS_BETWEEN_WORK)
+    private val msBetweenWork = envAsLong(env_MS_BETWEEN_WORK)
 
     private val log = KotlinLogging.logger { }
 
     fun start() {
-        log.info { "Starting app ${envOrNull(env_DEPLOY_APP)} - devContext $devContext with poster settings ${envAsSettings(env_POSTER_SETTINGS)}" }
+        log.info { "Starting app ${envOrNull(env_DEPLOY_APP)} - devContext $devContext with poster settings ${envAsFlags(env_POSTER_FLAGS)}" }
+        DefaultExports.initialize() // Instantiate Prometheus standard metrics
         naisAPI().asServer(ApacheServer(8080)).start()
-        loop()
-    }
 
-    private tailrec fun loop() {
-        val stop = ShutdownHook.isActive()
-        when {
-            stop -> Unit.also { log.info { "Stopped" } }
-            else -> {
-                try {
-                    poster.runWorkSession(env(env_KAFKA_TOPIC_PERSONDOKUMENT))
-                    // posterPlain.runWorkSession(env(env_KAFKA_TOPIC_GEOGRAFISKTILKNYTNING))
-                } catch (e: Exception) {
-                    log.error { "A work session failed:\n${e.stackTraceToString()}" }
-                }
-                conditionalWait(bootstrapWaitTime)
-                loop()
+        while (!ShutdownHook.isActive()) {
+            try {
+                poster.runWorkSession()
+            } catch (e: Exception) {
+                log.error { "A work session failed:\n${e.stackTraceToString()}" }
+                WorkSessionStatistics.workSessionExceptionCounter.inc()
             }
+            conditionalWait(msBetweenWork)
         }
     }
 }

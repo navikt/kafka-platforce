@@ -59,4 +59,4 @@ fun envAsInt(env: String): Int { return System.getenv(env).toInt() }
 
 fun envAsList(env: String): List<String> { return System.getenv(env).split(",").map { it.trim() }.toList() }
 
-fun envAsSettings(env: String): List<KafkaToSFPoster.Settings> { return envAsList(env).stream().map { KafkaToSFPoster.Settings.valueOf(it) }.toList() }
+fun envAsFlags(env: String): List<KafkaToSFPoster.Flag> { return envAsList(env).stream().map { KafkaToSFPoster.Flag.valueOf(it) }.toList() }

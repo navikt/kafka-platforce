@@ -1,3 +1,5 @@
+package no.nav.sf.pdl.kafka
+
 import com.google.gson.JsonArray
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject

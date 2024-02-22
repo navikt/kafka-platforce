@@ -4,16 +4,14 @@ import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.NUMBER_OF_SAMPLES_IN_SAMPLE_RUN
 import no.nav.sf.pdl.kafka.encodeB64
 import no.nav.sf.pdl.kafka.env
+import no.nav.sf.pdl.kafka.envAsFlags
 import no.nav.sf.pdl.kafka.envAsLong
-import no.nav.sf.pdl.kafka.envAsSettings
 import no.nav.sf.pdl.kafka.env_KAFKA_POLL_DURATION
 import no.nav.sf.pdl.kafka.env_KAFKA_TOPIC_PERSONDOKUMENT
-import no.nav.sf.pdl.kafka.env_POSTER_SETTINGS
+import no.nav.sf.pdl.kafka.env_POSTER_FLAGS
 import no.nav.sf.pdl.kafka.kafka.propertiesPlain
-import no.nav.sf.pdl.kafka.metrics.kCommonMetrics
-import no.nav.sf.pdl.kafka.metrics.numberOfWorkSessionsWithoutEvents
+import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.salesforce.KafkaMessage
-import no.nav.sf.pdl.kafka.salesforce.SFsObjectRest
 import no.nav.sf.pdl.kafka.salesforce.SalesforceClient
 import no.nav.sf.pdl.kafka.salesforce.isSuccess
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -28,128 +26,126 @@ import java.time.Duration
  * This class is responsible for handling a work session, ie polling and posting to salesforce until we are up-to-date with topic
  * Makes use of SalesforceClient to setup connection to salesforce
  */
-class KafkaToSFPoster<K, V>(
-    val filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
-    val modifier: ((ConsumerRecord<String, String?>) -> String?)? = null,
-    kafkaTopic: String = env(env_KAFKA_TOPIC_PERSONDOKUMENT),
-    settings: List<Settings> = envAsSettings(env_POSTER_SETTINGS)
+class KafkaToSFPoster(
+    private val filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
+    private val modifier: ((ConsumerRecord<String, String?>) -> String?)? = null,
+    private val sfClient: SalesforceClient = SalesforceClient(),
+    private val kafkaTopic: String = env(env_KAFKA_TOPIC_PERSONDOKUMENT),
+    flags: List<Flag> = envAsFlags(env_POSTER_FLAGS)
 ) {
-    enum class Settings { DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE }
+    enum class Flag { DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE }
 
-    private enum class ConsumeStatus { START, SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
+    private enum class ConsumeStatus { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
 
     private val log = KotlinLogging.logger { }
 
-    private val hasFlagFromBeginning = settings.contains(Settings.FROM_BEGINNING)
-    private val hasFlagNoPost = settings.contains(Settings.NO_POST)
-    private val hasFlagSample = settings.contains(Settings.SAMPLE)
-    private var hasFlagRunOnce = settings.contains(Settings.RUN_ONCE)
-
-    private val sfClient = SalesforceClient()
+    // Flags set from settings
+    private val hasFlagFromBeginning = flags.contains(Flag.FROM_BEGINNING)
+    private val hasFlagNoPost = flags.contains(Flag.NO_POST)
+    private val hasFlagSample = flags.contains(Flag.SAMPLE)
+    private val hasFlagRunOnce = flags.contains(Flag.RUN_ONCE)
 
     private var samplesLeft = NUMBER_OF_SAMPLES_IN_SAMPLE_RUN
     private var hasRunOnce = false
 
-    val kafkaConsumer = KafkaConsumer<String, String>(propertiesPlain).apply {
-        // Using assign rather than subscribe since we need the ability to seek to a particular offset
-        val topicPartitions = partitionsFor(kafkaTopic).map { TopicPartition(it.topic(), it.partition()) }
-        assign(topicPartitions)
-        log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
-        if (hasFlagFromBeginning) {
-            seekToBeginning(emptyList()) // emptyList(): Seeks to the first offset for all provided partitions
-        }
-    }
+    private lateinit var stats: WorkSessionStatistics
 
-    fun runWorkSession(kafkaTopic: String) {
+    fun runWorkSession() {
         if (hasFlagRunOnce && hasRunOnce) {
             log.info { "Work session skipped due to setting Only Run Once, and has consumed once" }
             return
         }
+        hasRunOnce = true
 
-        val stats = WorkSessionStatistics()
+        stats = WorkSessionStatistics()
 
-        var status = ConsumeStatus.START
+        val kafkaConsumer = setupKafkaConsumer(kafkaTopic)
 
-        while (status == ConsumeStatus.START || status == ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH) {
-            val recordsFromTopic = kafkaConsumer.poll(Duration.ofMillis(envAsLong(env_KAFKA_POLL_DURATION)))
-                as ConsumerRecords<String, String>
-            hasRunOnce = true
-            status = if (recordsFromTopic.isEmpty) {
-                if (status == ConsumeStatus.START) {
-                    log.info { "Work: Finished session without consuming. Number of work sessions without events during lifetime of app: $numberOfWorkSessionsWithoutEvents" }
-                } else {
-                    log.info { "Work: Finished session with activity. $stats" }
-                }
-                ConsumeStatus.NO_MORE_RECORDS
-            } else {
-                numberOfWorkSessionsWithoutEvents = 0
-                kCommonMetrics.noOfConsumedEvents.inc(recordsFromTopic.count().toDouble())
-                val recordsPostFilter = filter?.let { filter -> recordsFromTopic.filter { filter(it) } } ?: recordsFromTopic
-                val blockedByFilterInBatch = recordsFromTopic.count() - recordsPostFilter.count()
-                stats.blockedByFilter += blockedByFilterInBatch
-                kCommonMetrics.noOfEventsBlockedByFilter.inc(blockedByFilterInBatch.toDouble())
-                stats.consumed += recordsFromTopic.count()
+        pollAndConsume(kafkaConsumer)
+    }
 
-                if (hasFlagSample) sample(recordsPostFilter)
-
-                if (recordsPostFilter.count() == 0 || hasFlagNoPost) {
-                    if (recordsFromTopic.count() > 0 && recordsFromTopic.any { it.value() == null }) {
-                        val kafkaMessages = recordsPostFilter.map {
-                            KafkaMessage(
-                                CRM_Topic__c = it.topic(),
-                                CRM_Key__c = it.key().toString(),
-                                CRM_Value__c = (
-                                    modifier?.let { modifier -> modifier(it) } ?: it.value()?.toString()
-                                        ?.encodeB64()
-                                    )
-                            )
-                        }
-
-                        val requestBody = SFsObjectRest(
-                            records = kafkaMessages.toSet().toList()
-                        ).toJson()
-
-                        File("/tmp/exampleBatchWithTombstone").writeText(requestBody)
-                    }
-                    ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
-                } else {
-                    val kafkaMessages = recordsPostFilter.map {
-                        KafkaMessage(
-                            CRM_Topic__c = it.topic(),
-                            CRM_Key__c = it.key().toString(),
-                            CRM_Value__c = (modifier?.let { modifier -> modifier(it) } ?: it.value()?.toString()?.encodeB64())
-                        )
-                    }
-
-                    val uniqueValueCount = kafkaMessages.toSet().count()
-                    if (kafkaMessages.size != uniqueValueCount) {
-                        log.warn { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in $kafkaTopic batch" }
-                    }
-                    stats.postedUniqueRecords += uniqueValueCount
-
-                    val requestBody = SFsObjectRest(
-                        records = kafkaMessages.toSet().toList()
-                    ).toJson()
-
-                    when (sfClient(requestBody).isSuccess()) {
-                        true -> {
-                            kCommonMetrics.noOfPostedEvents.inc(recordsPostFilter.count().toDouble())
-                            stats.postedOffsets.update(recordsPostFilter.toList())
-                            ConsumeStatus.NO_MORE_RECORDS
-                        }
-
-                        false -> {
-                            log.warn { "Failed when posting to SF" }
-                            kCommonMetrics.producerIssues.inc()
-                            ConsumeStatus.FAIL
-                        }
-                    }
-                }
+    private fun setupKafkaConsumer(kafkaTopic: String): KafkaConsumer<String, String?> {
+        return KafkaConsumer<String, String?>(propertiesPlain).apply {
+            // Using assign rather than subscribe since we need the ability to seek to a particular offset
+            val topicPartitions = partitionsFor(kafkaTopic).map { TopicPartition(it.topic(), it.partition()) }
+            assign(topicPartitions)
+            log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
+            if (hasFlagFromBeginning) {
+                seekToBeginning(emptyList()) // emptyList(): Seeks to the first offset for all provided partitions
             }
         }
     }
 
-    fun sample(records: Iterable<ConsumerRecord<String, String?>>) {
+    private tailrec fun pollAndConsume(kafkaConsumer: KafkaConsumer<String, String?>) {
+        val records = kafkaConsumer.poll(Duration.ofMillis(envAsLong(env_KAFKA_POLL_DURATION)))
+            as ConsumerRecords<String, String?>
+
+        if (consumeRecords(records) == ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH) {
+            kafkaConsumer.commitSync() // Will update position of kafka consumer in kafka cluster
+            pollAndConsume(kafkaConsumer)
+        }
+    }
+
+    private fun consumeRecords(recordsFromTopic: ConsumerRecords<String, String?>): ConsumeStatus =
+        if (recordsFromTopic.isEmpty) {
+            if (!stats.hasConsumed()) {
+                log.info { "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}" }
+                WorkSessionStatistics.workSessionsWithoutEventsCounter.inc()
+            } else {
+                log.info { "Finished work session with activity. $stats" }
+            }
+            ConsumeStatus.NO_MORE_RECORDS
+        } else {
+            WorkSessionStatistics.workSessionsWithoutEventsCounter.clear()
+            stats.incConsumed(recordsFromTopic.count())
+
+            val recordsFiltered = filterRecords(recordsFromTopic)
+
+            if (hasFlagSample) sampleRecords(recordsFiltered)
+
+            if (recordsFiltered.count() == 0 || hasFlagNoPost) {
+                // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
+                // consider it a successfully consumed batch without further action
+                ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
+            } else {
+                when (sfClient.postRecords(recordsFiltered.toKafkaMessagesSet()).isSuccess()) {
+                    true -> {
+                        stats.updatePostedStatistics(recordsFiltered)
+                        ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
+                    }
+                    false -> {
+                        log.warn { "Failed when posting to SF - $stats" }
+                        WorkSessionStatistics.failedSalesforceCallCounter.inc()
+                        ConsumeStatus.FAIL
+                    }
+                }
+            }
+        }
+
+    private fun filterRecords(records: ConsumerRecords<String, String?>): Iterable<ConsumerRecord<String, String?>> {
+        val recordsPostFilter = filter?.run { records.filter { this(it) } } ?: records
+        stats.incBlockedByFilter(records.count() - recordsPostFilter.count())
+        return recordsPostFilter
+    }
+
+    private fun Iterable<ConsumerRecord<String, String?>>.toKafkaMessagesSet(): Set<KafkaMessage> {
+        val kafkaMessages = this.map {
+            KafkaMessage(
+                CRM_Topic__c = it.topic(),
+                CRM_Key__c = it.key(),
+                CRM_Value__c = (modifier?.run { this(it) } ?: it.value()?.encodeB64())
+            )
+        }
+
+        val uniqueKafkaMessages = kafkaMessages.toSet()
+        val uniqueValueCount = uniqueKafkaMessages.count()
+        if (kafkaMessages.size != uniqueValueCount) {
+            log.warn { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in $kafkaTopic batch" }
+        }
+        return uniqueKafkaMessages
+    }
+
+    private fun sampleRecords(records: Iterable<ConsumerRecord<String, String?>>) {
         if (samplesLeft > 0) {
             records.forEach {
                 if (samplesLeft-- > 0) {

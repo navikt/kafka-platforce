@@ -1,7 +1,7 @@
 package no.nav.sf.pdl.kafka
 
 const val env_DEPLOY_APP = "DEPLOY_APP"
-const val env_POSTER_SETTINGS = "POSTER_SETTINGS"
+const val env_POSTER_FLAGS = "POSTER_FLAGS"
 
 const val env_MS_BETWEEN_WORK = "MS_BETWEEN_WORK"
 

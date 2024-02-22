@@ -20,17 +20,9 @@ private val log = KotlinLogging.logger { }
  */
 data class SFsObjectRest(
     val allOrNone: Boolean = true,
-    val records: List<KafkaMessage>
+    val records: Set<KafkaMessage>
 ) {
     fun toJson() = gson.toJson(this)
-
-    companion object {
-        fun fromJson(data: String): SFsObjectRest = runCatching { gson.fromJson(data, SFsObjectRest::class.java) as SFsObjectRest }
-            .onFailure {
-                log.error { "Parsing of SFsObjectRest request failed - ${it.localizedMessage}" }
-            }
-            .getOrDefault(SFsObjectRest(true, emptyList()))
-    }
 }
 
 data class KafkaMessage(

@@ -1,12 +1,11 @@
+package no.nav.sf.pdl.kafka
+
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
-import no.nav.sf.pdl.kafka.KafkaPosterApplication
-import no.nav.sf.pdl.kafka.env
-import no.nav.sf.pdl.kafka.env_WHITELIST_FILE
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 
@@ -105,24 +104,24 @@ private fun findNonWhitelistedFields(
  */
 private fun JsonElement.removeFields(fieldTree: List<String>) {
     if (fieldTree.size == 1) {
-        if (this is JsonObject) {
-            this.remove(fieldTree.first())
-        } else if (this is JsonArray) {
-            this.forEach {
+        when (this) {
+            is JsonObject -> this.remove(fieldTree.first())
+            is JsonArray -> this.forEach {
                 (it as JsonObject).remove(fieldTree.first())
             }
-        } else {
-            throw IllegalStateException("JsonElement.removeFieldRecurse attempted removing on primitive or null")
+            else -> {
+                throw IllegalStateException("JsonElement.removeFieldRecurse attempted removing on primitive or null")
+            }
         }
     } else {
-        if (this is JsonObject) {
-            this.get(fieldTree.first()).removeFields(fieldTree.subList(1, fieldTree.size))
-        } else if (this is JsonArray) {
-            this.forEach {
+        when (this) {
+            is JsonObject -> this.get(fieldTree.first()).removeFields(fieldTree.subList(1, fieldTree.size))
+            is JsonArray -> this.forEach {
                 (it as JsonObject).get(fieldTree.first()).removeFields(fieldTree.subList(1, fieldTree.size))
             }
-        } else {
-            throw IllegalStateException("JsonElement.removeFieldRecurse attempted stepping into on primitive or null")
+            else -> {
+                throw IllegalStateException("JsonElement.removeFieldRecurse attempted stepping into on primitive or null")
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ spec:
   env:
     - name: CONTEXT
       value: DEV
-    - name: POSTER_SETTINGS # DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE
+    - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE
       value: SAMPLE, FROM_BEGINNING, NO_POST, RUN_ONCE
     - name: KAFKA_POLL_DURATION
       value: '10000'
@@ -45,8 +45,8 @@ spec:
       value: sf-pdl-kafka
     - name: KAFKA_TOPIC_PERSONDOKUMENT
       value: pdl.pdl-persondokument-tagged-v1
-    - name: KAFKA_TOPIC_GEOGRAFISKTILKNYTNING
-      value: pdl.geografisktilknytning-v1
+#    - name: KAFKA_TOPIC_GEOGRAFISKTILKNYTNING
+#      value: pdl.geografisktilknytning-v1
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: SF_TOKENHOST

@@ -1,6 +1,5 @@
 package no.nav.sf.pdl.kafka
 
-import isTombstoneOrSalesforceTagged
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

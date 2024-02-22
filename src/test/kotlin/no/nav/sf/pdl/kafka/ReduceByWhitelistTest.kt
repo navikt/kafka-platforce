@@ -6,7 +6,6 @@ import com.google.gson.JsonParser.parseString
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import reduceByWhitelist
 
 class ReduceByWhitelistTest {
     private val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
