@@ -38,7 +38,7 @@ spec:
     - name: CONTEXT
       value: DEV
     - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE
-      value: SAMPLE, FROM_BEGINNING, NO_POST, RUN_ONCE
+      value: SAMPLE, NO_POST, RUN_ONCE
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: KAFKA_CLIENTID

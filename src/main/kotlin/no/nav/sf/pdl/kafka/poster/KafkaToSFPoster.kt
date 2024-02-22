@@ -24,7 +24,7 @@ import java.time.Duration
 /**
  * KafkaToSFPoster
  * This class is responsible for handling a work session, ie polling and posting to salesforce until we are up-to-date with topic
- * Makes use of SalesforceClient to setup connection to salesforce
+ * Makes use of SalesforceClient to set up connection to salesforce
  */
 class KafkaToSFPoster(
     private val filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
