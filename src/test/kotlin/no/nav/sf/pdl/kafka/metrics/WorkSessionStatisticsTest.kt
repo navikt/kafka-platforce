@@ -28,7 +28,7 @@ internal class WorkSessionStatisticsTest {
         assertTrue(Prometheus.metricsAsText.contains("consumed 1.0"))
         assertTrue(Prometheus.metricsAsText.contains("blocked_by_filter 2.0"))
 
-        // New worksession resets .toString() before update, but not metrics
+        // New work session resets data class before update, but not metrics
         workSessionStatistics = WorkSessionStatistics()
         workSessionStatistics.incConsumed(10)
         assertEquals(

@@ -70,7 +70,7 @@ class KafkaToSFPoster(
             val topicPartitions = partitionsFor(kafkaTopic).map { TopicPartition(it.topic(), it.partition()) }
             assign(topicPartitions)
             log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
-            if (hasFlagFromBeginning) {
+            if (hasFlagFromBeginning && !hasRunOnce) {
                 seekToBeginning(emptyList()) // emptyList(): Seeks to the first offset for all provided partitions
             }
         }
@@ -89,8 +89,8 @@ class KafkaToSFPoster(
     private fun consumeRecords(recordsFromTopic: ConsumerRecords<String, String?>): ConsumeStatus =
         if (recordsFromTopic.isEmpty) {
             if (!stats.hasConsumed()) {
-                log.info { "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}" }
                 WorkSessionStatistics.workSessionsWithoutEventsCounter.inc()
+                log.info { "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}" }
             } else {
                 log.info { "Finished work session with activity. $stats" }
             }

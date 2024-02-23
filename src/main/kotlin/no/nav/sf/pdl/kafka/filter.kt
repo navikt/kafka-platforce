@@ -14,7 +14,7 @@ fun isTombstoneOrSalesforceTagged(record: ConsumerRecord<String, String?>): Bool
         if (obj["tags"] == null || obj["tags"] is JsonNull) return false
         return (obj["tags"] as JsonArray).any { it.asString == "SALESFORCE" }
     } catch (e: Exception) {
-        File("/tmp/filtercontainssalesforcetagfail").appendText("$record\nMESSAGE ${e.message}\n\n")
+        File("/tmp/filterSalesforceTagFail").appendText("$record\nMESSAGE ${e.message}\n\n")
         throw RuntimeException("Unable to parse value for salesforce tag filter ${e.message}")
     }
 }

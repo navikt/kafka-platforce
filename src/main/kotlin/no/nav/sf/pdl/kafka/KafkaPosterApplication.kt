@@ -23,7 +23,7 @@ class KafkaPosterApplication(
 ) {
     private val poster = KafkaToSFPoster(filter, modifier)
 
-    private val msBetweenWork = envAsLong(env_MS_BETWEEN_WORK)
+    private val msBetweenWork = envAsLong(env_MS_BETWEEN_WORK+"_donotexist")
 
     private val log = KotlinLogging.logger { }
 

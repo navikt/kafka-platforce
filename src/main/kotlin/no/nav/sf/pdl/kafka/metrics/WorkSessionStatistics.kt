@@ -23,6 +23,7 @@ data class WorkSessionStatistics(
     companion object Metrics {
         private val consumedCounter = registerCounter("consumed")
         private val postedCounter = registerCounter("posted")
+        private val postedTombstonesCounter = registerCounter("posted_tombstones")
         private val latestPostedOffsetGauge = registerLabelGauge("latest_posted_offset", "partition")
         private val blockedByFilterGauge = registerGauge("blocked_by_filter")
         val workSessionsWithoutEventsCounter = registerCounter("work_sessions_without_events")
@@ -48,6 +49,7 @@ data class WorkSessionStatistics(
         val count = postedRecords.count()
         posted += count
         postedCounter.inc(count.toDouble())
+        postedTombstonesCounter.inc(postedRecords.count { it.value() == null }.toDouble())
         postedRecords.forEach {
             if (!postedOffsets.firstOffsetPostedPerPartition.containsKey(it.partition())) {
                 postedOffsets.firstOffsetPostedPerPartition[it.partition()] = it.offset()
