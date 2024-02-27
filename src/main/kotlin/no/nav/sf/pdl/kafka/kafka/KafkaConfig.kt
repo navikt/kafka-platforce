@@ -1,8 +1,8 @@
 package no.nav.sf.pdl.kafka.kafka
 
+import no.nav.sf.pdl.kafka.config_KAFKA_CLIENTID
 import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.env_KAFKA_BROKERS
-import no.nav.sf.pdl.kafka.env_KAFKA_CLIENTID
 import no.nav.sf.pdl.kafka.env_KAFKA_CREDSTORE_PASSWORD
 import no.nav.sf.pdl.kafka.env_KAFKA_KEYSTORE_PATH
 import no.nav.sf.pdl.kafka.env_KAFKA_TRUSTSTORE_PATH
@@ -14,12 +14,12 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import java.util.Properties
 
 // Instantiate each get() to fetch config from current state of environment (fetch injected updates of credentials)
-val propertiesBase get() = Properties().apply {
+private val propertiesBase get() = Properties().apply {
     putAll(
         mapOf<String, Any>(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to env(env_KAFKA_BROKERS),
-            ConsumerConfig.GROUP_ID_CONFIG to env(env_KAFKA_CLIENTID),
-            ConsumerConfig.CLIENT_ID_CONFIG to env(env_KAFKA_CLIENTID),
+            ConsumerConfig.GROUP_ID_CONFIG to env(config_KAFKA_CLIENTID),
+            ConsumerConfig.CLIENT_ID_CONFIG to env(config_KAFKA_CLIENTID),
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
             ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 200,
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",

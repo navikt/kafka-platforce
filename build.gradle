@@ -71,6 +71,7 @@ dependencies {
     implementation "org.xerial.snappy:snappy-java:1.1.10.4" //Desired transient snappy to kafka-clients above
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testImplementation 'io.mockk:mockk:1.13.8'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
 }
 

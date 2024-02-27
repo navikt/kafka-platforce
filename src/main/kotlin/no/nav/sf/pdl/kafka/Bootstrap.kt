@@ -1,6 +1,6 @@
 package no.nav.sf.pdl.kafka
 
-val application = when (env(env_DEPLOY_APP)) {
+val application = when (env(config_DEPLOY_APP)) {
     "sf-pdl-kafka" -> KafkaPosterApplication(
         filter = if (devContext) ::isTombstoneOrSalesforceTagged else null,
         modifier = ::reduceByWhitelist

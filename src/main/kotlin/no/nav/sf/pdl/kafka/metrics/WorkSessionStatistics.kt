@@ -27,6 +27,7 @@ data class WorkSessionStatistics(
         private val latestPostedOffsetGauge = registerLabelGauge("latest_posted_offset", "partition")
         private val blockedByFilterGauge = registerGauge("blocked_by_filter")
         val workSessionsWithoutEventsCounter = registerCounter("work_sessions_without_events")
+        val subsequentWorkSessionsWithEventsCounter = registerCounter("subsequent_work_sessions_with_events")
         val failedSalesforceCallCounter = registerCounter("failed_salesforce_call")
         val workSessionExceptionCounter = registerCounter("work_session_exception")
     }

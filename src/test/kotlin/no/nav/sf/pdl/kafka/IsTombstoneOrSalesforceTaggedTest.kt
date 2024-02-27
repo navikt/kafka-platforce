@@ -4,7 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class IsTombstoneOrSalesforceTaggedTest {
+internal class IsTombstoneOrSalesforceTaggedTest {
     private val exampleWithoutTagElement = readResourceFile("/exampleWithoutTagElement.json").asRecordValue()
     private val exampleWithoutTag = readResourceFile("/exampleWithoutTag.json").asRecordValue()
     private val exampleWithoutSalesforceTag = readResourceFile("/exampleWithoutSalesforceTag.json").asRecordValue()

@@ -2,14 +2,13 @@ package no.nav.sf.pdl.kafka.poster
 
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.NUMBER_OF_SAMPLES_IN_SAMPLE_RUN
-import no.nav.sf.pdl.kafka.encodeB64
+import no.nav.sf.pdl.kafka.config_KAFKA_POLL_DURATION
+import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
+import no.nav.sf.pdl.kafka.config_POSTER_FLAGS
 import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.envAsFlags
 import no.nav.sf.pdl.kafka.envAsLong
-import no.nav.sf.pdl.kafka.env_KAFKA_POLL_DURATION
-import no.nav.sf.pdl.kafka.env_KAFKA_TOPIC_PERSONDOKUMENT
-import no.nav.sf.pdl.kafka.env_POSTER_FLAGS
-import no.nav.sf.pdl.kafka.kafka.propertiesPlain
+import no.nav.sf.pdl.kafka.kafka.KafkaConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.salesforce.KafkaMessage
 import no.nav.sf.pdl.kafka.salesforce.SalesforceClient
@@ -20,6 +19,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import java.io.File
 import java.time.Duration
+import java.util.Base64
 
 /**
  * KafkaToSFPoster
@@ -30,8 +30,10 @@ class KafkaToSFPoster(
     private val filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
     private val modifier: ((ConsumerRecord<String, String?>) -> String?)? = null,
     private val sfClient: SalesforceClient = SalesforceClient(),
-    private val kafkaTopic: String = env(env_KAFKA_TOPIC_PERSONDOKUMENT),
-    flags: List<Flag> = envAsFlags(env_POSTER_FLAGS)
+    private val kafkaTopic: String = env(config_KAFKA_TOPIC),
+    private val kafkaConsumerFactory: KafkaConsumerFactory = KafkaConsumerFactory(),
+    private val kafkaPollDuration: Long = envAsLong(config_KAFKA_POLL_DURATION),
+    flags: List<Flag> = envAsFlags(config_POSTER_FLAGS),
 ) {
     enum class Flag { DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE }
 
@@ -55,17 +57,19 @@ class KafkaToSFPoster(
             log.info { "Work session skipped due to setting Only Run Once, and has consumed once" }
             return
         }
-        hasRunOnce = true
 
         stats = WorkSessionStatistics()
 
+        // Instantiate each work session to fetch config from current state of environment (fetch injected updates of credentials)
         val kafkaConsumer = setupKafkaConsumer(kafkaTopic)
+
+        hasRunOnce = true
 
         pollAndConsume(kafkaConsumer)
     }
 
     private fun setupKafkaConsumer(kafkaTopic: String): KafkaConsumer<String, String?> {
-        return KafkaConsumer<String, String?>(propertiesPlain).apply {
+        return kafkaConsumerFactory.createConsumer().apply {
             // Using assign rather than subscribe since we need the ability to seek to a particular offset
             val topicPartitions = partitionsFor(kafkaTopic).map { TopicPartition(it.topic(), it.partition()) }
             assign(topicPartitions)
@@ -77,7 +81,7 @@ class KafkaToSFPoster(
     }
 
     private tailrec fun pollAndConsume(kafkaConsumer: KafkaConsumer<String, String?>) {
-        val records = kafkaConsumer.poll(Duration.ofMillis(envAsLong(env_KAFKA_POLL_DURATION)))
+        val records = kafkaConsumer.poll(Duration.ofMillis(kafkaPollDuration))
             as ConsumerRecords<String, String?>
 
         if (consumeRecords(records) == ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH) {
@@ -89,10 +93,12 @@ class KafkaToSFPoster(
     private fun consumeRecords(recordsFromTopic: ConsumerRecords<String, String?>): ConsumeStatus =
         if (recordsFromTopic.isEmpty) {
             if (!stats.hasConsumed()) {
+                WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.clear()
                 WorkSessionStatistics.workSessionsWithoutEventsCounter.inc()
                 log.info { "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}" }
             } else {
-                log.info { "Finished work session with activity. $stats" }
+                WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.inc()
+                log.info { "Finished work session with activity (subsequent ${WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.get().toInt()}). $stats" }
             }
             ConsumeStatus.NO_MORE_RECORDS
         } else {
@@ -123,7 +129,7 @@ class KafkaToSFPoster(
         }
 
     private fun filterRecords(records: ConsumerRecords<String, String?>): Iterable<ConsumerRecord<String, String?>> {
-        val recordsPostFilter = filter?.run { records.filter { this(it) } } ?: records
+        val recordsPostFilter = filter?.run { records.filter { invoke(it) } } ?: records
         stats.incBlockedByFilter(records.count() - recordsPostFilter.count())
         return recordsPostFilter
     }
@@ -133,7 +139,7 @@ class KafkaToSFPoster(
             KafkaMessage(
                 CRM_Topic__c = it.topic(),
                 CRM_Key__c = it.key(),
-                CRM_Value__c = (modifier?.run { this(it) } ?: it.value()?.encodeB64())
+                CRM_Value__c = (modifier?.run { invoke(it) } ?: it.value())?.encodeB64()
             )
         }
 
@@ -158,4 +164,6 @@ class KafkaToSFPoster(
             }
         }
     }
+
+    private fun String.encodeB64(): String = Base64.getEncoder().encodeToString(this.toByteArray())
 }

@@ -43,10 +43,8 @@ spec:
       value: '10000'
     - name: KAFKA_CLIENTID
       value: sf-pdl-kafka
-    - name: KAFKA_TOPIC_PERSONDOKUMENT
+    - name: KAFKA_TOPIC
       value: pdl.pdl-persondokument-tagged-v1
-#    - name: KAFKA_TOPIC_GEOGRAFISKTILKNYTNING
-#      value: pdl.geografisktilknytning-v1
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: SF_TOKENHOST

@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ReduceByWhitelistTest {
-    private val exampleWithSalesforceTag = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
-    private val exampleTombstone = null.asRecordValue()
+    private val exampleWithSalesforceTagRecord = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
+    private val exampleTombstoneRecord = null.asRecordValue()
 
     private fun String?.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)
 
@@ -28,7 +28,7 @@ class ReduceByWhitelistTest {
               }
             }
         """
-        assertEquals(null, reduceByWhitelist(exampleTombstone, whitelist))
+        assertEquals(null, reduceByWhitelist(exampleTombstoneRecord, whitelist))
     }
 
     @Test
@@ -79,7 +79,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, whitelist)?.toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
         )
     }
 
@@ -125,7 +125,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, whitelist)?.toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
         )
     }
 
@@ -156,7 +156,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTag, whitelist)?.toPrettyFormat()
+            reduceByWhitelist(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
         )
     }
 }

@@ -12,7 +12,7 @@ import java.io.File
 fun reduceByWhitelist(
     record: ConsumerRecord<String, String?>,
     whitelist: String =
-        KafkaPosterApplication::class.java.getResource(env(env_WHITELIST_FILE)).readText()
+        KafkaPosterApplication::class.java.getResource(env(config_WHITELIST_FILE)).readText()
 ): String? {
     if (record.value() == null) return null // Tombstone - no reduction to be made
     try {
@@ -110,7 +110,7 @@ private fun JsonElement.removeFields(fieldTree: List<String>) {
                 (it as JsonObject).remove(fieldTree.first())
             }
             else -> {
-                throw IllegalStateException("JsonElement.removeFieldRecurse attempted removing on primitive or null")
+                throw IllegalStateException("JsonElement.removeFieldRecurse attempted removing a primitive or null")
             }
         }
     } else {
@@ -120,7 +120,7 @@ private fun JsonElement.removeFields(fieldTree: List<String>) {
                 (it as JsonObject).get(fieldTree.first()).removeFields(fieldTree.subList(1, fieldTree.size))
             }
             else -> {
-                throw IllegalStateException("JsonElement.removeFieldRecurse attempted stepping into on primitive or null")
+                throw IllegalStateException("JsonElement.removeFieldRecurse attempted stepping into a primitive or null")
             }
         }
     }

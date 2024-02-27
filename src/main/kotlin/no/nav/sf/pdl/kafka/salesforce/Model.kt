@@ -1,5 +1,6 @@
 package no.nav.sf.pdl.kafka.salesforce
 
+import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.gson
@@ -51,8 +52,8 @@ data class SFObjectError(
 fun Response.isSuccess(): Boolean = when (status) {
     Status.OK ->
         try {
-            val listOfStatusObject: Type = object : TypeToken<ArrayList<SFsObjectStatus>>() {}.getType()
-            val parsedResult = gson.fromJson(bodyString(), listOfStatusObject) as List<SFsObjectStatus>
+            val listOfStatusObject: Type = object : TypeToken<ArrayList<SFsObjectStatus>>() {}.type
+            val parsedResult = Gson().fromJson(bodyString(), listOfStatusObject) as List<SFsObjectStatus>
             // Salesforce gives 200 OK independent of successful posting of records or not, need to check response value
             if (parsedResult.isEmpty()) {
                 log.error { "Posting response has no status object successes" }

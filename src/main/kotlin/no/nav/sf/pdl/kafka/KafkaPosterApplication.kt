@@ -1,6 +1,9 @@
 package no.nav.sf.pdl.kafka
 
 import io.prometheus.client.hotspot.DefaultExports
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
@@ -23,12 +26,12 @@ class KafkaPosterApplication(
 ) {
     private val poster = KafkaToSFPoster(filter, modifier)
 
-    private val msBetweenWork = envAsLong(env_MS_BETWEEN_WORK + "_donotexist")
+    private val msBetweenWork = envAsLong(config_MS_BETWEEN_WORK)
 
     private val log = KotlinLogging.logger { }
 
     fun start() {
-        log.info { "Starting app ${envOrNull(env_DEPLOY_APP)} - devContext $devContext with poster settings ${envAsFlags(env_POSTER_FLAGS)}" }
+        log.info { "Starting app ${env(config_DEPLOY_APP)} - devContext $devContext with poster settings ${envAsFlags(config_POSTER_FLAGS)}" }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics
         naisAPI().asServer(ApacheServer(8080)).start()
 
@@ -42,4 +45,31 @@ class KafkaPosterApplication(
             conditionalWait(msBetweenWork)
         }
     }
+
+    /**
+     * conditionalWait
+     * Interruptable wait function
+     */
+    private fun conditionalWait(ms: Long) =
+        runBlocking {
+
+            log.debug { "Will wait $ms ms" }
+
+            val cr = launch {
+                runCatching { delay(ms) }
+                    .onSuccess { log.info { "waiting completed" } }
+                    .onFailure { log.info { "waiting interrupted" } }
+            }
+
+            tailrec suspend fun loop(): Unit = when {
+                cr.isCompleted -> Unit
+                ShutdownHook.isActive() -> cr.cancel()
+                else -> {
+                    delay(250L)
+                    loop()
+                }
+            }
+            loop()
+            cr.join()
+        }
 }

@@ -1,11 +1,11 @@
-import no.nav.sf.pdl.kafka.metrics.Prometheus
-import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
+package no.nav.sf.pdl.kafka.metrics
+
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class WorkSessionStatisticsTest {
+class WorkSessionStatisticsTest {
     @Test
     fun `Test that consume work sessions statistics and lifetime metrics are updated as expected`() {
         var workSessionStatistics = WorkSessionStatistics()
