@@ -1,7 +1,6 @@
 package no.nav.sf.pdl.kafka.poster
 
 import mu.KotlinLogging
-import no.nav.sf.pdl.kafka.NUMBER_OF_SAMPLES_IN_SAMPLE_RUN
 import no.nav.sf.pdl.kafka.config_KAFKA_POLL_DURATION
 import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
 import no.nav.sf.pdl.kafka.config_POSTER_FLAGS
@@ -21,6 +20,7 @@ import java.io.File
 import java.time.Duration
 import java.util.Base64
 
+const val NUMBER_OF_SAMPLES_IN_SAMPLE_RUN = 3
 /**
  * KafkaToSFPoster
  * This class is responsible for handling a work session, ie polling and posting to salesforce until we are up-to-date with topic

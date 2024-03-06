@@ -1,12 +1,13 @@
 package no.nav.sf.pdl.kafka.salesforce
 
-import no.nav.sf.pdl.kafka.SALESFORCE_VERSION
 import org.http4k.client.ApacheClient
 import org.http4k.core.Headers
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
+
+const val SALESFORCE_VERSION = "v57.0"
 
 class SalesforceClient(
     private val httpClient: HttpHandler = ApacheClient(),

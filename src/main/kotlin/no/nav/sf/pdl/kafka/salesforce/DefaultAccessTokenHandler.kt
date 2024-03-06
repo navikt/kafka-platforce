@@ -6,12 +6,12 @@ import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.env_SF_TOKENHOST
-import no.nav.sf.pdl.kafka.secret_KeystorePassword
-import no.nav.sf.pdl.kafka.secret_PrivateKeyAlias
-import no.nav.sf.pdl.kafka.secret_PrivateKeyPassword
-import no.nav.sf.pdl.kafka.secret_SFClientID
-import no.nav.sf.pdl.kafka.secret_SFUsername
-import no.nav.sf.pdl.kafka.secret_keystoreJKSB64
+import no.nav.sf.pdl.kafka.secret_KEYSTORE_JKS_B64
+import no.nav.sf.pdl.kafka.secret_KEYSTORE_PASSWORD
+import no.nav.sf.pdl.kafka.secret_PRIVATE_KEY_ALIAS
+import no.nav.sf.pdl.kafka.secret_PRIVATE_KEY_PASSWORD
+import no.nav.sf.pdl.kafka.secret_SF_CLIENT_ID
+import no.nav.sf.pdl.kafka.secret_SF_USERNAME
 import org.apache.commons.codec.binary.Base64.decodeBase64
 import org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString
 import org.http4k.client.ApacheClient
@@ -44,12 +44,12 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
     private val log = KotlinLogging.logger { }
 
     private val sfTokenHost = env(env_SF_TOKENHOST)
-    private val sfClientID = env(secret_SFClientID)
-    private val sfUsername = env(secret_SFUsername)
-    private val keystoreB64 = env(secret_keystoreJKSB64)
-    private val keystorePassword = env(secret_KeystorePassword)
-    private val privateKeyAlias = env(secret_PrivateKeyAlias)
-    private val privateKeyPassword = env(secret_PrivateKeyPassword)
+    private val sfClientID = env(secret_SF_CLIENT_ID)
+    private val sfUsername = env(secret_SF_USERNAME)
+    private val keystoreB64 = env(secret_KEYSTORE_JKS_B64)
+    private val keystorePassword = env(secret_KEYSTORE_PASSWORD)
+    private val privateKeyAlias = env(secret_PRIVATE_KEY_ALIAS)
+    private val privateKeyPassword = env(secret_PRIVATE_KEY_PASSWORD)
 
     private val client: HttpHandler = ApacheClient()
 
@@ -79,9 +79,8 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
             pkAlias = privateKeyAlias,
             pkPwd = privateKeyPassword
         )
-        val claimWithHeaderJsonUrlSafe = "${
-        gson.toJson(JWTClaimHeader("RS256")).encodeB64UrlSafe()
-        }.${gson.toJson(claim).encodeB64UrlSafe()}"
+        val claimWithHeaderJsonUrlSafe = gson.toJson(JWTClaimHeader("RS256")).encodeB64UrlSafe() +
+            "." + gson.toJson(claim).encodeB64UrlSafe()
         val fullClaimSignature = privateKey.sign(claimWithHeaderJsonUrlSafe.toByteArray())
 
         val accessTokenRequest = Request(Method.POST, sfTokenHost)

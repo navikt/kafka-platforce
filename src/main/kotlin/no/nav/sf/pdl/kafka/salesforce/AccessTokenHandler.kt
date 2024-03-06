@@ -4,5 +4,5 @@ interface AccessTokenHandler {
     val accessToken: String
     val instanceUrl: String
 
-    fun refreshToken()
+    fun refreshToken() // To refresh in advance
 }
