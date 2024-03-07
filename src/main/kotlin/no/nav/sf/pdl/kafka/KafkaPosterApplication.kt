@@ -15,8 +15,8 @@ import org.http4k.server.asServer
 
 /**
  * KafkaPosterApplication
- * This is the top level of the integration. Its function is to setup a server with the required
- * endpoints for the kubernetes environement
+ * This is the top level of the integration. Its function is to set up a server with the required
+ * endpoints for the kubernetes environment
  * and create a work loop that alternatives between work sessions (i.e polling from kafka until we are in sync) and
  * an interruptable pause (configured with MS_BETWEEN_WORK).
  */
@@ -55,21 +55,21 @@ class KafkaPosterApplication(
 
             log.debug { "Will wait $ms ms" }
 
-            val cr = launch {
+            val waitJob = launch {
                 runCatching { delay(ms) }
                     .onSuccess { log.info { "waiting completed" } }
                     .onFailure { log.info { "waiting interrupted" } }
             }
 
             tailrec suspend fun loop(): Unit = when {
-                cr.isCompleted -> Unit
-                ShutdownHook.isActive() -> cr.cancel()
+                waitJob.isCompleted -> Unit
+                ShutdownHook.isActive() -> waitJob.cancel()
                 else -> {
                     delay(250L)
                     loop()
                 }
             }
             loop()
-            cr.join()
+            waitJob.join()
         }
 }
