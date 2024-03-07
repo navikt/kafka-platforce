@@ -4,8 +4,8 @@ import com.google.gson.Gson
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.config_SF_TOKENHOST
 import no.nav.sf.pdl.kafka.env
-import no.nav.sf.pdl.kafka.env_SF_TOKENHOST
 import no.nav.sf.pdl.kafka.secret_KEYSTORE_JKS_B64
 import no.nav.sf.pdl.kafka.secret_KEYSTORE_PASSWORD
 import no.nav.sf.pdl.kafka.secret_PRIVATE_KEY_ALIAS
@@ -43,7 +43,7 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
 
     private val log = KotlinLogging.logger { }
 
-    private val sfTokenHost = env(env_SF_TOKENHOST)
+    private val sfTokenHost = env(config_SF_TOKENHOST)
     private val sfClientID = env(secret_SF_CLIENT_ID)
     private val sfUsername = env(secret_SF_USERNAME)
     private val keystoreB64 = env(secret_KEYSTORE_JKS_B64)

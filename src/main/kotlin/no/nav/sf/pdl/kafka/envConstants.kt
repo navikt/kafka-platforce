@@ -29,8 +29,8 @@ const val env_KAFKA_KEYSTORE_PATH = "KAFKA_KEYSTORE_PATH"
 const val env_KAFKA_CREDSTORE_PASSWORD = "KAFKA_CREDSTORE_PASSWORD"
 const val env_KAFKA_TRUSTSTORE_PATH = "KAFKA_TRUSTSTORE_PATH"
 
-// Salesforce injected environment dependencies
-const val env_SF_TOKENHOST = "SF_TOKENHOST"
+// Salesforce configured environment dependency
+const val config_SF_TOKENHOST = "SF_TOKENHOST"
 
 // Salesforce required secrets
 const val secret_SF_CLIENT_ID = "SF_CLIENT_ID"
