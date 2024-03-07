@@ -110,23 +110,26 @@ class KafkaToSFPoster(
             if (hasFlagSample) sampleRecords(recordsFiltered)
 
             if (recordsFiltered.count() == 0 || hasFlagNoPost) {
+
+                updateWhatWouldBeSent(recordsFiltered)
                 // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
                 // consider it a successfully consumed batch without further action
                 ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
             } else {
-                when (sfClient.postRecords(recordsFiltered.toKafkaMessagesSet()).isSuccess()) {
-                    true -> {
-                        stats.updatePostedStatistics(recordsFiltered)
-                        ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
-                    }
-                    false -> {
-                        log.warn { "Failed when posting to SF - $stats" }
-                        WorkSessionStatistics.failedSalesforceCallCounter.inc()
-                        ConsumeStatus.FAIL
-                    }
+                if (sfClient.postRecords(recordsFiltered.toKafkaMessagesSet()).isSuccess()) {
+                    stats.updatePostedStatistics(recordsFiltered)
+                    ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
+                } else {
+                    log.warn { "Failed when posting to SF - $stats" }
+                    WorkSessionStatistics.failedSalesforceCallCounter.inc()
+                    ConsumeStatus.FAIL
                 }
             }
         }
+
+    private fun updateWhatWouldBeSent(recordsFiltered: Iterable<ConsumerRecord<String, String?>>) {
+        File("/tmp/whatwouldbesent").appendText("BATCH ${whatWouldBeSentBatch++}\n${recordsFiltered.toKafkaMessagesSet().joinToString("\n")}\n\n")
+    }
 
     private fun filterRecords(records: ConsumerRecords<String, String?>): Iterable<ConsumerRecord<String, String?>> {
         val recordsPostFilter = filter?.run { records.filter { invoke(it) } } ?: records
@@ -167,3 +170,5 @@ class KafkaToSFPoster(
 
     private fun String.encodeB64(): String = Base64.getEncoder().encodeToString(this.toByteArray())
 }
+
+var whatWouldBeSentBatch = 1

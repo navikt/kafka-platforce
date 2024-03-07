@@ -29,6 +29,11 @@ class KafkaToSFPosterTest {
 
     private fun String?.asRecordValue(offset: Long = 1L) = ConsumerRecord("topic", 0, offset, "key", this)
 
+    // Helper function to create an instance of ConsumerRecords from list of consumer records
+    private fun List<ConsumerRecord<String, String?>>.toConsumerRecords(): ConsumerRecords<String, String?> {
+        return ConsumerRecords<String, String?>(mapOf(TopicPartition("topic", 0) to this))
+    }
+
     private val gson = Gson()
 
     private val sfClientMock = mockk<SalesforceClient>()
@@ -73,11 +78,6 @@ class KafkaToSFPosterTest {
         flags = listOf()
         filter = null
         modifier = null
-    }
-
-    // Helper function to create an instance of ConsumerRecords from list of consumer records
-    fun List<ConsumerRecord<String, String?>>.toConsumerRecords(): ConsumerRecords<String, String?> {
-        return ConsumerRecords<String, String?>(mapOf(TopicPartition("topic", 0) to this))
     }
 
     @Test

@@ -7,10 +7,27 @@ import com.google.gson.JsonParser
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 
-val devPersonsKeysOffsets: MutableMap<String, Long> = mutableMapOf()
-
 fun isTombstoneOrSalesforceTagged(record: ConsumerRecord<String, String?>): Boolean {
     try {
+        if (record.value() == null) return true // Allow tombstone signal
+        val obj = JsonParser.parseString(record.value()) as JsonObject
+        if (obj["tags"] == null || obj["tags"] is JsonNull) return false
+        return (obj["tags"] as JsonArray).any { it.asString == "SALESFORCE" }
+    } catch (e: Exception) {
+        File("/tmp/filterSalesforceTagFail").appendText("$record\nMESSAGE ${e.message}\n\n")
+        throw RuntimeException("Unable to parse value for salesforce tag filter ${e.message}")
+    }
+}
+
+// TEST VARIANT:
+
+val devPersonsKeysOffsets: MutableMap<String, Long> = mutableMapOf()
+
+val firstOffset = 20776583L
+val lastOffset = 21067981L
+fun isTombstoneOrSalesforceTaggedMod(record: ConsumerRecord<String, String?>): Boolean {
+    try {
+        if ((record.offset() < firstOffset) || (record.offset() > lastOffset)) return false
         if (record.value() == null) return true.also { updatePassedFile(record) } // Allow tombstone signal
         val obj = JsonParser.parseString(record.value()) as JsonObject
         if (obj["tags"] == null || obj["tags"] is JsonNull) return false

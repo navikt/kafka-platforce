@@ -52,7 +52,6 @@ class KafkaPosterApplication(
      */
     private fun conditionalWait(ms: Long) =
         runBlocking {
-
             log.debug { "Will wait $ms ms" }
 
             val waitJob = launch {

@@ -1,4 +1,7 @@
 package no.nav.sf.pdl.kafka
+
+import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
+
 /**
  * Naming convention applied to environment variable constants: a lowercase prefix separated from the actual constant, i.e. prefix_ENVIRONMENT_VARIABLE_NAME.
  *
@@ -41,3 +44,14 @@ const val secret_KEYSTORE_JKS_B64 = "KEYSTORE_JKS_B64"
 const val secret_KEYSTORE_PASSWORD = "KEYSTORE_PASSWORD"
 const val secret_PRIVATE_KEY_ALIAS = "PRIVATE_KEY_ALIAS"
 const val secret_PRIVATE_KEY_PASSWORD = "PRIVATE_KEY_PASSWORD"
+
+/**
+ * Shortcuts for fetching environment variables
+ */
+fun env(name: String): String { return System.getenv(name) }
+
+fun envAsLong(name: String): Long { return System.getenv(name).toLong() }
+
+fun envAsList(name: String): List<String> { return System.getenv(name).split(",").map { it.trim() }.toList() }
+
+fun envAsFlags(name: String): List<KafkaToSFPoster.Flag> { return envAsList(name).stream().map { KafkaToSFPoster.Flag.valueOf(it) }.toList() }

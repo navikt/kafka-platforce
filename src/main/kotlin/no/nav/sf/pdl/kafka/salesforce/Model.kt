@@ -3,7 +3,6 @@ package no.nav.sf.pdl.kafka.salesforce
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
-import no.nav.sf.pdl.kafka.gson
 import org.http4k.core.Response
 import org.http4k.core.Status
 import java.lang.reflect.Type
@@ -15,6 +14,8 @@ import java.lang.reflect.Type
 
 private val log = KotlinLogging.logger { }
 
+private val gson = Gson()
+
 /**
  * The general sObject REST API for posting records of different types
  * In this case, post of KafkaMessage containing attribute refering to Salesforce custom object KafkaMessage__c
@@ -23,7 +24,7 @@ data class SFsObjectRest(
     val allOrNone: Boolean = true,
     val records: Set<KafkaMessage>
 ) {
-    fun toJson() = gson.toJson(this)
+    fun toJson(): String = gson.toJson(this)
 }
 
 data class KafkaMessage(
