@@ -1,6 +1,9 @@
 package no.nav.sf.pdl.kafka.nais
 
+import com.google.gson.JsonObject
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.GuiRepresentation
+import no.nav.sf.pdl.kafka.markRemovedFields
 import no.nav.sf.pdl.kafka.metrics.Prometheus
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
@@ -26,6 +29,11 @@ fun naisAPI(): HttpHandler = routes(
             log.error { "/prometheus failed writing metrics - ${e.message}" }
             Response(Status.INTERNAL_SERVER_ERROR)
         }
+    },
+    "/internal/gui" bind Method.GET to {
+        GuiRepresentation.latestMerge = JsonObject()
+        markRemovedFields(GuiRepresentation.latestMessageModel, GuiRepresentation.latestRemoval, GuiRepresentation.latestMerge)
+        Response(Status.OK).body(GuiRepresentation.latestMerge.toString().replace(":{}", ""))
     }
 )
 

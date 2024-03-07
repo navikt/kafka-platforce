@@ -25,6 +25,10 @@ fun reduceByWhitelist(
             removeList.map { it.joinToString(".") }.joinToString("\n")
         )
 
+        val allList = listAllFields(messageObject)
+
+        updateGuiRepresentationModels(removeList, allList)
+
         removeList.forEach {
             messageObject.removeFields(it)
         }
@@ -33,6 +37,80 @@ fun reduceByWhitelist(
     } catch (e: Exception) {
         File("/tmp/reducebywhitelistfail").appendText("$record\n\n")
         throw RuntimeException("Unable to parse event and filter to reduce by whitelist")
+    }
+}
+
+fun updateGuiRepresentationModels(removeList: List<List<String>>, allList: Set<List<String>>) {
+    GuiRepresentation.latestMessageModel = parseFieldsListToJsonObject(allList.map { it.joinToString(".") })
+    GuiRepresentation.latestRemoval = parseFieldsListToJsonObject(removeList.map { it.joinToString(".") })
+}
+
+fun parseFieldsListToJsonObject(fields: List<String>): JsonObject {
+    val jsonObject = JsonObject()
+
+    for (field in fields) {
+        val fieldHierarchy = field.split('.')
+        var currentObject = jsonObject
+
+        for (fieldName in fieldHierarchy) {
+            if (!currentObject.has(fieldName)) {
+                val newObject = JsonObject()
+                currentObject.add(fieldName, newObject)
+                currentObject = newObject
+            } else {
+                currentObject = currentObject.getAsJsonObject(fieldName)
+            }
+        }
+    }
+
+    return jsonObject
+}
+
+object GuiRepresentation {
+    var latestMessageModel: JsonObject = JsonObject()
+    var latestRemoval: JsonObject = JsonObject()
+    var latestMerge: JsonObject = JsonObject()
+}
+
+private fun listAllFields(
+    messageElement: JsonElement,
+    resultHolder: MutableSet<List<String>> = mutableSetOf(),
+    parents: List<String> = listOf()
+): Set<List<String>> {
+    val messageEntrySet = if (messageElement is JsonArray) {
+        messageElement.filterIsInstance<JsonObject>().flatMap { it.entrySet() }
+    } else { (messageElement as JsonObject).entrySet() }
+
+    val list = messageEntrySet.map { parents + it.key }
+
+    resultHolder.addAll(list)
+
+    messageEntrySet
+        .filter { it.value is JsonObject || it.value is JsonArray }
+        .forEach {
+            listAllFields(
+                it.value,
+                resultHolder,
+                parents.toList() + it.key
+            )
+        }
+    return resultHolder
+}
+
+fun markRemovedFields(message: JsonObject, removeObject: JsonObject, ref: JsonObject, mark: Boolean = false) {
+    for ((key, value) in message.entrySet()) {
+        if (value is JsonObject) {
+            val obj = JsonObject()
+            val exitsInRemove = removeObject.keySet().contains(key)
+            val shouldMark = mark || (exitsInRemove && removeObject[key].asJsonObject.size() == 0)
+
+            val markString = if (shouldMark) "!" else ""
+            ref.add(markString + key, obj)
+            markRemovedFields(value.asJsonObject, if (exitsInRemove) removeObject[key].asJsonObject else JsonObject(), obj, shouldMark)
+        } else {
+            println("NOT HANDLED")
+            // ref.add(key, value)
+        }
     }
 }
 
@@ -97,7 +175,7 @@ private fun findNonWhitelistedFields(
 
 /**
  * JsonElement.removeField
- * Recursive extention function that facilitates the removal of a specified field within a JSON structure
+ * Recursive extension function that facilitates the removal of a specified field within a JSON structure
  * It supports recursive removal, allowing the removal of nested fields.
  *
  * - fieldTree: A list of strings representing the path to the field to be removed.
