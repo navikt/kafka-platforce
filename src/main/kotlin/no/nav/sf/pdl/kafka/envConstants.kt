@@ -19,6 +19,7 @@ import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
 // Config environment variables set in yaml file
 const val config_DEPLOY_APP = "DEPLOY_APP"
 const val config_POSTER_FLAGS = "POSTER_FLAGS"
+const val config_SEEK_OFFSET = "SEEK_OFFSET"
 const val config_MS_BETWEEN_WORK = "MS_BETWEEN_WORK"
 const val config_KAFKA_CLIENT_ID = "KAFKA_CLIENT_ID"
 const val config_KAFKA_TOPIC = "KAFKA_TOPIC"

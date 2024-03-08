@@ -69,6 +69,7 @@ class KafkaToSFPosterTest {
             kafkaTopic = "topic",
             kafkaConsumerFactory = kafkaConsumerFactoryMock,
             kafkaPollDuration = 10L,
+            seekOffset = 0L,
             flags = flags
         )
     }
@@ -158,6 +159,21 @@ class KafkaToSFPosterTest {
         kafkaToSFPoster.runWorkSession()
 
         verify(exactly = 1) { kafkaConsumerMock.seekToBeginning(any()) }
+    }
+
+    @Test
+    fun `Seek flag - should make consumer seek on first work session`() {
+        flags = listOf(KafkaToSFPoster.Flag.SEEK)
+        setUp()
+
+        val pollResponse1 = ConsumerRecords<String, String?>(mapOf()) // Result of first poll call - no records
+
+        every { kafkaConsumerMock.seek(any(), 0L) } returns Unit
+        every { kafkaConsumerMock.poll(any<Duration>()) } returns pollResponse1
+
+        kafkaToSFPoster.runWorkSession()
+
+        verify(exactly = 1) { kafkaConsumerMock.seek(any(), 0L) }
     }
 
     @Test

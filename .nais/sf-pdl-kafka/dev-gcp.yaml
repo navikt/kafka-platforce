@@ -39,16 +39,18 @@ spec:
   env:
     - name: CONTEXT
       value: DEV
-    - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE
-      value: SAMPLE, NO_POST, RUN_ONCE, FROM_BEGINNING
+    - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE
+      value: SAMPLE, NO_POST, RUN_ONCE, SEEK
+    - name: SEEK_OFFSET # Only applied if flag SEEK is set
+      value: 20777320
     - name: KAFKA_POLL_DURATION
-      value: '10000'
+      value: 10000
     - name: KAFKA_CLIENT_ID
       value: sf-pdl-kafka
     - name: KAFKA_TOPIC
       value: pdl.pdl-persondokument-tagged-v1
     - name: MS_BETWEEN_WORK
-      value: '180000'
+      value: 180000
     - name: SF_TOKENHOST
       value: https://test.salesforce.com
     - name: DEPLOY_APP

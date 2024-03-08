@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.config_KAFKA_POLL_DURATION
 import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
 import no.nav.sf.pdl.kafka.config_POSTER_FLAGS
+import no.nav.sf.pdl.kafka.config_SEEK_OFFSET
 import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.envAsFlags
 import no.nav.sf.pdl.kafka.envAsLong
@@ -33,9 +34,10 @@ class KafkaToSFPoster(
     private val kafkaTopic: String = env(config_KAFKA_TOPIC),
     private val kafkaConsumerFactory: KafkaConsumerFactory = KafkaConsumerFactory(),
     private val kafkaPollDuration: Long = envAsLong(config_KAFKA_POLL_DURATION),
+    private val seekOffset: Long = envAsLong(config_SEEK_OFFSET),
     flags: List<Flag> = envAsFlags(config_POSTER_FLAGS),
 ) {
-    enum class Flag { DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE }
+    enum class Flag { DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE }
 
     private enum class ConsumeStatus { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
 
@@ -43,6 +45,7 @@ class KafkaToSFPoster(
 
     // Flags set from settings
     private val hasFlagFromBeginning = flags.contains(Flag.FROM_BEGINNING)
+    private val hasFlagSeek = flags.contains(Flag.SEEK)
     private val hasFlagNoPost = flags.contains(Flag.NO_POST)
     private val hasFlagSample = flags.contains(Flag.SAMPLE)
     private val hasFlagRunOnce = flags.contains(Flag.RUN_ONCE)
@@ -74,8 +77,14 @@ class KafkaToSFPoster(
             val topicPartitions = partitionsFor(kafkaTopic).map { TopicPartition(it.topic(), it.partition()) }
             assign(topicPartitions)
             log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
-            if (hasFlagFromBeginning && !hasRunOnce) {
-                seekToBeginning(emptyList()) // emptyList(): Seeks to the first offset for all provided partitions
+            if (!hasRunOnce) {
+                if (hasFlagFromBeginning) {
+                    seekToBeginning(emptyList()) // emptyList(): Seeks to the first offset for all provided partitions
+                } else if (hasFlagSeek) {
+                    topicPartitions.forEach {
+                        seek(it, seekOffset)
+                    }
+                }
             }
         }
     }
