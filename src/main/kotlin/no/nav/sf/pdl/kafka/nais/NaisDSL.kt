@@ -1,5 +1,6 @@
 package no.nav.sf.pdl.kafka.nais
 
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.GuiRepresentation
@@ -33,7 +34,9 @@ fun naisAPI(): HttpHandler = routes(
     "/internal/gui" bind Method.GET to {
         GuiRepresentation.latestMerge = JsonObject()
         markRemovedFields(GuiRepresentation.latestMessageModel, GuiRepresentation.latestRemoval, GuiRepresentation.latestMerge)
-        Response(Status.OK).body(GuiRepresentation.latestMerge.toString().replace(":{}", ""))
+        val prettifier = GsonBuilder().setPrettyPrinting().create()
+        // .toString().replace(":{}", "")
+        Response(Status.OK).body(generateHTML(prettifier.toJson(GuiRepresentation.latestMerge)))
     }
 )
 
@@ -59,4 +62,28 @@ object ShutdownHook {
     }
 
     fun isActive() = shutdownhookActive
+}
+
+fun generateHTML(jsonString: String): String {
+    val jsonLines = jsonString.split("\n")
+    val htmlStringBuilder = StringBuilder()
+    htmlStringBuilder.append("<html>")
+    htmlStringBuilder.append("<head>")
+    htmlStringBuilder.append("<style>")
+    htmlStringBuilder.append(".toberemoved { background-color: #ffcccc; }")
+    htmlStringBuilder.append("</style>")
+    htmlStringBuilder.append("</head>")
+    htmlStringBuilder.append("<body>")
+    htmlStringBuilder.append("<pre>")
+    for (line in jsonLines) {
+        if (line.isNotBlank()) {
+            val trimmedLine = line.trim()
+            val spanClass = if (trimmedLine.startsWith("\"!")) " class=\"toberemoved\"" else ""
+            htmlStringBuilder.append("<span$spanClass>${line.replace("!", "")}</span><br>")
+        }
+    }
+    htmlStringBuilder.append("</pre>")
+    htmlStringBuilder.append("</body>")
+    htmlStringBuilder.append("</html>")
+    return htmlStringBuilder.toString()
 }
