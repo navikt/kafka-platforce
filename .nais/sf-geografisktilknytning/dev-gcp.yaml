@@ -43,7 +43,7 @@ spec:
       value: '0'
     - name: KAFKA_POLL_DURATION
       value: '10000'
-    - name: KAFKA_CLIENTID
+    - name: KAFKA_CLIENT_ID
       value: sf-pdl-kafka
     - name: KAFKA_TOPIC
       value: pdl.geografisktilknytning-v1
