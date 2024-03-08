@@ -36,8 +36,10 @@ spec:
   env:
     - name: CONTEXT
       value: PROD
-    - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, NO_POST, SAMPLE, RUN_ONCE
+    - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE
       value: SAMPLE, FROM_BEGINNING, NO_POST, RUN_ONCE
+    - name: SEEK_OFFSET # Only applied if flag SEEK is set
+      value: '20777320'
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: KAFKA_CLIENTID
