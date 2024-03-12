@@ -43,7 +43,7 @@ class KafkaToSFPoster(
 
     private val log = KotlinLogging.logger { }
 
-    // Flags set from settings
+    // Flags set from POSTER_FLAGS
     private val hasFlagFromBeginning = flags.contains(Flag.FROM_BEGINNING)
     private val hasFlagSeek = flags.contains(Flag.SEEK)
     private val hasFlagNoPost = flags.contains(Flag.NO_POST)
@@ -112,7 +112,7 @@ class KafkaToSFPoster(
             ConsumeStatus.NO_MORE_RECORDS
         } else {
             WorkSessionStatistics.workSessionsWithoutEventsCounter.clear()
-            stats.incConsumed(recordsFromTopic.count())
+            stats.updateConsumedStatistics(recordsFromTopic)
 
             val recordsFiltered = filterRecords(recordsFromTopic)
 

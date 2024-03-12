@@ -12,17 +12,20 @@ class WorkSessionStatisticsTest {
 
         // Initial state is reflected in .toString() and in metrics
         assertEquals(
-            "WorkSessionStatistics(consumed=0, blockedByFilter=0, posted=0, postedOffsets=NONE)",
+            "WorkSessionStatistics(consumed=0, blockedByFilter=0, posted=0, consumedOffsets=NONE, postedOffsets=NONE)",
             workSessionStatistics.toString()
         )
         assertTrue(Prometheus.metricsAsText.contains("consumed 0.0"))
 
-        workSessionStatistics.incConsumed(1)
+        val listOf1 = listOf(
+            ConsumerRecord("topic", 0, 1L, "key", "value"),
+        )
+        workSessionStatistics.updateConsumedStatistics(listOf1)
         workSessionStatistics.incBlockedByFilter(2)
 
         // Updated state is reflected in .toString() and in metrics
         assertEquals(
-            "WorkSessionStatistics(consumed=1, blockedByFilter=2, posted=0, postedOffsets=NONE)",
+            "WorkSessionStatistics(consumed=1, blockedByFilter=2, posted=0, consumedOffsets=0:[1-1], postedOffsets=NONE)",
             workSessionStatistics.toString()
         )
         assertTrue(Prometheus.metricsAsText.contains("consumed 1.0"))
@@ -30,12 +33,19 @@ class WorkSessionStatisticsTest {
 
         // New work session resets data class before update, but not metrics
         workSessionStatistics = WorkSessionStatistics()
-        workSessionStatistics.incConsumed(10)
+        val listOf5 = listOf(
+            ConsumerRecord("topic", 0, 1L, "key", "value"),
+            ConsumerRecord("topic", 0, 2L, "key", "value"),
+            ConsumerRecord("topic", 0, 3L, "key", "value"),
+            ConsumerRecord("topic", 1, 10L, "key", "value"),
+            ConsumerRecord("topic", 1, 11L, "key", "value")
+        )
+        workSessionStatistics.updateConsumedStatistics(listOf5)
         assertEquals(
-            "WorkSessionStatistics(consumed=10, blockedByFilter=0, posted=0, postedOffsets=NONE)",
+            "WorkSessionStatistics(consumed=5, blockedByFilter=0, posted=0, consumedOffsets=0:[1-3],1:[10-11], postedOffsets=NONE)",
             workSessionStatistics.toString()
         )
-        assertTrue(Prometheus.metricsAsText.contains("consumed 11.0")) // Total during lifetime
+        assertTrue(Prometheus.metricsAsText.contains("consumed 6.0")) // Total during lifetime
     }
 
     @Test
@@ -44,7 +54,7 @@ class WorkSessionStatisticsTest {
 
         // Initial state is reflected in .toString() and in metrics
         assertEquals(
-            "WorkSessionStatistics(consumed=0, blockedByFilter=0, posted=0, postedOffsets=NONE)",
+            "WorkSessionStatistics(consumed=0, blockedByFilter=0, posted=0, consumedOffsets=NONE, postedOffsets=NONE)",
             workSessionStatistics.toString()
         )
         assertTrue(Prometheus.metricsAsText.contains("posted 0.0"))
@@ -63,7 +73,7 @@ class WorkSessionStatisticsTest {
         assertTrue(Prometheus.metricsAsText.contains("latest_posted_offset{partition=\"1\",} 11.0"))
 
         assertEquals(
-            "WorkSessionStatistics(consumed=0, blockedByFilter=0, posted=5, postedOffsets=0:[1-3],1:[10-11])",
+            "WorkSessionStatistics(consumed=0, blockedByFilter=0, posted=5, consumedOffsets=NONE, postedOffsets=0:[1-3],1:[10-11])",
             workSessionStatistics.toString()
         )
     }

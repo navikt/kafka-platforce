@@ -1,5 +1,7 @@
 package no.nav.sf.pdl.kafka
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
@@ -27,7 +29,7 @@ fun reduceByWhitelist(
 
         val allList = listAllFields(messageObject)
 
-        updateGuiRepresentationModels(removeList, allList)
+        GuiRepresentation.latestAllFieldsAndRemovalSets = Pair(allList, removeList)
 
         removeList.forEach {
             messageObject.removeFields(it)
@@ -40,16 +42,10 @@ fun reduceByWhitelist(
     }
 }
 
-fun updateGuiRepresentationModels(removeList: List<List<String>>, allList: Set<List<String>>) {
-    GuiRepresentation.latestMessageModel = parseFieldsListToJsonObject(allList.map { it.joinToString(".") })
-    GuiRepresentation.latestRemoval = parseFieldsListToJsonObject(removeList.map { it.joinToString(".") })
-}
-
-fun parseFieldsListToJsonObject(fields: List<String>): JsonObject {
+fun parseFieldsListToJsonObject(fields: Set<List<String>>): JsonObject {
     val jsonObject = JsonObject()
 
-    for (field in fields) {
-        val fieldHierarchy = field.split('.')
+    for (fieldHierarchy in fields) {
         var currentObject = jsonObject
 
         for (fieldName in fieldHierarchy) {
@@ -67,9 +63,8 @@ fun parseFieldsListToJsonObject(fields: List<String>): JsonObject {
 }
 
 object GuiRepresentation {
-    var latestMessageModel: JsonObject = JsonObject()
-    var latestRemoval: JsonObject = JsonObject()
-    var latestMerge: JsonObject = JsonObject()
+    val prettifier: Gson = GsonBuilder().setPrettyPrinting().create()
+    var latestAllFieldsAndRemovalSets: Pair<Set<List<String>>, Set<List<String>>> = Pair(setOf(), setOf())
 }
 
 private fun listAllFields(
@@ -126,9 +121,9 @@ fun markRemovedFields(message: JsonObject, removeObject: JsonObject, ref: JsonOb
 private fun findNonWhitelistedFields(
     whitelistElement: JsonElement,
     messageElement: JsonElement,
-    resultHolder: MutableList<List<String>> = mutableListOf(),
+    resultHolder: MutableSet<List<String>> = mutableSetOf(),
     parents: List<String> = listOf(),
-): List<List<String>> {
+): Set<List<String>> {
     val whitelistEntrySet = (whitelistElement as JsonObject).entrySet()
 
     val messageEntrySet = if (messageElement is JsonArray) {
