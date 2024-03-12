@@ -32,8 +32,8 @@ fun naisAPI(): HttpHandler = routes(
         }
     },
     "/internal/gui" bind Method.GET to {
-        val latestMessageModel = parseFieldsListToJsonObject(GuiRepresentation.latestAllFieldsAndRemovalSets.first)
-        val latestRemovalModel = parseFieldsListToJsonObject(GuiRepresentation.latestAllFieldsAndRemovalSets.first)
+        val latestMessageModel = parseFieldsListToJsonObject(GuiRepresentation.latestMessageAndRemovalSets.first)
+        val latestRemovalModel = parseFieldsListToJsonObject(GuiRepresentation.latestMessageAndRemovalSets.second)
         val latestMerge = JsonObject()
         markRemovedFields(latestMessageModel, latestRemovalModel, latestMerge)
         Response(Status.OK).body(generateHTMLFromJSON(GuiRepresentation.prettifier.toJson(latestMerge)))

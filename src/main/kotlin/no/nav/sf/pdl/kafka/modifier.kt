@@ -29,7 +29,7 @@ fun reduceByWhitelist(
 
         val allList = listAllFields(messageObject)
 
-        GuiRepresentation.latestAllFieldsAndRemovalSets = Pair(allList, removeList)
+        GuiRepresentation.latestMessageAndRemovalSets = Pair(allList, removeList)
 
         removeList.forEach {
             messageObject.removeFields(it)
@@ -64,7 +64,7 @@ fun parseFieldsListToJsonObject(fields: Set<List<String>>): JsonObject {
 
 object GuiRepresentation {
     val prettifier: Gson = GsonBuilder().setPrettyPrinting().create()
-    var latestAllFieldsAndRemovalSets: Pair<Set<List<String>>, Set<List<String>>> = Pair(setOf(), setOf())
+    var latestMessageAndRemovalSets: Pair<Set<List<String>>, Set<List<String>>> = Pair(setOf(), setOf())
 }
 
 private fun listAllFields(
