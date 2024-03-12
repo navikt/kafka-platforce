@@ -1,13 +1,12 @@
 package no.nav.sf.pdl.kafka
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
+import no.nav.sf.pdl.kafka.gui.Gui
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 
@@ -29,7 +28,7 @@ fun reduceByWhitelist(
 
         val allList = listAllFields(messageObject)
 
-        GuiRepresentation.latestMessageAndRemovalSets = Pair(allList, removeList)
+        Gui.latestMessageAndRemovalSets = Pair(allList, removeList)
 
         removeList.forEach {
             messageObject.removeFields(it)
@@ -40,31 +39,6 @@ fun reduceByWhitelist(
         File("/tmp/reducebywhitelistfail").appendText("$record\n\n")
         throw RuntimeException("Unable to parse event and filter to reduce by whitelist")
     }
-}
-
-fun parseFieldsListToJsonObject(fields: Set<List<String>>): JsonObject {
-    val jsonObject = JsonObject()
-
-    for (fieldHierarchy in fields) {
-        var currentObject = jsonObject
-
-        for (fieldName in fieldHierarchy) {
-            if (!currentObject.has(fieldName)) {
-                val newObject = JsonObject()
-                currentObject.add(fieldName, newObject)
-                currentObject = newObject
-            } else {
-                currentObject = currentObject.getAsJsonObject(fieldName)
-            }
-        }
-    }
-
-    return jsonObject
-}
-
-object GuiRepresentation {
-    val prettifier: Gson = GsonBuilder().setPrettyPrinting().create()
-    var latestMessageAndRemovalSets: Pair<Set<List<String>>, Set<List<String>>> = Pair(setOf(), setOf())
 }
 
 private fun listAllFields(
@@ -90,23 +64,6 @@ private fun listAllFields(
             )
         }
     return resultHolder
-}
-
-fun markRemovedFields(message: JsonObject, removeObject: JsonObject, ref: JsonObject, mark: Boolean = false) {
-    for ((key, value) in message.entrySet()) {
-        if (value is JsonObject) {
-            val obj = JsonObject()
-            val exitsInRemove = removeObject.keySet().contains(key)
-            val shouldMark = mark || (exitsInRemove && removeObject[key].asJsonObject.size() == 0)
-
-            val markString = if (shouldMark) "!" else ""
-            ref.add(markString + key, obj)
-            markRemovedFields(value.asJsonObject, if (exitsInRemove) removeObject[key].asJsonObject else JsonObject(), obj, shouldMark)
-        } else {
-            println("NOT HANDLED")
-            // ref.add(key, value)
-        }
-    }
 }
 
 /**

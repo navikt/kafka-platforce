@@ -1,11 +1,8 @@
 package no.nav.sf.pdl.kafka.nais
 
-import com.google.gson.JsonObject
 import mu.KotlinLogging
-import no.nav.sf.pdl.kafka.GuiRepresentation
-import no.nav.sf.pdl.kafka.markRemovedFields
+import no.nav.sf.pdl.kafka.gui.Gui
 import no.nav.sf.pdl.kafka.metrics.Prometheus
-import no.nav.sf.pdl.kafka.parseFieldsListToJsonObject
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
@@ -31,13 +28,7 @@ fun naisAPI(): HttpHandler = routes(
             Response(Status.INTERNAL_SERVER_ERROR)
         }
     },
-    "/internal/gui" bind Method.GET to {
-        val latestMessageModel = parseFieldsListToJsonObject(GuiRepresentation.latestMessageAndRemovalSets.first)
-        val latestRemovalModel = parseFieldsListToJsonObject(GuiRepresentation.latestMessageAndRemovalSets.second)
-        val latestMerge = JsonObject()
-        markRemovedFields(latestMessageModel, latestRemovalModel, latestMerge)
-        Response(Status.OK).body(generateHTMLFromJSON(GuiRepresentation.prettifier.toJson(latestMerge)))
-    }
+    "/internal/gui" bind Method.GET to Gui.guiHandler
 )
 
 object ShutdownHook {
@@ -62,39 +53,4 @@ object ShutdownHook {
     }
 
     fun isActive() = shutdownhookActive
-}
-
-fun generateHTMLFromJSON(jsonString: String): String {
-    val jsonLines = jsonString.split("\n")
-    return wrapWithHTMLPage(buildHTMLContentFromJsonLines(jsonLines))
-}
-
-private fun wrapWithHTMLPage(content: String): String {
-    return """
-        <html>
-        <head>
-        <style>
-        .toberemoved { background-color: #ffcccc; }
-        </style>
-        </head>
-        <body>
-        $content
-        </body>
-        </html>
-    """.trimIndent()
-}
-
-private fun buildHTMLContentFromJsonLines(jsonLines: List<String>): String {
-    val htmlContent = StringBuilder()
-    htmlContent.append("<pre>")
-    for (line in jsonLines) {
-        if (line.isNotBlank()) {
-            val trimmedLine = line.trim()
-            val spanClass = if (trimmedLine.startsWith("\"!")) " class=\"toberemoved\"" else ""
-            val sanitizedLine = line.replace("!", "")
-            htmlContent.append("<span$spanClass>$sanitizedLine</span><br>")
-        }
-    }
-    htmlContent.append("</pre>")
-    return htmlContent.toString()
 }
