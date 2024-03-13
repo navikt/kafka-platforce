@@ -14,6 +14,6 @@ jobs:
       DEPLOY_CLUSTER: dev-gcp
       FLAG_SAMPLE: true
       FLAG_SEEK: false
-      SEEK_OFFSET: 0
+      SEEK_OFFSET: 0 # '20777320' # - save some time for test case
       FLAG_NO_POST: false
       FLAG_RUN_ONCE: false
