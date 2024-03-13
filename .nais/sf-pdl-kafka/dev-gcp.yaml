@@ -41,8 +41,8 @@ spec:
       value: DEV
     - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE
       value: SAMPLE, NO_POST, RUN_ONCE, SEEK
-    - name: FLAG_SAMPLE
-      value: {{ FLAG_SAMPLE }}
+    - name: FLAG_SAMPLE"
+      value:  "{{ FLAG_SAMPLE }}"
     - name: SEEK_OFFSET # Only applied if flag SEEK is set (currently assuming one partition)
       value: '20777320' # - save some time for test case
     - name: KAFKA_POLL_DURATION
