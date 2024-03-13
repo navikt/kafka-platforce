@@ -8,6 +8,15 @@ jobs:
     permissions:
       id-token: write
       contents: write
+    inputs: # Define inputs for manual triggering
+      DEPLOY_APP:
+        description: 'Deployment Application'
+        required: true
+        default: 'sf-pdl-kafka'
+      DEPLOY_CLUSTER:
+        description: 'Deployment Cluster'
+        required: true
+        default: 'dev-gcp'
     secrets: inherit
     with:
       DEPLOY_APP: ${{ github.event.inputs.DEPLOY_APP }}
