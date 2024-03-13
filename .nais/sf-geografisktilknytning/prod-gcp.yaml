@@ -41,7 +41,7 @@ spec:
     - name: FLAG_SEEK
       value: "{{ FLAG_SEEK }}"
     - name: SEEK_OFFSET # Only applied if flag SEEK is set (currently assuming one partition)
-      value: {{ SEEK_OFFSET }}
+      value: "{{ SEEK_OFFSET }}"
     - name: FLAG_NO_POST
       value: "{{ FLAG_NO_POST }}"
     - name: FLAG_RUN_ONCE
