@@ -1,4 +1,4 @@
-name: Build, push, and deploy
+name: Test/Build/Deploy
 
 on:
   workflow_call:
