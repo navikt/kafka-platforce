@@ -13,3 +13,6 @@ jobs:
       DEPLOY_APP: sf-pdl-kafka # sf-geografisktilknytning
       DEPLOY_CLUSTER: dev-gcp
       FLAG_SAMPLE: true
+      FLAG_SEEK: false
+      FLAG_NO_POST: false
+      FLAG_RUN_ONCE: false

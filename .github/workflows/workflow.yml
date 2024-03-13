@@ -12,6 +12,15 @@ on:
       FLAG_SAMPLE:
         required: true
         type: boolean
+      FLAG_SEEK:
+        required: true
+        type: boolean
+      FLAG_NO_POST:
+        required: true
+        type: boolean
+      FLAG_RUN_ONCE:
+        required: true
+        type: boolean
   workflow_dispatch:
     inputs:
       DEPLOY_APP:
@@ -31,10 +40,27 @@ on:
           - 'dev-gcp'
           - 'prod-gcp'
       FLAG_SAMPLE:
-        description: "Flag Sample"
+        description: "Sample"
         required: true
         type: boolean
-run-name: Test/Build/Deploy - ${{ format('inputs {0} branch {1}', tojson(inputs), github.ref_name) }}
+      FLAG_SEEK:
+        description: "Seek"
+        required: true
+        type: boolean
+      FLAG_NO_POST:
+        description: "No post"
+        required: true
+        type: boolean
+      FLAG_RUN_ONCE:
+        description: "Run once"
+        required: true
+        type: boolean
+run-name: >-
+  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }} - flags - 
+  ${{ 'SAMPLE ' if inputs.FLAG_SAMPLE else '' } }} -
+  ${{ 'SEEK ' if inputs.FLAG_SEEK else '' } }} -
+  ${{ 'NO_POST ' if inputs.FLAG_NO_POST else '' } }} -
+  ${{ 'RUN_ONCE ' if inputs.FLAG_RUN_ONCE else '' } }} -
 jobs:
   test:
     name: Run tests

@@ -52,6 +52,8 @@ const val secret_PRIVATE_KEY_PASSWORD = "PRIVATE_KEY_PASSWORD"
  */
 fun env(name: String): String { return System.getenv(name) }
 
+fun envAsBoolean(name: String): Boolean { return System.getenv(name).toBoolean() }
+
 fun envAsLong(name: String): Long { return System.getenv(name).toLong() }
 
 fun envAsList(name: String): List<String> { return System.getenv(name).split(",").map { it.trim() }.toList() }
