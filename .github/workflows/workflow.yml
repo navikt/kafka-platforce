@@ -34,7 +34,7 @@ on:
         description: "Flag Sample"
         required: true
         type: boolean
-run-name: ${{ format('Inputs {0}, Branch {1}', tojson(inputs), github.ref_name) }}
+run-name: Test/Build/Deploy - ${{ format('inputs {0} branch {1}', tojson(inputs), github.ref_name) }}
 jobs:
   test:
     name: Run tests
