@@ -1,0 +1,14 @@
+name: Run workflow from github
+
+on: [workflow_dispatch]
+
+jobs:
+  build-deploy:
+    uses: ./.github/workflows/workflow.yml
+    permissions:
+      id-token: write
+      contents: write
+    secrets: inherit
+    with:
+      DEPLOY_APP: ${{ github.event.inputs.DEPLOY_APP }}
+      DEPLOY_CLUSTER: ${{ github.event.inputs.DEPLOY_CLUSTER }}
