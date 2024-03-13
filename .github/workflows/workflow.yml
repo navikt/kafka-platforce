@@ -131,5 +131,5 @@ jobs:
             FLAG_SAMPLE=${{ inputs.FLAG_SAMPLE }},
             FLAG_SEEK=${{ inputs.FLAG_SEEK }},
             SEEK_OFFSET=${{ inputs.SEEK_OFFSET }},
-            FLAG_NO_POST=${{ inputs.NO_POST }},
-            FLAG_RUN_ONCE=${{ inputs.RUN_ONCE }}
+            FLAG_NO_POST=${{ inputs.FLAG_NO_POST }},
+            FLAG_RUN_ONCE=${{ inputs.FLAG_RUN_ONCE }}
