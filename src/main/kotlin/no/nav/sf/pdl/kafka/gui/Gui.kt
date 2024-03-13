@@ -78,7 +78,7 @@ object Gui {
         <html>
         <head>
         <style>
-        .toberemoved { background-color: #ffcccc; }
+            .toberemoved { background-color: #ffcccc; }
         </style>
         </head>
         <body>

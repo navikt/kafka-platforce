@@ -41,31 +41,6 @@ fun reduceByWhitelist(
     }
 }
 
-private fun listAllFields(
-    messageElement: JsonElement,
-    resultHolder: MutableSet<List<String>> = mutableSetOf(),
-    parents: List<String> = listOf()
-): Set<List<String>> {
-    val messageEntrySet = if (messageElement is JsonArray) {
-        messageElement.filterIsInstance<JsonObject>().flatMap { it.entrySet() }
-    } else { (messageElement as JsonObject).entrySet() }
-
-    val list = messageEntrySet.map { parents + it.key }
-
-    resultHolder.addAll(list)
-
-    messageEntrySet
-        .filter { it.value is JsonObject || it.value is JsonArray }
-        .forEach {
-            listAllFields(
-                it.value,
-                resultHolder,
-                parents.toList() + it.key
-            )
-        }
-    return resultHolder
-}
-
 /**
  * findNonWhitelistedField
  * A function designed to identify and collect paths of non-whitelisted fields within a
@@ -84,7 +59,7 @@ private fun findNonWhitelistedFields(
     val whitelistEntrySet = (whitelistElement as JsonObject).entrySet()
 
     val messageEntrySet = if (messageElement is JsonArray) {
-        messageElement.map { it as JsonObject }.flatMap { it.entrySet() }
+        messageElement.map { it as JsonObject }.flatMap { it.entrySet() }.toSet()
     } else { (messageElement as JsonObject).entrySet() }
 
     // Whitelist field with primitive value (typically "ALL") means allow field plus any subfields
@@ -154,4 +129,35 @@ private fun JsonElement.removeFields(fieldTree: List<String>) {
             }
         }
     }
+}
+
+/**
+ * listAllFields
+ * Recursive function that traverses a json object a returns a set of field paths (flat description of all fields).
+ */
+private fun listAllFields(
+    messageElement: JsonElement,
+    resultHolder: MutableSet<List<String>> = mutableSetOf(),
+    parents: List<String> = listOf()
+): Set<List<String>> {
+    val messageEntrySet = if (messageElement is JsonArray) {
+        messageElement.filterIsInstance<JsonObject>().flatMap { it.entrySet() }.toSet()
+    } else {
+        (messageElement as JsonObject).entrySet()
+    }
+
+    val list = messageEntrySet.map { parents + it.key }
+
+    resultHolder.addAll(list)
+
+    messageEntrySet
+        .filter { it.value is JsonObject || it.value is JsonArray }
+        .forEach {
+            listAllFields(
+                it.value,
+                resultHolder,
+                parents.toList() + it.key
+            )
+        }
+    return resultHolder
 }

@@ -42,7 +42,7 @@ spec:
     - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE
       value: SAMPLE, NO_POST, RUN_ONCE, SEEK
     - name: SEEK_OFFSET # Only applied if flag SEEK is set (currently assuming one partition)
-      value: '0'
+      value: 20777320' # - save some time for test case
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: KAFKA_CLIENT_ID
