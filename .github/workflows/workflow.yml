@@ -10,16 +10,17 @@ on:
         required: true
         type: string
   workflow_dispatch:
-    DEPLOY_APP:
-      description: 'Deployment Application'
-      required: true
-      type: string
-      default: 'sf-pdl-kafka'
-    DEPLOY_CLUSTER:
-      description: 'Deployment Cluster'
-      required: true
-      type: string
-      default: 'dev-gcp'
+    inputs:
+      DEPLOY_APP:
+        description: 'Deployment Application'
+        required: true
+        type: string
+        default: 'sf-pdl-kafka'
+      DEPLOY_CLUSTER:
+        description: 'Deployment Cluster'
+        required: true
+        type: string
+        default: 'dev-gcp'
 
 jobs:
   test:
