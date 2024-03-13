@@ -37,8 +37,6 @@ spec:
   kafka:
     pool: nav-dev # enum of nav-dev, nav-prod
   env:
-    - name: CONTEXT
-      value: DEV
     - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE
       value: SAMPLE, NO_POST, RUN_ONCE, SEEK
     - name: FLAG_SAMPLE

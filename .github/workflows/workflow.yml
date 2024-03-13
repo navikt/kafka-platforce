@@ -1,4 +1,4 @@
-name: Test/Build/Deploy
+name: Test/Build/Deploy - with dispatcher
 
 on:
   workflow_call:

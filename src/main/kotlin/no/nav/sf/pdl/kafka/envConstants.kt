@@ -19,7 +19,6 @@ import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
 // Config environment variables set in yaml file
 const val config_DEPLOY_APP = "DEPLOY_APP"
 const val config_POSTER_FLAGS = "POSTER_FLAGS"
-const val config_SEEK_OFFSET = "SEEK_OFFSET"
 const val config_MS_BETWEEN_WORK = "MS_BETWEEN_WORK"
 const val config_KAFKA_CLIENT_ID = "KAFKA_CLIENT_ID"
 const val config_KAFKA_TOPIC = "KAFKA_TOPIC"
@@ -27,6 +26,10 @@ const val config_KAFKA_POLL_DURATION = "KAFKA_POLL_DURATION"
 const val config_WHITELIST_FILE = "WHITELIST_FILE"
 const val config_CONTEXT = "CONTEXT"
 const val config_FLAG_SAMPLE = "FLAG_SAMPLE"
+const val config_FLAG_SEEK = "FLAG_SAMPLE"
+const val config_SEEK_OFFSET = "SEEK_OFFSET"
+const val config_FLAG_NO_POST = "FLAG_NO_POST"
+const val config_FLAG_RUN_ONCE = "FLAG_RUN_ONCE"
 
 // Kafka injected environment dependencies
 const val env_KAFKA_BROKERS = "KAFKA_BROKERS"

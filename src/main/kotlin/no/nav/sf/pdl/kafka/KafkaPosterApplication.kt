@@ -31,7 +31,14 @@ class KafkaPosterApplication(
     private val log = KotlinLogging.logger { }
 
     fun start() {
-        log.info { "Starting app ${env(config_DEPLOY_APP)} - devContext $devContext flagSample ${env(config_FLAG_SAMPLE)} with poster settings ${envAsFlags(config_POSTER_FLAGS)}" }
+        log.info {
+            "Starting app ${env(config_DEPLOY_APP)} - devContext $devContext" +
+                (if (envAsBoolean(config_FLAG_SAMPLE)) " - SAMPLE" else "") +
+                (if (envAsBoolean(config_FLAG_SEEK)) " - SEEK ${envAsLong(config_SEEK_OFFSET)}" else "") +
+                (if (envAsBoolean(config_FLAG_NO_POST)) " - NO_POST" else "") +
+                (if (envAsBoolean(config_FLAG_RUN_ONCE)) " - RUN_ONCE" else "") +
+                " with poster flags ${envAsFlags(config_POSTER_FLAGS)}"
+        }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics
         naisAPI().asServer(ApacheServer(8080)).start()
 
