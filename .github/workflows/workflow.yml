@@ -9,6 +9,9 @@ on:
       DEPLOY_CLUSTER:
         required: true
         type: string
+      FLAG_SAMPLE:
+        required: true
+        type: boolean
   workflow_dispatch:
     inputs:
       DEPLOY_APP:
@@ -27,7 +30,10 @@ on:
         options:
           - 'dev-gcp'
           - 'prod-gcp'
-
+      FLAG_SAMPLE:
+        description: "Flag Sample"
+        required: true
+        type: boolean
 jobs:
   test:
     name: Run tests
@@ -84,4 +90,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.DEPLOY_CLUSTER }}
           RESOURCE: .nais/${{ inputs.DEPLOY_APP }}/${{ inputs.DEPLOY_CLUSTER }}.yaml
-          VAR: image=${{ needs.build.outputs.image }},DEPLOY_APP=${{ inputs.DEPLOY_APP}},DEPLOY_CLUSTER=${{ inputs.DEPLOY_CLUSTER}}
+          VAR: image=${{ needs.build.outputs.image }},DEPLOY_APP=${{ inputs.DEPLOY_APP}},DEPLOY_CLUSTER=${{ inputs.DEPLOY_CLUSTER}},FLAG_SAMPLE=${{ inputs.FLAG_SAMPLE}}

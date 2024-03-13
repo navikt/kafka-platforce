@@ -1,6 +1,6 @@
 name: Preconfigured run on push
 
-on: [push, pull_request]
+on: [pull_request] #[push, pull_request]
 
 jobs:
   build-deploy:
@@ -12,3 +12,4 @@ jobs:
     with:
       DEPLOY_APP: sf-pdl-kafka # sf-geografisktilknytning
       DEPLOY_CLUSTER: dev-gcp
+      FLAG_SAMPLE: true

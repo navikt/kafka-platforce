@@ -26,6 +26,7 @@ const val config_KAFKA_TOPIC = "KAFKA_TOPIC"
 const val config_KAFKA_POLL_DURATION = "KAFKA_POLL_DURATION"
 const val config_WHITELIST_FILE = "WHITELIST_FILE"
 const val config_CONTEXT = "CONTEXT"
+const val config_FLAG_SAMPLE = "FLAG_SAMPLE"
 
 // Kafka injected environment dependencies
 const val env_KAFKA_BROKERS = "KAFKA_BROKERS"
