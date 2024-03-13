@@ -124,7 +124,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.DEPLOY_CLUSTER }}
           RESOURCE: .nais/${{ inputs.DEPLOY_APP }}/${{ inputs.DEPLOY_CLUSTER }}.yaml
-          VAR: |
+          VAR: >-
             image=${{ needs.build.outputs.image }},
             DEPLOY_APP=${{ inputs.DEPLOY_APP }},
             DEPLOY_CLUSTER=${{ inputs.DEPLOY_CLUSTER }},
