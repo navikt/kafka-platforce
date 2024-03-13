@@ -57,8 +57,8 @@ on:
         type: boolean
 run-name: >-
   ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }} - flags - 
-  ${{ inputs.FLAG_SAMPLE && 'SAMPLE' ELSE '' }} -
-  ${{ inputs.FLAG_SEEK && 'SEEK' ELSE '' }}
+  ${{ inputs.FLAG_SAMPLE && 'SAMPLE' || '' }} -
+  ${{ inputs.FLAG_SEEK && 'SEEK' || '' }}
 #  ${{ 'NO_POST ' if inputs.FLAG_NO_POST else '' }} -
 #  ${{ 'RUN_ONCE ' if inputs.FLAG_RUN_ONCE else '' }} -
 jobs:
