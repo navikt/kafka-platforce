@@ -16,11 +16,17 @@ on:
         required: true
         type: string
         default: 'sf-pdl-kafka'
+        options:
+          - 'sf-pdl-kafka'
+          - 'sf-geografisktilknytning'
       DEPLOY_CLUSTER:
         description: 'Deployment Cluster'
         required: true
         type: string
         default: 'dev-gcp'
+        options:
+          - 'dev-gcp'
+          - 'prod-gcp'
 
 jobs:
   test:
