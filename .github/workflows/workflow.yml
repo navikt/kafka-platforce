@@ -63,14 +63,11 @@ on:
         required: true
         type: boolean
 run-name: >-
-  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }} -
-  ${{ inputs.FLAG_SAMPLE && ' SAMPLE' || '' }}
-  ${{ inputs.FLAG_SEEK && ' SEEK' || '' }}
-  ${{ inputs.FLAG_SEEK && format('{0}{1}', ' ', inputs.SEEK_OFFSET) || '' }}
-  ${{ inputs.FLAG_NO_POST && ' NO_POST' || '' }}
-  ${{ inputs.FLAG_RUN_ONCE && ' RUN_ONCE' || '' }}
-#  ${{ 'NO_POST ' if inputs.FLAG_NO_POST else '' }} -
-#  ${{ 'RUN_ONCE ' if inputs.FLAG_RUN_ONCE else '' }} -
+  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
+  ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
+  ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
+  ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
+  ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
 jobs:
   test:
     name: Run tests
