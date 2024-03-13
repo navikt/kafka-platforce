@@ -15,6 +15,9 @@ on:
       FLAG_SEEK:
         required: true
         type: boolean
+      SEEK_OFFSET:
+        required: true
+        type: string
       FLAG_NO_POST:
         required: true
         type: boolean
@@ -47,6 +50,10 @@ on:
         description: "Seek"
         required: true
         type: boolean
+      SEEK_OFFSET:
+        description: "Seek offset"
+        required: true
+        default: 0
       FLAG_NO_POST:
         description: "No post"
         required: true
@@ -56,9 +63,12 @@ on:
         required: true
         type: boolean
 run-name: >-
-  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }} - flags - 
-  ${{ inputs.FLAG_SAMPLE && 'SAMPLE' || '' }} -
-  ${{ inputs.FLAG_SEEK && 'SEEK' || '' }}
+  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }} -
+  ${{ inputs.FLAG_SAMPLE && ' SAMPLE' || '' }}
+  ${{ inputs.FLAG_SEEK && ' SEEK' || '' }}
+  ${{ inputs.FLAG_SEEK && ' ' + inputs.SEEK_OFFSET || '' }}
+  ${{ inputs.FLAG_NO_POST && ' NO_POST' || '' }}
+  ${{ inputs.FLAG_RUN_ONCE && ' RUN_ONCE' || '' }}
 #  ${{ 'NO_POST ' if inputs.FLAG_NO_POST else '' }} -
 #  ${{ 'RUN_ONCE ' if inputs.FLAG_RUN_ONCE else '' }} -
 jobs:
