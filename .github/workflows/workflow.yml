@@ -124,12 +124,5 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.DEPLOY_CLUSTER }}
           RESOURCE: .nais/${{ inputs.DEPLOY_APP }}/${{ inputs.DEPLOY_CLUSTER }}.yaml
-          VAR: |-
-            image=${{ needs.build.outputs.image }},
-            DEPLOY_APP=${{ inputs.DEPLOY_APP }},
-            DEPLOY_CLUSTER=${{ inputs.DEPLOY_CLUSTER }},
-            FLAG_SAMPLE=${{ inputs.FLAG_SAMPLE }},
-            FLAG_SEEK=${{ inputs.FLAG_SEEK }},
-            SEEK_OFFSET=${{ inputs.SEEK_OFFSET }},
-            FLAG_NO_POST=${{ inputs.FLAG_NO_POST }},
-            FLAG_RUN_ONCE=${{ inputs.FLAG_RUN_ONCE }}
+          VAR: image=${{ needs.build.outputs.image }},INPUTS=${{ inputs }},IJSON=${{ toJson(inputs) }}
+          #VAR: image=${{ needs.build.outputs.image }},DEPLOY_APP=${{ inputs.DEPLOY_APP }},DEPLOY_CLUSTER=${{ inputs.DEPLOY_CLUSTER }},FLAG_SAMPLE=${{ inputs.FLAG_SAMPLE }},FLAG_SEEK=${{ inputs.FLAG_SEEK }},SEEK_OFFSET=${{ inputs.SEEK_OFFSET }},FLAG_NO_POST=${{ inputs.FLAG_NO_POST }},FLAG_RUN_ONCE=${{ inputs.FLAG_RUN_ONCE }}
