@@ -78,8 +78,10 @@ jobs:
       ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Dummy Step
-        run: echo "This is a dummy step"
+      - name: Dump github context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
   test:
     name: Run tests
     needs: run-info
