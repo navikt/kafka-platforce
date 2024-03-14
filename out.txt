@@ -1,0 +1,1 @@
+europe-north1-docker.pkg.dev/nais-management-233d/teamcrm/sf-pdl-kafka:2024.03.14-20.00-ad7681a
