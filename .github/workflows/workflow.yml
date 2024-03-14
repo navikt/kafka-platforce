@@ -63,14 +63,12 @@ on:
         required: true
         type: boolean
 run-name: >-
+  ${{ github.event.workflow_call.head_commit.message }}
   ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
   ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
   ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
   ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
   ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
-  ${{ github.event.head_commit.message }}
-  ${{ github.event.workflow_call.head_commit.message }}
-  ${{ github.event.workflow_dispatch.head_commit.message }}
 jobs:
   test:
     name: Run tests
