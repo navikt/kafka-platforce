@@ -65,6 +65,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           WORKFLOW_ID=77696646
+          echo "WORKFLOW_ID: $WORKFLOW_ID"
           ARTIFACT_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success" | jq -r '.workflow_runs[0].artifacts_url')
           echo "ARTIFACT_URL: $ARTIFACT_URL"
 
