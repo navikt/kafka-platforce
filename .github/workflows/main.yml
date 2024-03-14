@@ -17,3 +17,4 @@ jobs:
       SEEK_OFFSET: 0 # '20777320' # - save some time for test case
       FLAG_NO_POST: false
       FLAG_RUN_ONCE: false
+      name: ${{ inputs.DEPLOY_APP }}
