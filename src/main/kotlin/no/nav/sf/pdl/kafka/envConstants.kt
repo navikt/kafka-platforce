@@ -16,6 +16,7 @@ package no.nav.sf.pdl.kafka
 
 // Config environment variables set in yaml file
 const val config_DEPLOY_APP = "DEPLOY_APP"
+const val config_DEPLOY_CLUSTER = "DEPLOY_CLUSTER"
 const val config_KAFKA_TOPIC = "KAFKA_TOPIC"
 const val config_MS_BETWEEN_WORK = "MS_BETWEEN_WORK"
 const val config_KAFKA_POLL_DURATION = "KAFKA_POLL_DURATION"
