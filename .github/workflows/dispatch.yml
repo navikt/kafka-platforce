@@ -59,13 +59,13 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: image-url
-          path: image-url.txt  # Specify the directory where the artifact should be downloaded
+          name: imageUrl
+          path: imageUrl.txt  # Specify the directory where the artifact should be downloaded
 
       - name: Read image URL from artifact
         id: read-image-url
         run: |
-          IMAGE_URL=$(cat ./image_url.txt)
+          IMAGE_URL=$(cat ./imageUrl.txt)
           echo "::set-output name=image_url::$IMAGE_URL"
 
       - name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }}

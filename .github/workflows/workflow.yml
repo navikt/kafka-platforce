@@ -138,19 +138,19 @@ jobs:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
   deploy:
-    name: Deploy ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }} - image ${{ needs.build.outputs.image }}
+    name: Deploy ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Create image URL text file
-        run: echo "${{ needs.build.outputs.image }}" > image-url.txt
+        run: echo "${{ needs.build.outputs.image }}" > imageUrl.txt
 
       - name: Create artifact containing image URL
         uses: actions/upload-artifact@v4
         with:
-          name: image-url
-          path: image-url.txt
+          name: imageUrl
+          path: imageUrl.txt
 
       - uses: nais/deploy/actions/deploy@v1
         env:
