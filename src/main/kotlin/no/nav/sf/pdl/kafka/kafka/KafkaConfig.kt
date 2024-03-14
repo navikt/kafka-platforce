@@ -1,7 +1,9 @@
 package no.nav.sf.pdl.kafka.kafka
 
+import no.nav.sf.pdl.kafka.config_FLAG_ALT_ID
 import no.nav.sf.pdl.kafka.config_KAFKA_CLIENT_ID
 import no.nav.sf.pdl.kafka.env
+import no.nav.sf.pdl.kafka.envAsBoolean
 import no.nav.sf.pdl.kafka.env_KAFKA_BROKERS
 import no.nav.sf.pdl.kafka.env_KAFKA_CREDSTORE_PASSWORD
 import no.nav.sf.pdl.kafka.env_KAFKA_KEYSTORE_PATH
@@ -15,11 +17,12 @@ import java.util.Properties
 
 // Instantiate each get() to fetch config from current state of environment (fetch injected updates of credentials)
 private val propertiesBase get() = Properties().apply {
+    val clientId = env(config_KAFKA_CLIENT_ID) + (if (envAsBoolean(config_FLAG_ALT_ID)) "-alt" else "")
     putAll(
         mapOf<String, Any>(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to env(env_KAFKA_BROKERS),
-            ConsumerConfig.GROUP_ID_CONFIG to env(config_KAFKA_CLIENT_ID),
-            ConsumerConfig.CLIENT_ID_CONFIG to env(config_KAFKA_CLIENT_ID),
+            ConsumerConfig.GROUP_ID_CONFIG to clientId,
+            ConsumerConfig.CLIENT_ID_CONFIG to clientId,
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
             ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 200,
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",

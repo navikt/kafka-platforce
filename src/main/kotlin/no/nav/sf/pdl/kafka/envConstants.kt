@@ -1,7 +1,5 @@
 package no.nav.sf.pdl.kafka
 
-import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
-
 /**
  * Naming convention applied to environment variable constants: a lowercase prefix separated from the actual constant, i.e. prefix_ENVIRONMENT_VARIABLE_NAME.
  *
@@ -18,26 +16,24 @@ import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
 
 // Config environment variables set in yaml file
 const val config_DEPLOY_APP = "DEPLOY_APP"
-const val config_POSTER_FLAGS = "POSTER_FLAGS"
-const val config_MS_BETWEEN_WORK = "MS_BETWEEN_WORK"
-const val config_KAFKA_CLIENT_ID = "KAFKA_CLIENT_ID"
 const val config_KAFKA_TOPIC = "KAFKA_TOPIC"
+const val config_MS_BETWEEN_WORK = "MS_BETWEEN_WORK"
 const val config_KAFKA_POLL_DURATION = "KAFKA_POLL_DURATION"
+const val config_SF_TOKENHOST = "SF_TOKENHOST"
 const val config_WHITELIST_FILE = "WHITELIST_FILE"
+const val config_KAFKA_CLIENT_ID = "KAFKA_CLIENT_ID"
 const val config_FLAG_SAMPLE = "FLAG_SAMPLE"
 const val config_FLAG_SEEK = "FLAG_SAMPLE"
 const val config_SEEK_OFFSET = "SEEK_OFFSET"
 const val config_FLAG_NO_POST = "FLAG_NO_POST"
 const val config_FLAG_RUN_ONCE = "FLAG_RUN_ONCE"
+const val config_FLAG_ALT_ID = "FLAG_ALT_ID"
 
 // Kafka injected environment dependencies
 const val env_KAFKA_BROKERS = "KAFKA_BROKERS"
 const val env_KAFKA_KEYSTORE_PATH = "KAFKA_KEYSTORE_PATH"
 const val env_KAFKA_CREDSTORE_PASSWORD = "KAFKA_CREDSTORE_PASSWORD"
 const val env_KAFKA_TRUSTSTORE_PATH = "KAFKA_TRUSTSTORE_PATH"
-
-// Salesforce configured environment dependency
-const val config_SF_TOKENHOST = "SF_TOKENHOST"
 
 // Salesforce required secrets
 const val secret_SF_CLIENT_ID = "SF_CLIENT_ID"
@@ -57,7 +53,3 @@ fun env(name: String): String { return System.getenv(name) }
 fun envAsBoolean(name: String): Boolean { return System.getenv(name).toBoolean() }
 
 fun envAsLong(name: String): Long { return System.getenv(name).toLong() }
-
-fun envAsList(name: String): List<String> { return System.getenv(name).split(",").map { it.trim() }.toList() }
-
-fun envAsFlags(name: String): List<KafkaToSFPoster.Flag> { return envAsList(name).stream().map { KafkaToSFPoster.Flag.valueOf(it) }.toList() }

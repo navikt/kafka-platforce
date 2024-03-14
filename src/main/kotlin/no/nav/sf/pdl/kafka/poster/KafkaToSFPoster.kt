@@ -1,12 +1,15 @@
 package no.nav.sf.pdl.kafka.poster
 
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.config_FLAG_NO_POST
+import no.nav.sf.pdl.kafka.config_FLAG_RUN_ONCE
+import no.nav.sf.pdl.kafka.config_FLAG_SAMPLE
+import no.nav.sf.pdl.kafka.config_FLAG_SEEK
 import no.nav.sf.pdl.kafka.config_KAFKA_POLL_DURATION
 import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
-import no.nav.sf.pdl.kafka.config_POSTER_FLAGS
 import no.nav.sf.pdl.kafka.config_SEEK_OFFSET
 import no.nav.sf.pdl.kafka.env
-import no.nav.sf.pdl.kafka.envAsFlags
+import no.nav.sf.pdl.kafka.envAsBoolean
 import no.nav.sf.pdl.kafka.envAsLong
 import no.nav.sf.pdl.kafka.kafka.KafkaConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
@@ -34,21 +37,15 @@ class KafkaToSFPoster(
     private val kafkaTopic: String = env(config_KAFKA_TOPIC),
     private val kafkaConsumerFactory: KafkaConsumerFactory = KafkaConsumerFactory(),
     private val kafkaPollDuration: Long = envAsLong(config_KAFKA_POLL_DURATION),
+    private val flagSeek: Boolean = envAsBoolean(config_FLAG_SEEK),
     private val seekOffset: Long = envAsLong(config_SEEK_OFFSET),
-    flags: List<Flag> = envAsFlags(config_POSTER_FLAGS),
+    private val flagSample: Boolean = envAsBoolean(config_FLAG_SAMPLE),
+    private val flagNoPost: Boolean = envAsBoolean(config_FLAG_NO_POST),
+    private val flagRunOnce: Boolean = envAsBoolean(config_FLAG_RUN_ONCE)
 ) {
-    enum class Flag { DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE }
-
-    private enum class ConsumeStatus { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
+    private enum class ConsumeResult { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
 
     private val log = KotlinLogging.logger { }
-
-    // Flags set from POSTER_FLAGS
-    private val hasFlagFromBeginning = flags.contains(Flag.FROM_BEGINNING)
-    private val hasFlagSeek = flags.contains(Flag.SEEK)
-    private val hasFlagNoPost = flags.contains(Flag.NO_POST)
-    private val hasFlagSample = flags.contains(Flag.SAMPLE)
-    private val hasFlagRunOnce = flags.contains(Flag.RUN_ONCE)
 
     private var samplesLeft = NUMBER_OF_SAMPLES_IN_SAMPLE_RUN
     private var hasRunOnce = false
@@ -56,8 +53,8 @@ class KafkaToSFPoster(
     private lateinit var stats: WorkSessionStatistics
 
     fun runWorkSession() {
-        if (hasFlagRunOnce && hasRunOnce) {
-            log.info { "Work session skipped due to setting Only Run Once, and has consumed once" }
+        if (flagRunOnce && hasRunOnce) {
+            log.info { "Work session skipped due to flag Run Once, and has consumed once" }
             return
         }
 
@@ -78,9 +75,7 @@ class KafkaToSFPoster(
             assign(topicPartitions)
             log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
             if (!hasRunOnce) {
-                if (hasFlagFromBeginning) {
-                    seekToBeginning(emptyList()) // emptyList(): Seeks to the first offset for all provided partitions
-                } else if (hasFlagSeek) {
+                if (flagSeek) {
                     topicPartitions.forEach {
                         seek(it, seekOffset)
                     }
@@ -93,13 +88,13 @@ class KafkaToSFPoster(
         val records = kafkaConsumer.poll(Duration.ofMillis(kafkaPollDuration))
             as ConsumerRecords<String, String?>
 
-        if (consumeRecords(records) == ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH) {
+        if (consumeRecords(records) == ConsumeResult.SUCCESSFULLY_CONSUMED_BATCH) {
             kafkaConsumer.commitSync() // Will update position of kafka consumer in kafka cluster
             pollAndConsume(kafkaConsumer)
         }
     }
 
-    private fun consumeRecords(recordsFromTopic: ConsumerRecords<String, String?>): ConsumeStatus =
+    private fun consumeRecords(recordsFromTopic: ConsumerRecords<String, String?>): ConsumeResult =
         if (recordsFromTopic.isEmpty) {
             if (!stats.hasConsumed()) {
                 WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.clear()
@@ -109,29 +104,29 @@ class KafkaToSFPoster(
                 WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.inc()
                 log.info { "Finished work session with activity (subsequent ${WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.get().toInt()}). $stats" }
             }
-            ConsumeStatus.NO_MORE_RECORDS
+            ConsumeResult.NO_MORE_RECORDS
         } else {
             WorkSessionStatistics.workSessionsWithoutEventsCounter.clear()
             stats.updateConsumedStatistics(recordsFromTopic)
 
             val recordsFiltered = filterRecords(recordsFromTopic)
 
-            if (hasFlagSample) sampleRecords(recordsFiltered)
+            if (flagSample) sampleRecords(recordsFiltered)
 
-            if (recordsFiltered.count() == 0 || hasFlagNoPost) {
+            if (recordsFiltered.count() == 0 || flagNoPost) {
 
                 if (recordsFiltered.count() > 0) updateWhatWouldBeSent(recordsFiltered)
                 // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
                 // consider it a successfully consumed batch without further action
-                ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
+                ConsumeResult.SUCCESSFULLY_CONSUMED_BATCH
             } else {
                 if (sfClient.postRecords(recordsFiltered.toKafkaMessagesSet()).isSuccess()) {
                     stats.updatePostedStatistics(recordsFiltered)
-                    ConsumeStatus.SUCCESSFULLY_CONSUMED_BATCH
+                    ConsumeResult.SUCCESSFULLY_CONSUMED_BATCH
                 } else {
                     log.warn { "Failed when posting to SF - $stats" }
                     WorkSessionStatistics.failedSalesforceCallCounter.inc()
-                    ConsumeStatus.FAIL
+                    ConsumeResult.FAIL
                 }
             }
         }

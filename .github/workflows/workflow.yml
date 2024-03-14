@@ -66,11 +66,12 @@ on:
         required: true
         type: boolean
       FLAG_ALT_ID:
+        description: "Alt Id"
         required: true
         type: boolean
 run-name: >- # Used as run-name on dispatch:
   Dispatch:
-  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
+  ${{ inputs.DEPLOY_APP }} - ${{ inputs.DEPLOY_CLUSTER }}
   ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
   ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
   ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
@@ -79,7 +80,7 @@ run-name: >- # Used as run-name on dispatch:
 jobs:
   run-info:
     name: >- # Displays inputs as name on job
-      ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
+      ${{ inputs.DEPLOY_APP }} - ${{ inputs.DEPLOY_CLUSTER }}
       ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
       ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
       ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}

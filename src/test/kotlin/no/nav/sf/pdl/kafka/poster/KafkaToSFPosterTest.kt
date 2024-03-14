@@ -47,12 +47,15 @@ class KafkaToSFPosterTest {
     lateinit var kafkaToSFPoster: KafkaToSFPoster
 
     // Parameters to be altered by test cases
-    var flags: List<KafkaToSFPoster.Flag> = listOf()
     var filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null
     var modifier: ((ConsumerRecord<String, String?>) -> String?)? = null
 
     @BeforeEach
-    fun setUp() {
+    fun beforeEach() {
+        setUp()
+    }
+
+    private fun setUp(flagSeek: Boolean = false, flagSample: Boolean = false, flagNoPost: Boolean = false, flagRunOnce: Boolean = false) {
         every { kafkaConsumerFactoryMock.createConsumer() } returns kafkaConsumerMock
         every { kafkaConsumerMock.partitionsFor(any()) } returns listOf(partitionInfoMock)
         every { partitionInfoMock.topic() } returns "topic"
@@ -69,14 +72,16 @@ class KafkaToSFPosterTest {
             kafkaTopic = "topic",
             kafkaConsumerFactory = kafkaConsumerFactoryMock,
             kafkaPollDuration = 10L,
+            flagSeek = flagSeek,
             seekOffset = 0L,
-            flags = flags
+            flagSample = flagSample,
+            flagNoPost = flagNoPost,
+            flagRunOnce = flagRunOnce
         )
     }
 
     @AfterEach
     fun tearDown() {
-        flags = listOf()
         filter = null
         modifier = null
     }
@@ -129,8 +134,7 @@ class KafkaToSFPosterTest {
 
     @Test
     fun `Run once flag - if first work session finds no records but later would - with RUN_ONCE flag we should only poll once and never commit`() {
-        flags = listOf(KafkaToSFPoster.Flag.RUN_ONCE)
-        setUp()
+        setUp(flagRunOnce = true)
 
         val pollResponse1 = ConsumerRecords<String, String?>(mapOf()) // Result of first poll call - no records - should end first work session
         val pollResponse2 = listOf(exampleWithSalesforceTagRecord).toConsumerRecords() // Result of a second poll call - one record
@@ -147,24 +151,8 @@ class KafkaToSFPosterTest {
     }
 
     @Test
-    fun `From beginning flag - should make consumer seek to beginning on first work session`() {
-        flags = listOf(KafkaToSFPoster.Flag.FROM_BEGINNING)
-        setUp()
-
-        val pollResponse1 = ConsumerRecords<String, String?>(mapOf()) // Result of first poll call - no records
-
-        every { kafkaConsumerMock.seekToBeginning(any()) } returns Unit
-        every { kafkaConsumerMock.poll(any<Duration>()) } returns pollResponse1
-
-        kafkaToSFPoster.runWorkSession()
-
-        verify(exactly = 1) { kafkaConsumerMock.seekToBeginning(any()) }
-    }
-
-    @Test
     fun `Seek flag - should make consumer seek on first work session`() {
-        flags = listOf(KafkaToSFPoster.Flag.SEEK)
-        setUp()
+        setUp(flagSeek = true)
 
         val pollResponse1 = ConsumerRecords<String, String?>(mapOf()) // Result of first poll call - no records
 
@@ -178,8 +166,7 @@ class KafkaToSFPosterTest {
 
     @Test
     fun `Flag no post - should not post anything but still commit when there is a record from poll`() {
-        flags = listOf(KafkaToSFPoster.Flag.NO_POST)
-        setUp()
+        setUp(flagNoPost = true)
 
         val pollResponse1 = listOf(exampleWithSalesforceTagRecord).toConsumerRecords() // Result of first poll call
         val pollResponse2 = ConsumerRecords<String, String?>(mapOf()) // Result of second poll call - no records
