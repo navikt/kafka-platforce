@@ -27,48 +27,48 @@ on:
       FLAG_ALT_ID:
         required: true
         type: boolean
-  workflow_dispatch:
-    inputs:
-      DEPLOY_APP:
-        description: 'Deployment Application'
-        required: true
-        type: choice
-        default: 'sf-pdl-kafka'
-        options:
-          - 'sf-pdl-kafka'
-          - 'sf-geografisktilknytning'
-      DEPLOY_CLUSTER:
-        description: 'Deployment Cluster'
-        required: true
-        type: choice
-        default: 'dev-gcp'
-        options:
-          - 'dev-gcp'
-          - 'prod-gcp'
-      FLAG_SEEK:
-        description: "Seek"
-        required: true
-        type: boolean
-      SEEK_OFFSET:
-        description: "Seek offset"
-        required: true
-        default: 0
-      FLAG_SAMPLE:
-        description: "Sample"
-        required: true
-        type: boolean
-      FLAG_NO_POST:
-        description: "No post"
-        required: true
-        type: boolean
-      FLAG_RUN_ONCE:
-        description: "Run once"
-        required: true
-        type: boolean
-      FLAG_ALT_ID:
-        description: "Alt Id"
-        required: true
-        type: boolean
+#  workflow_dispatch:
+#    inputs:
+#      DEPLOY_APP:
+#        description: 'Deployment Application'
+#        required: true
+#        type: choice
+#        default: 'sf-pdl-kafka'
+#        options:
+#          - 'sf-pdl-kafka'
+#          - 'sf-geografisktilknytning'
+#      DEPLOY_CLUSTER:
+#        description: 'Deployment Cluster'
+#        required: true
+#        type: choice
+#        default: 'dev-gcp'
+#        options:
+#          - 'dev-gcp'
+#          - 'prod-gcp'
+#      FLAG_SEEK:
+#        description: "Seek"
+#        required: true
+#        type: boolean
+#      SEEK_OFFSET:
+#        description: "Seek offset"
+#        required: true
+#        default: 0
+#      FLAG_SAMPLE:
+#        description: "Sample"
+#        required: true
+#        type: boolean
+#      FLAG_NO_POST:
+#        description: "No post"
+#        required: true
+#        type: boolean
+#      FLAG_RUN_ONCE:
+#        description: "Run once"
+#        required: true
+#        type: boolean
+#      FLAG_ALT_ID:
+#        description: "Alt Id"
+#        required: true
+#        type: boolean
 run-name: >- # Used as run-name on dispatch:
   Dispatch:
   ${{ inputs.DEPLOY_APP }} - ${{ inputs.DEPLOY_CLUSTER }}
