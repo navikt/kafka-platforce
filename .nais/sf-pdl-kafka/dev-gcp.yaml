@@ -50,7 +50,7 @@ spec:
     - name: KAFKA_CLIENT_ID
       value: "{{ DEPLOY_APP }}"
     - name: DEPLOY_APP
-      value: "{{ DEPLOY_APP }}"
+      value: {{ DEPLOY_APP }}
     - name: FLAG_SEEK
       value: "{{ FLAG_SEEK }}"
     - name: SEEK_OFFSET # Only applied if flag SEEK is set (currently assuming one partition)
