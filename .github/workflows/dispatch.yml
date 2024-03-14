@@ -63,7 +63,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: imageUrl
-          path: imageUrl.txt  # Specify the directory where the artifact should be downloaded
+          path: ./imageUrl.txt
 
       - name: Read image URL from artifact
         id: read-image-url

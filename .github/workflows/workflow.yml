@@ -144,13 +144,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Create image URL text file
-        run: echo "${{ needs.build.outputs.image }}" > imageUrl.txt
+        run: echo "${{ needs.build.outputs.image }}" > ./imageUrl.txt
 
       - name: Create artifact containing image URL
         uses: actions/upload-artifact@v4
         with:
           name: imageUrl
-          path: imageUrl.txt
+          path: ./imageUrl.txt
 
       - uses: nais/deploy/actions/deploy@v1
         env:
