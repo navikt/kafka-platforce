@@ -143,6 +143,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Create image URL text file
+        run: echo "${{ needs.build.outputs.image }}" > image_url.txt
+
+      - name: Create artifact containing image URL
+        uses: actions/upload-artifact@v2
+        with:
+          name: image-url
+          path: image_url.txt
+
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
