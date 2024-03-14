@@ -69,6 +69,7 @@ on:
         required: true
         type: boolean
 run-name: >- # Used as run-name on dispatch:
+  Dispatch:
   ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
   ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
   ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
