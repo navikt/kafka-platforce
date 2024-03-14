@@ -57,10 +57,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: image-url
-          path: ./  # Specify the directory where the artifact should be downloaded
+          path: image-url.txt  # Specify the directory where the artifact should be downloaded
 
       - name: Read image URL from artifact
         id: read-image-url

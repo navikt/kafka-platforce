@@ -147,10 +147,10 @@ jobs:
         run: echo "${{ needs.build.outputs.image }}" > image_url.txt
 
       - name: Create artifact containing image URL
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: image-url
-          path: image_url.txt
+          path: image-url.txt
 
       - uses: nais/deploy/actions/deploy@v1
         env:
