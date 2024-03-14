@@ -69,6 +69,14 @@ run-name: >-
   ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
   ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
 jobs:
+  echo:
+    name: Display Run Name
+    run: |
+      echo "${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}" \
+      ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }} \
+      ${{ inputs.FLAG_SEEK && ' - SEEK ' || '' }}${{ inputs.FLAG_SEEK && inputs.SEEK_OFFSET || '' }} \
+      ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }} \
+      ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
   test:
     name: Run tests
     runs-on: ubuntu-latest
