@@ -138,7 +138,7 @@ jobs:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
   deploy:
-    name: Deploy ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
+    name: Deploy ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }} - image ${{ needs.build.outputs.image }}
     needs: build
     runs-on: ubuntu-latest
     steps:
