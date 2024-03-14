@@ -71,6 +71,7 @@ on:
 jobs:
   run-info:
     name: >-
+      ${{ github.event.head_commit.message }}
       ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
       ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
       ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
