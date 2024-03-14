@@ -62,12 +62,12 @@ on:
         description: "Run once"
         required: true
         type: boolean
-run-name: >-
-  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
-  ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
-  ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
-  ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
-  ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
+#run-name: >-
+#  ${{ inputs.DEPLOY_APP }} to ${{ inputs.DEPLOY_CLUSTER }}
+#  ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
+#  ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
+#  ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
+#  ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
 jobs:
   run-info:
     name: >-
