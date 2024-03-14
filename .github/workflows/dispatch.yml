@@ -61,6 +61,8 @@ jobs:
     steps:
       - name: Fetch artifact
         id: read-image-url
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           WORKFLOW_ID=77696646
           ARTIFACT_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success" | jq -r '.workflow_runs[0].artifacts_url')
