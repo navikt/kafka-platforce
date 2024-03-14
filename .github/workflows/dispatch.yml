@@ -59,26 +59,28 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - name: Download artifact
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          workflow: main.yml
-          workflow_conclusion: success
-          branch: master
-          event: push
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: imageUrl
-          path: ./imageUrl.txt
-
-      - name: Read image URL from artifact
+      - name: Fetch artifact
         id: read-image-url
         run: |
-          IMAGE_URL=$(cat ./imageUrl.txt)
+          WORKFLOW_ID=77696646
+          ARTIFACT_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success" | jq -r '.workflow_runs[0].artifacts_url')
+          ARTIFACT_DETAILS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" $ARTIFACT_URL)
+          ARCHIVE_DOWNLOAD_URL=$(echo $ARTIFACT_DETAILS | jq -r '.artifacts[0].archive_download_url')
+          curl -s -H "Authorization: token $GITHUB_TOKEN" -o artifact.zip -L $ARCHIVE_DOWNLOAD_URL
+          IMAGE_URL=$(unzip -p artifact.zip)
           echo "::set-output name=image_url::$IMAGE_URL"
+
+#      - name: Download artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: imageUrl
+#          path: ./imageUrl.txt
+
+#      - name: Read image URL from artifact
+#        id: read-image-url
+#        run: |
+#          IMAGE_URL=$(cat ./imageUrl.txt)
+#          echo "::set-output name=image_url::$IMAGE_URL"
 
       - name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }}
         uses: nais/deploy/actions/deploy@v1
