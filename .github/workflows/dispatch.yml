@@ -55,6 +55,9 @@ jobs:
   deploy:
     name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }} (Dispatched)
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
