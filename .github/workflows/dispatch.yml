@@ -66,8 +66,8 @@ jobs:
         run: |
           WORKFLOW_ID=77696646
           echo "WORKFLOW_ID: $WORKFLOW_ID"
-          echo $(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success")
-          ARTIFACT_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success" | jq -r '.workflow_runs[0].artifacts_url')
+          echo $(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success&page=1&per_page=5")
+          ARTIFACT_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success&page=1&per_page=5" | jq -r '.workflow_runs[0].artifacts_url')
           echo "ARTIFACT_URL: $ARTIFACT_URL"
 
           ARTIFACT_DETAILS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$ARTIFACT_URL")
