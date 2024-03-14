@@ -1,0 +1,95 @@
+on:
+  workflow_dispatch:
+    inputs:
+      DEPLOY_APP:
+        description: 'Deployment Application'
+        required: true
+        type: choice
+        default: 'sf-pdl-kafka'
+        options:
+          - 'sf-pdl-kafka'
+          - 'sf-geografisktilknytning'
+      DEPLOY_CLUSTER:
+        description: 'Deployment Cluster'
+        required: true
+        type: choice
+        default: 'dev-gcp'
+        options:
+          - 'dev-gcp'
+          - 'prod-gcp'
+      FLAG_SEEK:
+        description: "Seek"
+        required: true
+        type: boolean
+      SEEK_OFFSET:
+        description: "Seek offset"
+        required: true
+        default: 0
+      FLAG_SAMPLE:
+        description: "Sample"
+        required: true
+        type: boolean
+      FLAG_NO_POST:
+        description: "No post"
+        required: true
+        type: boolean
+      FLAG_RUN_ONCE:
+        description: "Run once"
+        required: true
+        type: boolean
+      FLAG_ALT_ID:
+        description: "Alt Id"
+        required: true
+        type: boolean
+run-name: >- # Used as run-name on dispatch:
+  Dispatch-deploy:
+  ${{ inputs.DEPLOY_APP }} - ${{ inputs.DEPLOY_CLUSTER }}
+  ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
+  ${{ inputs.FLAG_SAMPLE && ' - SAMPLE' || '' }}
+  ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
+  ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
+  ${{ inputs.FLAG_ALT_ID && ' - ALT_ID' || '' }}
+jobs:
+  deploy:
+    name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }} (Dispatched)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve latest successful build information
+        id: get_build_info
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { octokit } = require("@octokit/core");
+            const octo = new octokit({ auth: process.env.GITHUB_TOKEN });
+
+            const res = await octo.request('GET /repos/{owner}/{repo}/actions/runs', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event: 'workflow_dispatch',
+              status: 'success',
+              branch: context.ref.replace('refs/heads/', ''),
+              per_page: 1
+            });
+
+            const latestRun = res.data.workflow_runs[0];
+
+            return { 
+              imageUrl: latestRun.artifacts_url,
+              commitSha: latestRun.head_sha
+            };
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download artifact from latest successful run
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifact
+          path: ./build-artifact
+
+      - name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }}
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{ github.event.inputs.DEPLOY_CLUSTER }}
+          RESOURCE: .nais/${{ github.event.inputs.DEPLOY_APP }}/${{ github.event.inputs.DEPLOY_CLUSTER }}.yaml
+          VAR: image=${{ needs.build.outputs.image }},DEPLOY_APP=${{ inputs.DEPLOY_APP }},DEPLOY_CLUSTER=${{ inputs.DEPLOY_CLUSTER }},FLAG_SAMPLE=${{ inputs.FLAG_SAMPLE }},FLAG_SEEK=${{ inputs.FLAG_SEEK }},SEEK_OFFSET=${{ inputs.SEEK_OFFSET }},FLAG_NO_POST=${{ inputs.FLAG_NO_POST }},FLAG_RUN_ONCE=${{ inputs.FLAG_RUN_ONCE }},FLAG_ALT_ID=${{ inputs.FLAG_ALT_ID }}
