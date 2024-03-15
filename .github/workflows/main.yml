@@ -1,6 +1,6 @@
 name: Preconfigured run on push
 
-on: [push, pull_request] #[push, pull_request]
+on: [pull_request] #[push, pull_request]
 
 jobs:
   build-deploy:
