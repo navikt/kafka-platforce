@@ -71,10 +71,9 @@ jobs:
           IMAGE_URL=$(unzip -p artifact.zip)
           echo "IMAGE_URL: $IMAGE_URL"
           echo "::set-output name=image_url::$IMAGE_URL"
-      - name: Checkout nais ymls
-        uses: actions/checkout@v4
-        with:
-          path: ./nais
+      - uses: actions/checkout@v4
+#        with:
+#          path: ./nais
       - name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }}
         uses: nais/deploy/actions/deploy@v1
         env:
