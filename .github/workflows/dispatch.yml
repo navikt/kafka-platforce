@@ -72,7 +72,7 @@ jobs:
           echo "IMAGE_URL: $IMAGE_URL"
           echo "::set-output name=image_url::$IMAGE_URL"
       - name: Checkout nais ymls
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
         with:
           path: ./nais
       - name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }}
