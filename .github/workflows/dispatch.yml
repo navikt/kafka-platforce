@@ -63,20 +63,21 @@ jobs:
       - name: Fetch artifact
         id: read-image-url
         env:
+          ARTIFACT_TOKEN: ${{ secrets.ARTIFACT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Length of GITHUB_TOKEN: ${#GITHUB_TOKEN}"
+          echo "Length of ARTIFACT_TOKEN: ${#ARTIFACT_TOKEN}"
           WORKFLOW_ID=77696646
           echo "WORKFLOW_ID: $WORKFLOW_ID"
-          echo $(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/artifacts?name=imageUrl")
-          ARTIFACT_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success&page=1&per_page=5" | jq -r '.workflow_runs[0].artifacts_url')
+          echo $(curl -s -H "Authorization: token $ARTIFACT_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/artifacts?name=imageUrl")
+          ARTIFACT_URL=$(curl -s -H "Authorization: token $ARTIFACT_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/workflows/$WORKFLOW_ID/runs?status=success&page=1&per_page=5" | jq -r '.workflow_runs[0].artifacts_url')
           echo "ARTIFACT_URL: $ARTIFACT_URL"
           
-          ARTIFACT_DETAILS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$ARTIFACT_URL")
+          ARTIFACT_DETAILS=$(curl -s -H "Authorization: token $ARTIFACT_TOKEN" "$ARTIFACT_URL")
           ARCHIVE_DOWNLOAD_URL=$(echo "$ARTIFACT_DETAILS" | jq -r '.artifacts[0].archive_download_url')
           echo "ARCHIVE_DOWNLOAD_URL: $ARCHIVE_DOWNLOAD_URL"
 
-          curl -s -H "Authorization: token $GITHUB_TOKEN" -o artifact.zip -L "$ARCHIVE_DOWNLOAD_URL"
+          curl -s -H "Authorization: token $ARTIFACT_TOKEN" -o artifact.zip -L "$ARCHIVE_DOWNLOAD_URL"
           IMAGE_URL=$(unzip -p artifact.zip)
           echo "IMAGE_URL: $IMAGE_URL"
 
