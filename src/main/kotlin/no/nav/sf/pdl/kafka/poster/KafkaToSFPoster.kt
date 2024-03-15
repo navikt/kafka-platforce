@@ -3,13 +3,14 @@ package no.nav.sf.pdl.kafka.poster
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.config_FLAG_NO_POST
 import no.nav.sf.pdl.kafka.config_FLAG_RUN_ONCE
-import no.nav.sf.pdl.kafka.config_FLAG_SAMPLE
 import no.nav.sf.pdl.kafka.config_FLAG_SEEK
 import no.nav.sf.pdl.kafka.config_KAFKA_POLL_DURATION
 import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
+import no.nav.sf.pdl.kafka.config_NUMBER_OF_SAMPLES
 import no.nav.sf.pdl.kafka.config_SEEK_OFFSET
 import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.envAsBoolean
+import no.nav.sf.pdl.kafka.envAsInt
 import no.nav.sf.pdl.kafka.envAsLong
 import no.nav.sf.pdl.kafka.kafka.KafkaConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
@@ -24,7 +25,6 @@ import java.io.File
 import java.time.Duration
 import java.util.Base64
 
-const val NUMBER_OF_SAMPLES_IN_SAMPLE_RUN = 3
 /**
  * KafkaToSFPoster
  * This class is responsible for handling a work session, ie polling and posting to salesforce until we are up-to-date with topic
@@ -39,7 +39,7 @@ class KafkaToSFPoster(
     private val kafkaPollDuration: Long = envAsLong(config_KAFKA_POLL_DURATION),
     private val flagSeek: Boolean = envAsBoolean(config_FLAG_SEEK),
     private val seekOffset: Long = envAsLong(config_SEEK_OFFSET),
-    private val flagSample: Boolean = envAsBoolean(config_FLAG_SAMPLE),
+    numberOfSamples: Int = envAsInt(config_NUMBER_OF_SAMPLES),
     private val flagNoPost: Boolean = envAsBoolean(config_FLAG_NO_POST),
     private val flagRunOnce: Boolean = envAsBoolean(config_FLAG_RUN_ONCE)
 ) {
@@ -47,7 +47,7 @@ class KafkaToSFPoster(
 
     private val log = KotlinLogging.logger { }
 
-    private var samplesLeft = NUMBER_OF_SAMPLES_IN_SAMPLE_RUN
+    private var samplesLeft = numberOfSamples
     private var hasRunOnce = false
 
     private lateinit var stats: WorkSessionStatistics
@@ -111,11 +111,11 @@ class KafkaToSFPoster(
 
             val recordsFiltered = filterRecords(recordsFromTopic)
 
-            if (flagSample) sampleRecords(recordsFiltered)
+            if (samplesLeft > 0) sampleRecords(recordsFiltered)
 
             if (recordsFiltered.count() == 0 || flagNoPost) {
+                // if (recordsFiltered.count() > 0) updateWhatWouldBeSent(recordsFiltered)
 
-                if (recordsFiltered.count() > 0) updateWhatWouldBeSent(recordsFiltered)
                 // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
                 // consider it a successfully consumed batch without further action
                 ConsumeResult.SUCCESSFULLY_CONSUMED_BATCH
@@ -159,15 +159,13 @@ class KafkaToSFPoster(
     }
 
     private fun sampleRecords(records: Iterable<ConsumerRecord<String, String?>>) {
-        if (samplesLeft > 0) {
-            records.forEach {
-                if (samplesLeft-- > 0) {
-                    File("/tmp/samplesFromTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
-                    if (modifier != null) {
-                        File("/tmp/samplesAfterModifier").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it)}\n\n")
-                    }
-                    log.info { "Saved sample. Samples left: $samplesLeft" }
+        records.forEach {
+            if (samplesLeft-- > 0) {
+                File("/tmp/samplesFromTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
+                if (modifier != null) {
+                    File("/tmp/samplesAfterModifier").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it)}\n\n")
                 }
+                log.info { "Saved sample. Samples left: $samplesLeft" }
             }
         }
     }

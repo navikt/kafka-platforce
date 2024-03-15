@@ -23,7 +23,7 @@ const val config_KAFKA_POLL_DURATION = "KAFKA_POLL_DURATION"
 const val config_SF_TOKENHOST = "SF_TOKENHOST"
 const val config_WHITELIST_FILE = "WHITELIST_FILE"
 const val config_KAFKA_CLIENT_ID = "KAFKA_CLIENT_ID"
-const val config_FLAG_SAMPLE = "FLAG_SAMPLE"
+const val config_NUMBER_OF_SAMPLES = "NUMBER_OF_SAMPLES"
 const val config_FLAG_SEEK = "FLAG_SEEK"
 const val config_SEEK_OFFSET = "SEEK_OFFSET"
 const val config_FLAG_NO_POST = "FLAG_NO_POST"
@@ -52,5 +52,7 @@ const val secret_PRIVATE_KEY_PASSWORD = "PRIVATE_KEY_PASSWORD"
 fun env(name: String): String { return System.getenv(name) }
 
 fun envAsBoolean(name: String): Boolean { return System.getenv(name).toBoolean() }
+
+fun envAsInt(name: String): Int { return System.getenv(name).toInt() }
 
 fun envAsLong(name: String): Long { return System.getenv(name).toLong() }
