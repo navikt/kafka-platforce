@@ -32,7 +32,7 @@ jobs:
     name: >- # Displays inputs as name on job
       ${{ inputs.DEPLOY_APP }} - ${{ inputs.DEPLOY_CLUSTER }}
       ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
-      ${{ inputs.NUMBER_OF_SAMPLES != '0' ? format(' - SAMPLE {0}', inputs.NUMBER_OF_SAMPLES) : '' }}
+      ${{ if ne(inputs.NUMBER_OF_SAMPLES, '0') }} - SAMPLE ${{ inputs.NUMBER_OF_SAMPLES }}{{ endif }}
       ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
       ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
       ${{ inputs.FLAG_ALT_ID && ' - ALT_ID' || '' }}
