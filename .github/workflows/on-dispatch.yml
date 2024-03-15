@@ -70,7 +70,7 @@ jobs:
           curl -s -H "Authorization: token $ARTIFACT_TOKEN" -o artifact.zip -L "$ARCHIVE_DOWNLOAD_URL"
           IMAGE_URL=$(unzip -p artifact.zip)
           echo "IMAGE_URL: $IMAGE_URL"
-          echo "::set-output name=image_url::$IMAGE_URL"
+          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v4
       - name: Deploy ${{ github.event.inputs.DEPLOY_APP }} to ${{ github.event.inputs.DEPLOY_CLUSTER }}
         uses: nais/deploy/actions/deploy@v1

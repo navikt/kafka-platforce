@@ -13,7 +13,7 @@ jobs:
       DEPLOY_APP: sf-pdl-kafka # sf-geografisktilknytning
       DEPLOY_CLUSTER: dev-gcp
       FLAG_SEEK: true
-      SEEK_OFFSET: '0' #'20777320' # - save some time for test case
+      SEEK_OFFSET: '3' #'20777320' # - save some time for test case
       NUMBER_OF_SAMPLES: '1'
       FLAG_NO_POST: true
       FLAG_RUN_ONCE: false
