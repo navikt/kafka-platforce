@@ -34,7 +34,7 @@ class KafkaPosterApplication(
         log.info {
             "Starting app ${env(config_DEPLOY_APP)} - devContext $devContext" +
                 (if (envAsBoolean(config_FLAG_SEEK)) " - SEEK ${envAsLong(config_SEEK_OFFSET)}" else "") +
-                (if (envAsBoolean(config_NUMBER_OF_SAMPLES)) " - SAMPLE" else "") +
+                (if (envAsInt(config_NUMBER_OF_SAMPLES) > 0) " - SAMPLE ${envAsInt(config_NUMBER_OF_SAMPLES)}" else "") +
                 (if (envAsBoolean(config_FLAG_NO_POST)) " - NO_POST" else "") +
                 (if (envAsBoolean(config_FLAG_RUN_ONCE)) " - RUN_ONCE" else "") +
                 (if (envAsBoolean(config_FLAG_ALT_ID)) " - ALT_ID" else "")
