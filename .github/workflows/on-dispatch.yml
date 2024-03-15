@@ -47,7 +47,7 @@ run-name: >- # Used as run-name on dispatch:
   Dispatch-deploy:
   ${{ inputs.DEPLOY_APP }} - ${{ inputs.DEPLOY_CLUSTER }}
   ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
-  ${{ inputs.NUMBER_OF_SAMPLES != '0' ? format(' - SAMPLE {0}', inputs.NUMBER_OF_SAMPLES) : '' }}
+  ${{ ne(inputs.NUMBER_OF_SAMPLES, '0') && format(' - SAMPLE {0}', inputs.NUMBER_OF_SAMPLES) || '' }}
   ${{ inputs.FLAG_NO_POST && ' - NO_POST' || '' }}
   ${{ inputs.FLAG_RUN_ONCE && ' - RUN_ONCE' || '' }}
   ${{ inputs.FLAG_ALT_ID && ' - ALT_ID' || '' }}
