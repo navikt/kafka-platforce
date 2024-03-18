@@ -44,7 +44,7 @@ on:
         required: true
         type: boolean
 run-name: >- # Used as run-name on dispatch:
-  Dispatch-deploy:
+  Dispatch:
   ${{ inputs.DEPLOY_APP }} - ${{ inputs.DEPLOY_CLUSTER }}
   ${{ inputs.FLAG_SEEK && format(' - SEEK {0}', inputs.SEEK_OFFSET) || '' }}
   ${{ inputs.NUMBER_OF_SAMPLES != '0' && format(' - SAMPLE {0}', inputs.NUMBER_OF_SAMPLES) || '' }}
@@ -58,16 +58,16 @@ jobs:
     permissions:
       id-token: write
       contents: write
+      actions: read
     steps:
       - name: Fetch latest image url from artifact
         id: read-image-url
-        env:
-          ARTIFACT_TOKEN: ${{ secrets.ARTIFACT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        env:
+#          ARTIFACT_TOKEN: ${{ secrets.ARTIFACT_TOKEN }}
         run: |
-          ARCHIVE_DOWNLOAD_URL=$(curl -s -H "Authorization: token $ARTIFACT_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/artifacts?name=imageUrl" | jq -r '.artifacts[0].archive_download_url')
+          ARCHIVE_DOWNLOAD_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/sf-pdl-kafka/actions/artifacts?name=imageUrl" | jq -r '.artifacts[0].archive_download_url')
           echo "ARCHIVE_DOWNLOAD_URL: $ARCHIVE_DOWNLOAD_URL"
-          curl -s -H "Authorization: token $ARTIFACT_TOKEN" -o artifact.zip -L "$ARCHIVE_DOWNLOAD_URL"
+          curl -s -H "Authorization: token $GITHUB_TOKEN" -o artifact.zip -L "$ARCHIVE_DOWNLOAD_URL"
           IMAGE_URL=$(unzip -p artifact.zip)
           echo "IMAGE_URL: $IMAGE_URL"
           echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
