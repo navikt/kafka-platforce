@@ -37,7 +37,7 @@ spec:
     - name: POSTER_FLAGS # DEFAULT, FROM_BEGINNING, SEEK, NO_POST, SAMPLE, RUN_ONCE
       value: SAMPLE, NO_POST, RUN_ONCE, FROM_BEGINNING
     - name: FLAG_SAMPLE
-      value:  "{{ FLAG_SAMPLE }}"
+      value: "{{ FLAG_SAMPLE }}"
     - name: FLAG_SEEK
       value: "{{ FLAG_SEEK }}"
     - name: SEEK_OFFSET # Only applied if flag SEEK is set (currently assuming one partition)

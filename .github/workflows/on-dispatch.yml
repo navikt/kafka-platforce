@@ -62,6 +62,8 @@ jobs:
     steps:
       - name: Fetch latest image url from artifact
         id: read-image-url
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        env:
 #          ARTIFACT_TOKEN: ${{ secrets.ARTIFACT_TOKEN }}
         run: |
