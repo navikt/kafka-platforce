@@ -114,7 +114,7 @@ class KafkaToSFPoster(
             if (samplesLeft > 0) sampleRecords(recordsFiltered)
 
             if (recordsFiltered.count() == 0 || flagNoPost) {
-                // if (recordsFiltered.count() > 0) updateWhatWouldBeSent(recordsFiltered)
+                if (recordsFiltered.count() > 0) updateWhatWouldBeSent(recordsFiltered)
 
                 // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
                 // consider it a successfully consumed batch without further action
