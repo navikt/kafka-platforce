@@ -131,6 +131,8 @@ class KafkaToSFPoster(
             }
         }
 
+    // For testdata:
+    private var whatWouldBeSentBatch = 1
     private fun updateWhatWouldBeSent(recordsFiltered: Iterable<ConsumerRecord<String, String?>>) {
         File("/tmp/whatwouldbesent").appendText("BATCH ${whatWouldBeSentBatch++}\n${recordsFiltered.toKafkaMessagesSet().joinToString("\n")}\n\n")
     }
@@ -172,5 +174,3 @@ class KafkaToSFPoster(
 
     private fun String.encodeB64(): String = Base64.getEncoder().encodeToString(this.toByteArray())
 }
-
-var whatWouldBeSentBatch = 1
