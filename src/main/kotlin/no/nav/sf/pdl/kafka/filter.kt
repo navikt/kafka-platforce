@@ -21,9 +21,11 @@ fun isTombstoneOrSalesforceTagged(record: ConsumerRecord<String, String?>): Bool
 
 fun cherryPickedOffsets(record: ConsumerRecord<String, String?>): Boolean {
     try {
-        return offsetsPersonTestData.contains(record.offset()).also { if (it) {
-            File("/tmp/cherry-keys").appendText(record.key()+"\n")
-        } }
+        return offsetsPersonTestData.contains(record.offset()).also {
+            if (it) {
+                File("/tmp/cherry-keys").appendText(record.key() + "\n")
+            }
+        }
     } catch (e: Exception) {
         File("/tmp/cherryPickedOffsetsFail").appendText("$record\nMESSAGE ${e.message}\n\n")
         throw RuntimeException("Unable to parse value for cherry pick filter ${e.message}")
