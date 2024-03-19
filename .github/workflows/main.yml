@@ -10,14 +10,14 @@ jobs:
       contents: write
     secrets: inherit
     with:
-      DEPLOY_APP: sf-pdl-kafka # sf-geografisktilknytning
+      DEPLOY_APP: sf-geografisktilknytning # sf-pdl-kafka # sf-geografisktilknytning
       DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
       FLAG_SEEK: true
 
       # Where to go if flag seek is set. Will seek to next offset that exists on queue, i.e '0' equals 'from beginning'
-      SEEK_OFFSET: '20777320' # - save some time for test case
+      SEEK_OFFSET: '0' # - save some time for test case
 
       # How many samples should be stored. Will sample first ones that passes filter.
       NUMBER_OF_SAMPLES: '5'

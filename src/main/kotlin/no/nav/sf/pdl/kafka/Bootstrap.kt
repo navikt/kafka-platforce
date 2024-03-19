@@ -7,7 +7,9 @@ val application = when (env(config_DEPLOY_APP)) {
         filter = if (devContext) ::cherryPickedKeys else null,
         modifier = ::reduceByWhitelist
     )
-    else -> KafkaPosterApplication()
+    else -> KafkaPosterApplication(
+        filter = ::cherryPickedKeys
+    )
 }
 
 fun main() = application.start()
