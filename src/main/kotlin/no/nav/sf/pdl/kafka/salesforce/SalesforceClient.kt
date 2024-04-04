@@ -20,7 +20,10 @@ class SalesforceClient(
         val dstUrl = "${accessTokenHandler.instanceUrl}/services/data/$SALESFORCE_VERSION/composite/sobjects"
 
         val headers: Headers =
-            listOf(Pair("Authorization", "Bearer ${accessTokenHandler.accessToken}"))
+            listOf(
+                "Authorization" to "Bearer ${accessTokenHandler.accessToken}",
+                "Content-Type" to "application/json;charset=UTF-8"
+            )
 
         val request = Request(Method.POST, dstUrl).headers(headers).body(requestBody)
 
