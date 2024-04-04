@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
 import org.http4k.core.Response
 import org.http4k.core.Status
+import java.io.File
 import java.lang.reflect.Type
 
 /**
@@ -70,6 +71,7 @@ fun Response.isSuccess(): Boolean = when (status) {
             false
         }
     else -> {
+        File("/tmp/sf-response-not-ok").writeText(this.toMessage())
         log.error { "Post request to Salesforce failed - ${status.description}(${status.code})" }
         false
     }
