@@ -94,8 +94,8 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
             )
 
         for (retry in 1..4) {
+            val response: Response = client(accessTokenRequest)
             try {
-                val response: Response = client(accessTokenRequest)
                 if (response.status.code == 200) {
                     val accessTokenResponse = gson.fromJson(response.bodyString(), AccessTokenResponse::class.java)
                     lastTokenPair = Pair(accessTokenResponse.access_token, accessTokenResponse.instance_url)
@@ -103,7 +103,7 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
                     return lastTokenPair
                 }
             } catch (e: Exception) {
-                File("/tmp/accessTokenFailStack").writeText(accessTokenRequest.toMessage() + "\n\n" + e.stackTraceToString())
+                File("/tmp/accessTokenFailStack").writeText(accessTokenRequest.toMessage() + "\n\n" + response.toMessage() + "\n\n" + e.stackTraceToString())
                 log.error("Attempt to fetch access token $retry of 3 failed by ${e.message}")
                 runBlocking { delay(retry * 1000L) }
             }
