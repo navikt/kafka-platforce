@@ -33,7 +33,7 @@ const val config_FLAG_ALT_ID = "FLAG_ALT_ID"
 // Kafka injected environment dependencies
 const val env_KAFKA_BROKERS = "KAFKA_BROKERS"
 const val env_KAFKA_KEYSTORE_PATH = "KAFKA_KEYSTORE_PATH"
-const val env_KAFKA_CREDSTORE_PASSWORD = "KAFKA_CREDST  ORE_PASSWORD"
+const val env_KAFKA_CREDSTORE_PASSWORD = "KAFKA_CREDSTORE_PASSWORD"
 const val env_KAFKA_TRUSTSTORE_PATH = "KAFKA_TRUSTSTORE_PATH"
 
 // Salesforce required secrets
