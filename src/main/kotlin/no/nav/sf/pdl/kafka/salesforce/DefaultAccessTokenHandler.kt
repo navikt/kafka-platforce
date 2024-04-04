@@ -84,7 +84,7 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
             "." + gson.toJson(claim).encodeB64UrlSafe()
         val fullClaimSignature = privateKey.sign(claimWithHeaderJsonUrlSafe.toByteArray())
 
-        val accessTokenRequest = Request(Method.POST, sfTokenHost)
+        val accessTokenRequest = Request(Method.POST, "$sfTokenHost/services/oauth2/token")
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(
                 listOf(
