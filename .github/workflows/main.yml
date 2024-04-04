@@ -10,23 +10,23 @@ jobs:
       contents: write
     secrets: inherit
     with:
-      DEPLOY_APP: sf-geografisktilknytning # sf-pdl-kafka # sf-geografisktilknytning
+      DEPLOY_APP: sf-pdl-kafka # sf-pdl-kafka # sf-geografisktilknytning
       DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
       FLAG_SEEK: true
 
       # Where to go if flag seek is set. Will seek to next offset that exists on queue, i.e '0' equals 'from beginning'
-      SEEK_OFFSET: '0' # - save some time for test case
+      SEEK_OFFSET: '20777320' # '20777320'- start here to save some time for test case sf-pdl-kafka
 
       # How many samples should be stored. Will sample first ones that passes filter.
-      NUMBER_OF_SAMPLES: '5'
+      NUMBER_OF_SAMPLES: '100'
 
       # To not post any records to salesforce - dry run
-      FLAG_NO_POST: true
+      FLAG_NO_POST: false
 
       # To run only one work session - ie when no more records found - stop polling for more during lifetime of app
-      FLAG_RUN_ONCE: true
+      FLAG_RUN_ONCE: false
 
       # To add -alt postfix to client id - will look like an alter ego to kafka cluster. Useful for doing an operation
       # and then switching off to return to previous position.

@@ -20,6 +20,7 @@ import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.body.toBody
+import java.io.File
 import java.security.KeyStore
 import java.security.PrivateKey
 
@@ -102,6 +103,7 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
                     return lastTokenPair
                 }
             } catch (e: Exception) {
+                File("/tmp/accessTokenFailStack").writeText(accessTokenRequest.toMessage() + "\n\n" + e.stackTraceToString())
                 log.error("Attempt to fetch access token $retry of 3 failed by ${e.message}")
                 runBlocking { delay(retry * 1000L) }
             }
