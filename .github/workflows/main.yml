@@ -14,6 +14,7 @@ jobs:
       DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
+      # Note that the consumer will go there each time the pod reboots, so make sure you turn this off once done
       FLAG_SEEK: true
 
       # Where to go if flag seek is set. Will seek to next offset that exists on queue, i.e '0' equals 'from beginning'
@@ -23,7 +24,7 @@ jobs:
       NUMBER_OF_SAMPLES: '100'
 
       # To not post any records to salesforce - dry run
-      FLAG_NO_POST: false
+      FLAG_NO_POST: true
 
       # To run only one work session - ie when no more records found - stop polling for more during lifetime of app
       FLAG_RUN_ONCE: false

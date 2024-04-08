@@ -49,7 +49,7 @@ const val secret_PRIVATE_KEY_PASSWORD = "PRIVATE_KEY_PASSWORD"
 /**
  * Shortcuts for fetching environment variables
  */
-fun env(name: String): String { return System.getenv(name) }
+fun env(name: String): String { return System.getenv(name) ?: throw NullPointerException("Cannot find env $name") }
 
 fun envAsBoolean(name: String): Boolean { return System.getenv(name).toBoolean() }
 
