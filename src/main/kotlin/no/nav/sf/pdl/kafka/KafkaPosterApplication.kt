@@ -26,18 +26,18 @@ class KafkaPosterApplication(
 ) {
     private val poster = KafkaToSFPoster(filter, modifier)
 
-    private val msBetweenWork = envAsLong(config_MS_BETWEEN_WORK)
+    private val msBetweenWork = env(config_MS_BETWEEN_WORK).toLong()
 
     private val log = KotlinLogging.logger { }
 
     fun start() {
         log.info {
             "Starting app ${env(config_DEPLOY_APP)} - devContext $devContext" +
-                (if (envAsBoolean(config_FLAG_SEEK)) " - SEEK ${envAsLong(config_SEEK_OFFSET)}" else "") +
-                (if (envAsInt(config_NUMBER_OF_SAMPLES) > 0) " - SAMPLE ${envAsInt(config_NUMBER_OF_SAMPLES)}" else "") +
-                (if (envAsBoolean(config_FLAG_NO_POST)) " - NO_POST" else "") +
-                (if (envAsBoolean(config_FLAG_RUN_ONCE)) " - RUN_ONCE" else "") +
-                (if (envAsBoolean(config_FLAG_ALT_ID)) " - ALT_ID" else "")
+                (if (env(config_FLAG_SEEK).toBoolean()) " - SEEK ${env(config_SEEK_OFFSET).toLong()}" else "") +
+                (if (env(config_NUMBER_OF_SAMPLES).toInt() > 0) " - SAMPLE ${env(config_NUMBER_OF_SAMPLES)}" else "") +
+                (if (env(config_FLAG_NO_POST).toBoolean()) " - NO_POST" else "") +
+                (if (env(config_FLAG_RUN_ONCE).toBoolean()) " - RUN_ONCE" else "") +
+                (if (env(config_FLAG_ALT_ID).toBoolean()) " - ALT_ID" else "")
         }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics
         naisAPI().asServer(ApacheServer(8080)).start()

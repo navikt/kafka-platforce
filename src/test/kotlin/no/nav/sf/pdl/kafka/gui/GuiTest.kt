@@ -43,6 +43,5 @@ class GuiTest {
 
         Assertions.assertEquals(expectedResultPage, response.body.toString())
 
-        println(response.body)
     }
 }

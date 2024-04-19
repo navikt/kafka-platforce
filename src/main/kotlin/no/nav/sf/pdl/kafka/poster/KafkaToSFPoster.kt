@@ -9,9 +9,6 @@ import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
 import no.nav.sf.pdl.kafka.config_NUMBER_OF_SAMPLES
 import no.nav.sf.pdl.kafka.config_SEEK_OFFSET
 import no.nav.sf.pdl.kafka.env
-import no.nav.sf.pdl.kafka.envAsBoolean
-import no.nav.sf.pdl.kafka.envAsInt
-import no.nav.sf.pdl.kafka.envAsLong
 import no.nav.sf.pdl.kafka.kafka.KafkaConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.salesforce.KafkaMessage
@@ -34,14 +31,14 @@ class KafkaToSFPoster(
     private val filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
     private val modifier: ((ConsumerRecord<String, String?>) -> String?)? = null,
     private val sfClient: SalesforceClient = SalesforceClient(),
-    private val kafkaTopic: String = env(config_KAFKA_TOPIC),
     private val kafkaConsumerFactory: KafkaConsumerFactory = KafkaConsumerFactory(),
-    private val kafkaPollDuration: Long = envAsLong(config_KAFKA_POLL_DURATION),
-    private val flagSeek: Boolean = envAsBoolean(config_FLAG_SEEK),
-    private val seekOffset: Long = envAsLong(config_SEEK_OFFSET),
-    numberOfSamples: Int = envAsInt(config_NUMBER_OF_SAMPLES),
-    private val flagNoPost: Boolean = envAsBoolean(config_FLAG_NO_POST),
-    private val flagRunOnce: Boolean = envAsBoolean(config_FLAG_RUN_ONCE)
+    private val kafkaTopic: String = env(config_KAFKA_TOPIC),
+    private val kafkaPollDuration: Long = env(config_KAFKA_POLL_DURATION).toLong(),
+    private val flagSeek: Boolean = env(config_FLAG_SEEK).toBoolean(),
+    private val seekOffset: Long = env(config_SEEK_OFFSET).toLong(),
+    numberOfSamples: Int = env(config_NUMBER_OF_SAMPLES).toInt(),
+    private val flagNoPost: Boolean = env(config_FLAG_NO_POST).toBoolean(),
+    private val flagRunOnce: Boolean = env(config_FLAG_RUN_ONCE).toBoolean()
 ) {
     private enum class ConsumeResult { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
 

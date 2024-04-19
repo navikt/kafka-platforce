@@ -3,7 +3,6 @@ package no.nav.sf.pdl.kafka.kafka
 import no.nav.sf.pdl.kafka.config_FLAG_ALT_ID
 import no.nav.sf.pdl.kafka.config_KAFKA_CLIENT_ID
 import no.nav.sf.pdl.kafka.env
-import no.nav.sf.pdl.kafka.envAsBoolean
 import no.nav.sf.pdl.kafka.env_KAFKA_BROKERS
 import no.nav.sf.pdl.kafka.env_KAFKA_CREDSTORE_PASSWORD
 import no.nav.sf.pdl.kafka.env_KAFKA_KEYSTORE_PATH
@@ -17,7 +16,7 @@ import java.util.Properties
 
 // Instantiate each get() to fetch config from current state of environment (fetch injected updates of credentials)
 private val propertiesBase get() = Properties().apply {
-    val clientId = env(config_KAFKA_CLIENT_ID) + (if (envAsBoolean(config_FLAG_ALT_ID)) "-alt" else "")
+    val clientId = env(config_KAFKA_CLIENT_ID) + (if (env(config_FLAG_ALT_ID).toBoolean()) "-alt" else "")
     putAll(
         mapOf<String, Any>(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to env(env_KAFKA_BROKERS),
