@@ -42,6 +42,5 @@ class GuiTest {
         val expectedResultPage = readResourceFile("/GuiPageFromTestCase.html")
 
         Assertions.assertEquals(expectedResultPage, response.body.toString())
-
     }
 }
