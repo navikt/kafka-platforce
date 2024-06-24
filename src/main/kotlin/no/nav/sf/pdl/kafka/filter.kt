@@ -44,8 +44,8 @@ fun cherryPickedKeys(record: ConsumerRecord<String, String?>): Boolean {
 // TEST VARIANT:
 val devPersonsKeysOffsets: MutableMap<String, Long> = mutableMapOf()
 
-val firstOffset = 20776583L
-val lastOffset = 21067981L
+val firstOffset = 21272947L
+val lastOffset = 22000000L
 fun isTombstoneOrSalesforceTaggedMod(record: ConsumerRecord<String, String?>): Boolean {
     try {
         if ((record.offset() < firstOffset) || (record.offset() > lastOffset)) return false
