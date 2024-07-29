@@ -3,36 +3,14 @@ name: Preconfigured run on push
 on: [push, pull_request] #[push, pull_request]
 
 jobs:
-  setup-matrix: # enable running build-deploy for .nais/*/ in parallel
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Set Matrix
-        id: set-matrix
-        run: |
-          set -x
-          matrix=(.nais/*/)
-          matrix=("${matrix[@]%/}")
-          matrix=("${matrix[@]#.nais/}")
-          json=$(jq -c -n '{app: $ARGS.positional}' --args "${matrix[@]}")
-          echo "::set-output name=matrix::$json"
   build-deploy:
-    needs:
-      - setup-matrix
-    strategy:
-      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
     uses: ./.github/workflows/workflow.yml
     permissions:
       id-token: write
       contents: write
     secrets: inherit
     with:
-      DEPLOY_APP: ${{ matrix.app }} # sf-pdl-kafka # sf-geografisktilknytning
+      DEPLOY_APP: sf-geografisktilknytning # sf-pdl-kafka # sf-geografisktilknytning
       DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
