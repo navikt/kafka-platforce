@@ -39,7 +39,7 @@ class GuiTest {
 
         val response = Gui.guiHandler.invoke(Request(Method.GET, "", ""))
 
-        val expectedResultPage = readResourceFile("/GuiPageFromTestCase.html")
+        val expectedResultPage = readResourceFile("/GuiPageFromTestCase.html").replace("\n", System.lineSeparator())
 
         Assertions.assertEquals(expectedResultPage, response.body.toString())
     }
