@@ -24,7 +24,7 @@ jobs:
       NUMBER_OF_SAMPLES: '5'
 
       # To not post any records to salesforce - dry run
-      FLAG_NO_POST: true
+      FLAG_NO_POST: false
 
       # To run only one work session - ie when no more records found - stop polling for more during lifetime of app
       FLAG_RUN_ONCE: false
