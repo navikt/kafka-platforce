@@ -2,7 +2,6 @@ package no.nav.sf.pdl.kafka.poster
 
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.config_FLAG_NO_POST
-import no.nav.sf.pdl.kafka.config_FLAG_RUN_ONCE
 import no.nav.sf.pdl.kafka.config_FLAG_SEEK
 import no.nav.sf.pdl.kafka.config_KAFKA_POLL_DURATION
 import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
@@ -37,8 +36,7 @@ class KafkaToSFPoster(
     private val flagSeek: Boolean = env(config_FLAG_SEEK).toBoolean(),
     private val seekOffset: Long = env(config_SEEK_OFFSET).toLong(),
     numberOfSamples: Int = env(config_NUMBER_OF_SAMPLES).toInt(),
-    private val flagNoPost: Boolean = env(config_FLAG_NO_POST).toBoolean(),
-    private val flagRunOnce: Boolean = env(config_FLAG_RUN_ONCE).toBoolean()
+    private val flagNoPost: Boolean = env(config_FLAG_NO_POST).toBoolean()
 ) {
     private enum class ConsumeResult { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
 
@@ -50,11 +48,6 @@ class KafkaToSFPoster(
     private lateinit var stats: WorkSessionStatistics
 
     fun runWorkSession() {
-        if (flagRunOnce && hasRunOnce) {
-            log.info { "Work session skipped due to flag Run Once, and has consumed once" }
-            return
-        }
-
         stats = WorkSessionStatistics()
 
         // Instantiate each work session to fetch config from current state of environment (fetch injected updates of credentials)

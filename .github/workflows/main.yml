@@ -11,7 +11,7 @@ jobs:
     secrets: inherit
     with:
       DEPLOY_APP: sf-pdl-kafka # sf-pdl-kafka # sf-geografisktilknytning
-      DEPLOY_CLUSTER: dev-gcp
+      DEPLOY_CLUSTER: prod-gcp
 
       # Start consuming from a particular offset
       # Note that the consumer will go there each time the pod reboots, so make sure you turn this off once done
@@ -24,10 +24,7 @@ jobs:
       NUMBER_OF_SAMPLES: '5'
 
       # To not post any records to salesforce - dry run
-      FLAG_NO_POST: false
-
-      # To run only one work session - ie when no more records found - stop polling for more during lifetime of app
-      FLAG_RUN_ONCE: false
+      FLAG_NO_POST: true
 
       # To add -alt postfix to client id - will look like an alter ego to kafka cluster. Useful for doing an operation
       # and then switching off to return to previous position.

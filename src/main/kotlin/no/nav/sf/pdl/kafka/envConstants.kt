@@ -27,7 +27,6 @@ const val config_NUMBER_OF_SAMPLES = "NUMBER_OF_SAMPLES"
 const val config_FLAG_SEEK = "FLAG_SEEK"
 const val config_SEEK_OFFSET = "SEEK_OFFSET"
 const val config_FLAG_NO_POST = "FLAG_NO_POST"
-const val config_FLAG_RUN_ONCE = "FLAG_RUN_ONCE"
 const val config_FLAG_ALT_ID = "FLAG_ALT_ID"
 
 // Kafka injected environment dependencies

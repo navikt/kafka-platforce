@@ -36,7 +36,6 @@ class KafkaPosterApplication(
                 (if (env(config_FLAG_SEEK).toBoolean()) " - SEEK ${env(config_SEEK_OFFSET).toLong()}" else "") +
                 (if (env(config_NUMBER_OF_SAMPLES).toInt() > 0) " - SAMPLE ${env(config_NUMBER_OF_SAMPLES)}" else "") +
                 (if (env(config_FLAG_NO_POST).toBoolean()) " - NO_POST" else "") +
-                (if (env(config_FLAG_RUN_ONCE).toBoolean()) " - RUN_ONCE" else "") +
                 (if (env(config_FLAG_ALT_ID).toBoolean()) " - ALT_ID" else "")
         }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics

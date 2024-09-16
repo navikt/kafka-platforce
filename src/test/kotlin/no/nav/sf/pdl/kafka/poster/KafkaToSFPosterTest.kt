@@ -75,8 +75,7 @@ class KafkaToSFPosterTest {
             flagSeek = flagSeek,
             seekOffset = 0L,
             numberOfSamples = numberOfSamples,
-            flagNoPost = flagNoPost,
-            flagRunOnce = flagRunOnce
+            flagNoPost = flagNoPost
         )
     }
 
@@ -130,24 +129,6 @@ class KafkaToSFPosterTest {
             )
         }
         verify { kafkaConsumerMock.commitSync() }
-    }
-
-    @Test
-    fun `Run once flag - if first work session finds no records but later would - with RUN_ONCE flag we should only poll once and never commit`() {
-        setUp(flagRunOnce = true)
-
-        val pollResponse1 = ConsumerRecords<String, String?>(mapOf()) // Result of first poll call - no records - should end first work session
-        val pollResponse2 = listOf(exampleWithSalesforceTagRecord).toConsumerRecords() // Result of a second poll call - one record
-        val pollResponse3 = ConsumerRecords<String, String?>(mapOf()) // Result of a third poll call - no more records
-
-        every { kafkaConsumerMock.poll(any<Duration>()) } returnsMany listOf(pollResponse1, pollResponse2, pollResponse3)
-
-        kafkaToSFPoster.runWorkSession()
-        kafkaToSFPoster.runWorkSession()
-        kafkaToSFPoster.runWorkSession()
-
-        verify(exactly = 1) { kafkaConsumerMock.poll(any<Duration>()) } // Only first work session results in a poll
-        verify(exactly = 0) { kafkaConsumerMock.commitSync() }
     }
 
     @Test
