@@ -35,7 +35,7 @@ spec:
     pool: nav-prod # enum of nav-dev, nav-prod
   env:
     - name: KAFKA_TOPIC
-      value: pdl.pdl-persondokument
+      value: pdl.pdl-persondokument-v1
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: KAFKA_POLL_DURATION
