@@ -8,9 +8,9 @@ val application = when (env(config_DEPLOY_APP)) {
         modifier = ::reduceByWhitelist
     )
     "sf-geografisktilknytning" -> KafkaPosterApplication(
-        filter = ::cherryPickedKeys
+        filter = if (devContext) ::cherryPickedKeys else null
     )
-    else -> KafkaPosterApplication()
+    else -> throw RuntimeException("Attempted to deploy unknown app")
 }
 
 fun main() = application.start()
