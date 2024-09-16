@@ -7,9 +7,7 @@ val application = when (env(config_DEPLOY_APP)) {
         filter = if (devContext) ::isTombstoneOrSalesforceTagged /*::cherryPickedKeys*/ else null,
         modifier = ::reduceByWhitelist
     )
-    else -> KafkaPosterApplication(
-        filter = ::cherryPickedKeys
-    )
+    else -> KafkaPosterApplication()
 }
 
 fun main() = application.start()

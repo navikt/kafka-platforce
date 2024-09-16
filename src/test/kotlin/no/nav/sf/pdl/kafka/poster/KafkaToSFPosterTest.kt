@@ -64,6 +64,7 @@ class KafkaToSFPosterTest {
 
         every { sfClientMock.postRecords(any()) } returns Response(Status.OK).body("[${gson.toJson(SFsObjectStatus("id", true))}]")
         every { kafkaConsumerMock.commitSync() } returns Unit
+        every { kafkaConsumerMock.close() } returns Unit
 
         kafkaToSFPoster = KafkaToSFPoster(
             filter = filter,
