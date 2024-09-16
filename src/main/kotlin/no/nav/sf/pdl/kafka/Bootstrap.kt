@@ -7,6 +7,9 @@ val application = when (env(config_DEPLOY_APP)) {
         filter = if (devContext) ::isTombstoneOrSalesforceTagged /*::cherryPickedKeys*/ else null,
         modifier = ::reduceByWhitelist
     )
+    "sf-geografisktilknytning" -> KafkaPosterApplication(
+        filter = ::cherryPickedKeys
+    )
     else -> KafkaPosterApplication()
 }
 
