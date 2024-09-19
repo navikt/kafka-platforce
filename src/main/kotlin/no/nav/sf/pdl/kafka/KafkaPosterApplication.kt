@@ -47,6 +47,11 @@ class KafkaPosterApplication(
             } catch (e: Exception) {
                 log.error { "A work session failed: \n${e.stackTraceToString()}" }
                 WorkSessionStatistics.workSessionExceptionCounter.inc()
+                try {
+                    poster.kafkaConsumer.close()
+                } catch (e: java.lang.Exception) {
+                    log.warn { "Failed to close kafkaConsumer (instance not existing?) ${e.message}" }
+                }
             }
             conditionalWait(msBetweenWork)
         }

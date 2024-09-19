@@ -47,11 +47,13 @@ class KafkaToSFPoster(
 
     private lateinit var stats: WorkSessionStatistics
 
+    lateinit var kafkaConsumer: KafkaConsumer<String, String?>
+
     fun runWorkSession() {
         stats = WorkSessionStatistics()
 
         // Instantiate each work session to fetch config from current state of environment (fetch injected updates of credentials)
-        val kafkaConsumer = setupKafkaConsumer(kafkaTopic)
+        kafkaConsumer = setupKafkaConsumer(kafkaTopic)
 
         hasRunOnce = true
 
