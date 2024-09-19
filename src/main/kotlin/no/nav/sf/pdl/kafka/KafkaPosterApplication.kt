@@ -40,6 +40,7 @@ class KafkaPosterApplication(
         }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics
         naisAPI().asServer(ApacheServer(8080)).start()
+        conditionalWait(msBetweenWork)
 
         while (!ShutdownHook.isActive()) {
             try {
