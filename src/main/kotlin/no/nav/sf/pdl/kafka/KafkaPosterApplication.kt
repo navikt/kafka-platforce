@@ -40,13 +40,12 @@ class KafkaPosterApplication(
         }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics
         naisAPI().asServer(ApacheServer(8080)).start()
-        conditionalWait(msBetweenWork)
 
         while (!ShutdownHook.isActive()) {
             try {
                 poster.runWorkSession()
             } catch (e: Exception) {
-                log.error { "A work session failed:\n${e.stackTraceToString()}" }
+                log.error { "A work session failed: \n${e.stackTraceToString()}" }
                 WorkSessionStatistics.workSessionExceptionCounter.inc()
             }
             conditionalWait(msBetweenWork)
