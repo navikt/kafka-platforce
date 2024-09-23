@@ -29,6 +29,8 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
+  ingresses:
+    - "https://sf-pdl-kafka.intern.nav.no"
   accessPolicy:
     outbound:
       external:
