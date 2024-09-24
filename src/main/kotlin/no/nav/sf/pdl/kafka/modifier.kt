@@ -163,52 +163,49 @@ private fun listAllFields(
 }
 
 fun removeHistoricalItems(jsonString: String): String {
-    // Parse the input JSON string
     val jsonElement: JsonElement = JsonParser.parseString(jsonString)
     val jsonObject: JsonObject = jsonElement.asJsonObject
 
-    // Access the "hentPerson" object
+    if (!jsonObject.has("hentPerson")) {
+        return jsonString
+    }
+
     val hentPerson = jsonObject.getAsJsonObject("hentPerson")
 
-    // Function to filter historical entries from an array
-    fun filterHistoricalEntries(array: JsonArray): JsonArray {
-        val updatedArray = JsonArray()
+    // Iterate over all fields in "hentPerson"
+    for (entry in hentPerson.entrySet()) {
+        val key = entry.key
+        val value = entry.value
 
-        for (element in array) {
-            val itemObject = element.asJsonObject
-
-            var isHistorical = false
-
-            if (itemObject.has("metadata")) {
-                val metadata = itemObject.getAsJsonObject("metadata")
-                // Check if "historisk" is false or doesn't exist
-                if (metadata.has("historisk")) {
-                    isHistorical = metadata.get("historisk")?.asBoolean ?: false
-                }
-            }
-
-            if (!isHistorical) {
-                updatedArray.add(itemObject) // Keep this entry if not historical
-            }
+        // Check if the value is an array
+        if (value.isJsonArray) {
+            val jsonArray = value.asJsonArray
+            val filteredArray = filterHistoricalEntries(jsonArray)
+            hentPerson.add(key, filteredArray)
         }
-
-        return updatedArray
-    }
-
-    // Check if "bostedsadresse" key exists and is an array, then filter
-    if (hentPerson != null && hentPerson.has("bostedsadresse") && hentPerson.get("bostedsadresse").isJsonArray) {
-        val bostedsadresseArray = hentPerson.getAsJsonArray("bostedsadresse")
-        val filteredBostedsadresse = filterHistoricalEntries(bostedsadresseArray)
-        hentPerson.add("bostedsadresse", filteredBostedsadresse)
-    }
-
-    // Check if "navn" key exists and is an array, then filter
-    if (hentPerson != null && hentPerson.has("navn") && hentPerson.get("navn").isJsonArray) {
-        val navnArray = hentPerson.getAsJsonArray("navn")
-        val filteredNavn = filterHistoricalEntries(navnArray)
-        hentPerson.add("navn", filteredNavn)
     }
 
     // Return the updated JSON as a string
     return jsonObject.toString()
+}
+
+// Function to filter historical entries from an array
+fun filterHistoricalEntries(array: JsonArray): JsonArray {
+    val updatedArray = JsonArray()
+
+    for (element in array) {
+        val itemObject = element.asJsonObject
+        if (itemObject.has("metadata")) {
+            val metadata = itemObject.getAsJsonObject("metadata")
+            // Check if "historisk" exists and is true
+            val isHistorical = metadata.get("historisk")?.asBoolean ?: false
+            if (!isHistorical) {
+                updatedArray.add(itemObject) // Keep this entry if not historical
+            }
+        } else {
+            updatedArray.add(itemObject) // Keep entries without metadata
+        }
+    }
+
+    return updatedArray
 }
