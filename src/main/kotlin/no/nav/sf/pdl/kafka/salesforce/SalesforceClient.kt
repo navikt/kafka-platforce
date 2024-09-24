@@ -6,6 +6,7 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
+import java.io.File
 
 const val SALESFORCE_VERSION = "v57.0"
 
@@ -26,6 +27,8 @@ class SalesforceClient(
             )
 
         val request = Request(Method.POST, dstUrl).headers(headers).body(requestBody)
+
+        File("/tmp/latestPostRequest").writeText(request.toMessage())
 
         return httpClient(request)
     }
