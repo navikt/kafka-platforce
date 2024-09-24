@@ -1,7 +1,7 @@
 package no.nav.sf.pdl.kafka.gui
 
 import no.nav.sf.pdl.kafka.readResourceFile
-import no.nav.sf.pdl.kafka.reduceByWhitelist
+import no.nav.sf.pdl.kafka.reduceByWhitelistAndRemoveHistoricalItems
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.http4k.core.Method
 import org.http4k.core.Request
@@ -35,7 +35,7 @@ class GuiTest {
         """
 
         // Will update Gui models:
-        reduceByWhitelist(exampleWithSalesforceTagRecord, whitelist)
+        reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)
 
         val response = Gui.guiHandler.invoke(Request(Method.GET, "", ""))
 

@@ -10,7 +10,7 @@ import no.nav.sf.pdl.kafka.gui.Gui
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 
-fun reduceByWhitelist(
+fun reduceByWhitelistAndRemoveHistoricalItems(
     record: ConsumerRecord<String, String?>,
     whitelist: String =
         KafkaPosterApplication::class.java.getResource(env(config_WHITELIST_FILE)).readText()
@@ -34,7 +34,7 @@ fun reduceByWhitelist(
             messageObject.removeFields(it)
         }
 
-        return messageObject.toString()
+        return removeHistoricalItems(messageObject.toString())
     } catch (e: Exception) {
         File("/tmp/reducebywhitelistfail").appendText("$record\n\n")
         throw RuntimeException("Unable to parse event and filter to reduce by whitelist")
@@ -160,4 +160,55 @@ private fun listAllFields(
             )
         }
     return resultHolder
+}
+
+fun removeHistoricalItems(jsonString: String): String {
+    // Parse the input JSON string
+    val jsonElement: JsonElement = JsonParser.parseString(jsonString)
+    val jsonObject: JsonObject = jsonElement.asJsonObject
+
+    // Access the "hentPerson" object
+    val hentPerson = jsonObject.getAsJsonObject("hentPerson")
+
+    // Function to filter historical entries from an array
+    fun filterHistoricalEntries(array: JsonArray): JsonArray {
+        val updatedArray = JsonArray()
+
+        for (element in array) {
+            val itemObject = element.asJsonObject
+
+            var isHistorical = false
+
+            if (itemObject.has("metadata")) {
+                val metadata = itemObject.getAsJsonObject("metadata")
+                // Check if "historisk" is false or doesn't exist
+                if (metadata.has("historisk")) {
+                    isHistorical = metadata.get("historisk")?.asBoolean ?: false
+                }
+            }
+
+            if (!isHistorical) {
+                updatedArray.add(itemObject) // Keep this entry if not historical
+            }
+        }
+
+        return updatedArray
+    }
+
+    // Check if "bostedsadresse" key exists and is an array, then filter
+    if (hentPerson != null && hentPerson.has("bostedsadresse") && hentPerson.get("bostedsadresse").isJsonArray) {
+        val bostedsadresseArray = hentPerson.getAsJsonArray("bostedsadresse")
+        val filteredBostedsadresse = filterHistoricalEntries(bostedsadresseArray)
+        hentPerson.add("bostedsadresse", filteredBostedsadresse)
+    }
+
+    // Check if "navn" key exists and is an array, then filter
+    if (hentPerson != null && hentPerson.has("navn") && hentPerson.get("navn").isJsonArray) {
+        val navnArray = hentPerson.getAsJsonArray("navn")
+        val filteredNavn = filterHistoricalEntries(navnArray)
+        hentPerson.add("navn", filteredNavn)
+    }
+
+    // Return the updated JSON as a string
+    return jsonObject.toString()
 }

@@ -28,7 +28,7 @@ class ReduceByWhitelistTest {
               }
             }
         """
-        assertEquals(null, reduceByWhitelist(exampleTombstoneRecord, whitelist))
+        assertEquals(null, reduceByWhitelistAndRemoveHistoricalItems(exampleTombstoneRecord, whitelist))
     }
 
     @Test
@@ -79,7 +79,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
+            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
         )
     }
 
@@ -125,7 +125,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
+            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
         )
     }
 
@@ -156,7 +156,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelist(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
+            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
         )
     }
 }
