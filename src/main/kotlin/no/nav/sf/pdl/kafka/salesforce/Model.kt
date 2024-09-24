@@ -63,6 +63,7 @@ fun Response.isSuccess(): Boolean = when (status) {
             } else if (parsedResult.all { it.success }) {
                 true
             } else {
+                File("/tmp/failedResponseFromSalesforcePost").writeText(this.toMessage())
                 log.error { "Posting of at least one record failed" }
                 false
             }
