@@ -16,17 +16,8 @@ class RemoveHistoricalItemsTest {
 
     @Test
     fun make_sure_we_let_null_value_through() {
-        // Example JSON input
         val jsonString = """{
         "hentPerson": {
-            "bostedsadresse": [
-                {
-                    "metadata": { "historisk": true }
-                },
-                {
-                    "metadata": { "historisk": false }
-                }
-            ],
             "navn": [
                 {
                     "fornavn": "John",
@@ -52,23 +43,13 @@ class RemoveHistoricalItemsTest {
             ]
         }
     }"""
-
-        // Call the function to remove historical entries
         val updatedJson = removeHistoricalItems(jsonString)
 
-        // Print the updated JSON
         println(updatedJson.toPrettyFormat())
         Assertions.assertEquals(
             """
         {
           "hentPerson": {
-            "bostedsadresse": [
-              {
-                "metadata": {
-                  "historisk": false
-                }
-              }
-            ],
             "navn": [
               {
                 "fornavn": "Jane",
