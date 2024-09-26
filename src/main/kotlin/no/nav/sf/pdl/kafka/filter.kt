@@ -6,15 +6,10 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 fun isTombstoneOrSalesforceTagged(record: ConsumerRecord<String, String?>): Boolean {
     try {
-        if (record.value() == null) {
-            File("/tmp/tombstones").appendText("${record.key()} at $currentTimeTag\n")
-            return true
-        } // Allow tombstone signal
+        if (record.value() == null) return true // Allow tombstone signal
         val obj = JsonParser.parseString(record.value()) as JsonObject
         if (obj["tags"] == null || obj["tags"] is JsonNull) return false
         return (obj["tags"] as JsonArray).any { it.asString == "SALESFORCE" }
@@ -23,8 +18,6 @@ fun isTombstoneOrSalesforceTagged(record: ConsumerRecord<String, String?>): Bool
         throw RuntimeException("Unable to parse value for salesforce tag filter ${e.message}")
     }
 }
-
-val currentTimeTag: String get() = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
 
 fun cherryPickedOffsets(record: ConsumerRecord<String, String?>): Boolean {
     try {

@@ -9,13 +9,18 @@ import com.google.gson.JsonPrimitive
 import no.nav.sf.pdl.kafka.gui.Gui
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 fun reduceByWhitelistAndRemoveHistoricalItems(
     record: ConsumerRecord<String, String?>,
     whitelist: String =
         KafkaPosterApplication::class.java.getResource(env(config_WHITELIST_FILE)).readText()
 ): String? {
-    if (record.value() == null) return null // Tombstone - no reduction to be made
+    if (record.value() == null) {
+        File("/tmp/tombstones").appendText("${record.key()} at $currentTimeTag\n")
+        return null // Tombstone - no reduction to be made
+    }
     try {
         val whitelistObject = JsonParser.parseString(whitelist) as JsonObject
         val messageObject = JsonParser.parseString(record.value()) as JsonObject
@@ -40,6 +45,8 @@ fun reduceByWhitelistAndRemoveHistoricalItems(
         throw RuntimeException("Unable to parse event and filter to reduce by whitelist")
     }
 }
+
+val currentTimeTag: String get() = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
 
 /**
  * findNonWhitelistedField
