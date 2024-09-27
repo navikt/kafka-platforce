@@ -2,6 +2,7 @@ package no.nav.sf.pdl.kafka.nais
 
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.gui.Gui
+import no.nav.sf.pdl.kafka.investigate.Investigate
 import no.nav.sf.pdl.kafka.metrics.Prometheus
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
@@ -28,7 +29,8 @@ fun naisAPI(): HttpHandler = routes(
             Response(Status.INTERNAL_SERVER_ERROR)
         }
     },
-    "/internal/gui" bind Method.GET to Gui.guiHandler
+    "/internal/gui" bind Method.GET to Gui.guiHandler,
+    "/internal/investigate" bind Method.GET to Investigate.investigateHandler
 )
 
 object ShutdownHook {
