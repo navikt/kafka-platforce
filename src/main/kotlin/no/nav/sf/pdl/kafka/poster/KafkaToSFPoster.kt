@@ -111,7 +111,7 @@ class KafkaToSFPoster(
                 WorkSessionStatistics.workSessionsWithoutEventsCounter.clear()
                 stats.updateConsumedStatistics(recordsFromTopic)
             } else {
-                WorkSessionStatistics.investigateConsumedCounter.inc()
+                WorkSessionStatistics.investigateConsumedCounter.inc(recordsFromTopic.count().toDouble())
             }
 
             val recordsFiltered = filterRecords(recordsFromTopic)

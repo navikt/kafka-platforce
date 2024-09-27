@@ -24,6 +24,8 @@ object Investigate {
                         "Current investigate count: ${WorkSessionStatistics.investigateConsumedCounter.get().toInt()} hits: ${WorkSessionStatistics.investigateHitCounter.get().toInt()}"
                 )
             } else {
+                WorkSessionStatistics.investigateConsumedCounter.clear()
+                WorkSessionStatistics.investigateHitCounter.clear()
                 investigateInProgress = true
                 Thread {
                     val investigatePoster = KafkaToSFPoster(
