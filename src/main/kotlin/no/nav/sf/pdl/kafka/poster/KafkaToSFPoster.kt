@@ -36,7 +36,8 @@ class KafkaToSFPoster(
     private val flagSeek: Boolean = env(config_FLAG_SEEK).toBoolean(),
     private val seekOffset: Long = env(config_SEEK_OFFSET).toLong(),
     numberOfSamples: Int = env(config_NUMBER_OF_SAMPLES).toInt(),
-    private val flagNoPost: Boolean = env(config_FLAG_NO_POST).toBoolean()
+    private val flagNoPost: Boolean = env(config_FLAG_NO_POST).toBoolean(),
+    private val metricsActive: Boolean = true
 ) {
     private enum class ConsumeResult { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
 
@@ -66,7 +67,7 @@ class KafkaToSFPoster(
             // Using assign rather than subscribe since we need the ability to seek to a particular offset
             val topicPartitions = partitionsFor(kafkaTopic).map { TopicPartition(it.topic(), it.partition()) }
             assign(topicPartitions)
-            log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
+            if (metricsActive) log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
             if (!hasRunOnce) {
                 if (flagSeek) {
                     if (seekOffset == -1L) {
@@ -93,25 +94,31 @@ class KafkaToSFPoster(
 
     private fun consumeRecords(recordsFromTopic: ConsumerRecords<String, String?>): ConsumeResult =
         if (recordsFromTopic.isEmpty) {
-            if (!stats.hasConsumed()) {
-                WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.clear()
-                WorkSessionStatistics.workSessionsWithoutEventsCounter.inc()
-                log.info { "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}" }
-            } else {
-                WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.inc()
-                log.info { "Finished work session with activity (subsequent ${WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.get().toInt()}). $stats" }
+            if (metricsActive) {
+                if (!stats.hasConsumed()) {
+                    WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.clear()
+                    WorkSessionStatistics.workSessionsWithoutEventsCounter.inc()
+                    log.info { "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}" }
+                } else {
+                    WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.inc()
+                    log.info { "Finished work session with activity (subsequent ${WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.get().toInt()}). $stats" }
+                }
             }
             ConsumeResult.NO_MORE_RECORDS
         } else {
-            WorkSessionStatistics.workSessionsWithoutEventsCounter.clear()
-            stats.updateConsumedStatistics(recordsFromTopic)
+            if (metricsActive) {
+                WorkSessionStatistics.workSessionsWithoutEventsCounter.clear()
+                stats.updateConsumedStatistics(recordsFromTopic)
+            } else {
+                WorkSessionStatistics.investigateConsumedCounter.inc()
+            }
 
             val recordsFiltered = filterRecords(recordsFromTopic)
 
             if (samplesLeft > 0) sampleRecords(recordsFiltered)
 
             if (recordsFiltered.count() == 0 || flagNoPost) {
-                if (recordsFiltered.count() > 0) updateWhatWouldBeSent(recordsFiltered)
+                if (recordsFiltered.count() > 0 && metricsActive) updateWhatWouldBeSent(recordsFiltered)
 
                 // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
                 // consider it a successfully consumed batch without further action
@@ -136,7 +143,7 @@ class KafkaToSFPoster(
 
     private fun filterRecords(records: ConsumerRecords<String, String?>): Iterable<ConsumerRecord<String, String?>> {
         val recordsPostFilter = filter?.run { records.filter { invoke(it) } } ?: records
-        stats.incBlockedByFilter(records.count() - recordsPostFilter.count())
+        if (metricsActive) stats.incBlockedByFilter(records.count() - recordsPostFilter.count())
         return recordsPostFilter
     }
 
@@ -152,7 +159,7 @@ class KafkaToSFPoster(
         val uniqueKafkaMessages = kafkaMessages.toSet()
         val uniqueValueCount = uniqueKafkaMessages.count()
         if (kafkaMessages.size != uniqueValueCount) {
-            log.warn { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in $kafkaTopic batch" }
+            if (metricsActive) log.warn { "Detected ${kafkaMessages.size - uniqueValueCount} duplicates in $kafkaTopic batch" }
         }
         return uniqueKafkaMessages
     }

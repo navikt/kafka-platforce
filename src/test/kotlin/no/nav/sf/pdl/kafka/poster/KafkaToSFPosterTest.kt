@@ -55,7 +55,7 @@ class KafkaToSFPosterTest {
         setUp()
     }
 
-    private fun setUp(flagSeek: Boolean = false, numberOfSamples: Int = 0, flagNoPost: Boolean = false, flagRunOnce: Boolean = false) {
+    private fun setUp(flagSeek: Boolean = false, numberOfSamples: Int = 0, flagNoPost: Boolean = false) {
         every { kafkaConsumerFactoryMock.createConsumer() } returns kafkaConsumerMock
         every { kafkaConsumerMock.partitionsFor(any()) } returns listOf(partitionInfoMock)
         every { partitionInfoMock.topic() } returns "topic"

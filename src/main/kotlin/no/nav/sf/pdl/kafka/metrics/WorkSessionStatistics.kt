@@ -33,6 +33,8 @@ data class WorkSessionStatistics(
         val subsequentWorkSessionsWithEventsCounter = registerCounter("subsequent_work_sessions_with_events")
         val failedSalesforceCallCounter = registerCounter("failed_salesforce_call")
         val workSessionExceptionCounter = registerCounter("work_session_exception")
+        val investigateConsumedCounter = registerCounter("investigateConsumed")
+        val investigateHitCounter = registerCounter("investigateHit")
     }
 
     fun hasConsumed(): Boolean {
