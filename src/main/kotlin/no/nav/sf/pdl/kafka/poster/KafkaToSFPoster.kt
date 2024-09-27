@@ -8,6 +8,7 @@ import no.nav.sf.pdl.kafka.config_KAFKA_TOPIC
 import no.nav.sf.pdl.kafka.config_NUMBER_OF_SAMPLES
 import no.nav.sf.pdl.kafka.config_SEEK_OFFSET
 import no.nav.sf.pdl.kafka.env
+import no.nav.sf.pdl.kafka.kafka.ConsumerFactory
 import no.nav.sf.pdl.kafka.kafka.KafkaConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.salesforce.KafkaMessage
@@ -30,7 +31,7 @@ class KafkaToSFPoster(
     private val filter: ((ConsumerRecord<String, String?>) -> Boolean)? = null,
     private val modifier: ((ConsumerRecord<String, String?>) -> String?)? = null,
     private val sfClient: SalesforceClient = SalesforceClient(),
-    private val kafkaConsumerFactory: KafkaConsumerFactory = KafkaConsumerFactory(),
+    private val kafkaConsumerFactory: ConsumerFactory = KafkaConsumerFactory(),
     private val kafkaTopic: String = env(config_KAFKA_TOPIC),
     private val kafkaPollDuration: Long = env(config_KAFKA_POLL_DURATION).toLong(),
     private val flagSeek: Boolean = env(config_FLAG_SEEK).toBoolean(),

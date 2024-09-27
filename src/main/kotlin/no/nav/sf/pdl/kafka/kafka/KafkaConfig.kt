@@ -44,3 +44,8 @@ val propertiesPlain get() = propertiesBase.apply {
         )
     )
 }
+
+val propertiesInvestigate get() = propertiesPlain.apply {
+    put(ConsumerConfig.GROUP_ID_CONFIG, env(config_KAFKA_CLIENT_ID) + "-investigate") // Override client id
+    put(ConsumerConfig.CLIENT_ID_CONFIG, env(config_KAFKA_CLIENT_ID) + "-investigate") // Override client id
+}

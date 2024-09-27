@@ -1,5 +1,6 @@
 package no.nav.sf.pdl.kafka.investigate
 
+import no.nav.sf.pdl.kafka.kafka.InvestigateConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -27,6 +28,7 @@ object Investigate {
                 Thread {
                     val investigatePoster = KafkaToSFPoster(
                         filter = createInvestigateFilter(ids),
+                        kafkaConsumerFactory = InvestigateConsumerFactory(),
                         flagSeek = true,
                         seekOffset = 0,
                         numberOfSamples = 0,
