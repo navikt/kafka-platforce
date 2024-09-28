@@ -18,24 +18,28 @@ object Investigate {
     @Volatile
     var timeSpentLastInvestigate = 0L
 
+    var lastOffsetSearch = 0L
+
     val investigateHandler: HttpHandler = {
         if (investigateInProgress) {
             Response(Status.OK).body("Investigate in progress\n${report()}")
         } else {
             val ids = it.query("id")?.split(",")
+            val offset = it.query("offset")?.toLong() ?: 0
             if (ids == null) {
-                Response(Status.OK).body("Use query parameter id with csv of ids to search for.\n${report()}")
+                Response(Status.OK).body("Use query parameter id with csv of ids to search for. Optionally use query parameter offset to seek to position\n${report()}")
             } else {
                 WorkSessionStatistics.investigateConsumedCounter.clear()
                 WorkSessionStatistics.investigateHitCounter.clear()
                 val startTime = System.currentTimeMillis()
                 investigateInProgress = true
+                lastOffsetSearch = offset
                 Thread {
                     val investigatePoster = KafkaToSFPoster(
                         filter = createInvestigateFilter(ids),
                         kafkaConsumerFactory = InvestigateConsumerFactory(),
                         flagSeek = true,
-                        seekOffset = 0,
+                        seekOffset = offset,
                         numberOfSamples = 0,
                         flagNoPost = true,
                         metricsActive = false
@@ -51,7 +55,8 @@ object Investigate {
 
                 Response(Status.OK).body(
                     "Will trigger search for these: " + ids.joinToString(" ") +
-                        (if (timeSpentLastInvestigate > 0) ", last finished took ${formatDuration(timeSpentLastInvestigate)}" else "")
+                        (if (timeSpentLastInvestigate > 0) ", last finished took ${formatDuration(timeSpentLastInvestigate)}" else "") +
+                        (if (offset > 0) ", from offset $offset" else "")
                 )
             }
         }
@@ -78,6 +83,7 @@ object Investigate {
         WorkSessionStatistics.investigateConsumedCounter.get().toInt()
         }, hits: ${
         WorkSessionStatistics.investigateHitCounter.get().toInt()
-        }" + (if (timeSpentLastInvestigate > 0) ", last finished took ${formatDuration(timeSpentLastInvestigate)}" else "")
+        }" + (if (timeSpentLastInvestigate > 0) ", last finished took ${formatDuration(timeSpentLastInvestigate)}" else "") +
+            (if (lastOffsetSearch > 0) " from offset $lastOffsetSearch" else "")
     }
 }
