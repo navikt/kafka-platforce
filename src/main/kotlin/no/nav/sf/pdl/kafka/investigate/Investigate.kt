@@ -1,5 +1,8 @@
 package no.nav.sf.pdl.kafka.investigate
 
+import no.nav.sf.pdl.kafka.config_DEPLOY_APP
+import no.nav.sf.pdl.kafka.config_DEPLOY_CLUSTER
+import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.kafka.InvestigateConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
@@ -27,7 +30,16 @@ object Investigate {
             val ids = it.query("id")?.split(",")
             val offset = it.query("offset")?.toLong() ?: 0
             if (ids == null) {
-                Response(Status.OK).body("Use query parameter id with csv of ids to search for. Optionally use query parameter offset to seek to position\n${report()}")
+                Response(Status.OK).body(
+                    "Use query parameter id with csv of ids to search for. " +
+                        "Optionally use query parameter offset to seek to position instead of from beginning\n" +
+                        (
+                            if ((env(config_DEPLOY_APP) == "sf-pdl-kafka") && (env(config_DEPLOY_CLUSTER) == "prod-gcp")) {
+                                "(Ref: sf-pdl-kafka prod offset 72043224 corresponds with 2024-09-18 00:00)\n"
+                            } else ""
+                            ) +
+                        report()
+                )
             } else {
                 WorkSessionStatistics.investigateConsumedCounter.clear()
                 WorkSessionStatistics.investigateHitCounter.clear()
