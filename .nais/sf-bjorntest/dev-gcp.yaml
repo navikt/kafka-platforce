@@ -30,7 +30,7 @@ spec:
       cpu: 10m
       memory: 512Mi
   ingresses:
-    - "https://sf-geografisktilknytning.intern.dev.nav.no"
+    - "https://sf-bjorntest.intern.dev.nav.no"
   accessPolicy:
     outbound:
       external:
