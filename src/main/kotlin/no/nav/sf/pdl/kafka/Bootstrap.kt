@@ -10,6 +10,7 @@ val application = when (env(config_DEPLOY_APP)) {
     "sf-geografisktilknytning" -> KafkaPosterApplication(
         filter = if (devContext) ::cherryPickedKeys else null
     )
+    "sf-bjorntest" -> KafkaPosterApplication()
     else -> throw RuntimeException("Attempted to deploy unknown app")
 }
 
