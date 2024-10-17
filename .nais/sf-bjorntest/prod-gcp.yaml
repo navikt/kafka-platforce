@@ -29,8 +29,6 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
-  ingresses:
-    - "https://sf-geografisktilknytning.intern.nav.no"
   accessPolicy:
     outbound:
       external:
