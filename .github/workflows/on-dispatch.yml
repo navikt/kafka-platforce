@@ -11,6 +11,7 @@ on:
         options:
           - 'sf-pdl-kafka'
           - 'sf-geografisktilknytning'
+          - 'sf-bjorntest'
       DEPLOY_CLUSTER:
         description: 'Deployment Cluster'
         required: true
