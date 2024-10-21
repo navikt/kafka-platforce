@@ -12,10 +12,14 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+// Only read once, first time it is used
+val whitelistText: String by lazy {
+    KafkaPosterApplication::class.java.getResource(env(config_WHITELIST_FILE)).readText()
+}
+
 fun reduceByWhitelistAndRemoveHistoricalItems(
     record: ConsumerRecord<String, String?>,
-    whitelist: String =
-        KafkaPosterApplication::class.java.getResource(env(config_WHITELIST_FILE)).readText()
+    whitelist: String = whitelistText
 ): String? {
     if (record.value() == null) {
         File("/tmp/tombstones").appendText("${record.key()} at $currentTimeTag\n")
