@@ -43,7 +43,7 @@ spec:
     pool: nav-dev # enum of nav-dev, nav-prod
   env:
     - name: KAFKA_TOPIC
-      value: teamcrm.bjorn-message
+      value: team-dialog.task
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: KAFKA_POLL_DURATION
