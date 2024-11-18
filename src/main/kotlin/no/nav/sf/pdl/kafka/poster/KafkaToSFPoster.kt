@@ -72,12 +72,9 @@ class KafkaToSFPoster(
             if (metricsActive) log.info { "Starting work session on topic $kafkaTopic with ${topicPartitions.size} partitions" }
             if (!hasRunOnce) {
                 if (flagSeek) {
-                    if (seekOffset == -1L) {
-                        seekToEnd(topicPartitions)
-                    } else {
-                        topicPartitions.forEach {
-                            seek(it, seekOffset)
-                        }
+                    log.info { "Will seek to offset $seekOffset" }
+                    topicPartitions.forEach {
+                        seek(it, seekOffset)
                     }
                 }
             }

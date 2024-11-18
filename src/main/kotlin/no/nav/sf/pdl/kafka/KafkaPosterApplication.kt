@@ -46,8 +46,7 @@ class KafkaPosterApplication(
 
         while (!ShutdownHook.isActive()) {
             try {
-                if (!runOnce) poster.runWorkSession()
-                runOnce = true
+                poster.runWorkSession()
                 RerunUtility.filterAndReport()
             } catch (e: Exception) {
                 log.error { "A work session failed: \n${e.stackTraceToString()}" }
