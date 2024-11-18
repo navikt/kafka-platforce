@@ -46,7 +46,7 @@ class KafkaToSFPoster(
     private val log = KotlinLogging.logger { }
 
     private var samplesLeft = numberOfSamples
-    private var hasRunOnce = false
+    var hasRunOnce = false
 
     private lateinit var stats: WorkSessionStatistics
 

@@ -23,7 +23,7 @@ private val propertiesBase get() = Properties().apply {
             ConsumerConfig.GROUP_ID_CONFIG to clientId,
             ConsumerConfig.CLIENT_ID_CONFIG to clientId,
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 20000,
+            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 200,
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",
             CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SSL",
             SaslConfigs.SASL_MECHANISM to "PLAIN",

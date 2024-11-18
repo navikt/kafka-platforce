@@ -17,7 +17,8 @@ object RerunUtility {
     val cache: MutableMap<String, Pair<Long, Boolean>> = mutableMapOf()
 
     fun filterAndReport() {
-        // val result = filterCache()
+        File("/tmp/offsetsToWithLatestVergeMal").writeText("")
+
         log.info {
             "Cache size ${cache.size}, after filter size ${cache.values.filter {
                 if (it.second) File("/tmp/offsetsToWithLatestVergeMal").appendText(it.first.toString() + "\n")
