@@ -3,6 +3,7 @@ package no.nav.sf.pdl.kafka.resend
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.hasVergemaalEllerFremtidsfullmakt
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import java.io.File
 
 object RerunUtility {
     private val log = KotlinLogging.logger { }
@@ -17,6 +18,11 @@ object RerunUtility {
 
     fun filterAndReport() {
         // val result = filterCache()
-        log.info { "Cache size ${cache.size}, after filter size ${cache.values.filter { it.second }.size}}" }
+        log.info {
+            "Cache size ${cache.size}, after filter size ${cache.values.filter {
+                if (it.second) File("/tmp/offsetsToWithLatestVergeMal").appendText(it.first.toString() + "\n")
+                it.second
+            }.size}}"
+        }
     }
 }
