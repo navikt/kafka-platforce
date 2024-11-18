@@ -9,6 +9,7 @@ import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.nais.naisAPI
 import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
+import no.nav.sf.pdl.kafka.resend.RerunUtility
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.http4k.server.ApacheServer
 import org.http4k.server.asServer
@@ -30,6 +31,8 @@ class KafkaPosterApplication(
 
     private val log = KotlinLogging.logger { }
 
+    private var runOnce = false
+
     fun start() {
         log.info {
             "Starting app ${env(config_DEPLOY_APP)} - devContext $devContext" +
@@ -43,7 +46,9 @@ class KafkaPosterApplication(
 
         while (!ShutdownHook.isActive()) {
             try {
-                poster.runWorkSession()
+                if (!runOnce) poster.runWorkSession()
+                runOnce = true
+                RerunUtility.filterAndReport()
             } catch (e: Exception) {
                 log.error { "A work session failed: \n${e.stackTraceToString()}" }
                 WorkSessionStatistics.workSessionExceptionCounter.inc()

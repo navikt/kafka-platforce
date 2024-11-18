@@ -11,6 +11,7 @@ import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.kafka.ConsumerFactory
 import no.nav.sf.pdl.kafka.kafka.KafkaConsumerFactory
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
+import no.nav.sf.pdl.kafka.resend.RerunUtility
 import no.nav.sf.pdl.kafka.salesforce.KafkaMessage
 import no.nav.sf.pdl.kafka.salesforce.SalesforceClient
 import no.nav.sf.pdl.kafka.salesforce.isSuccess
@@ -119,7 +120,8 @@ class KafkaToSFPoster(
             if (samplesLeft > 0) sampleRecords(recordsFiltered)
 
             if (recordsFiltered.count() == 0 || flagNoPost) {
-                if (recordsFiltered.count() > 0 && metricsActive) updateWhatWouldBeSent(recordsFiltered)
+                if (RerunUtility.populateCache) RerunUtility.addToCache(recordsFiltered)
+                // if (recordsFiltered.count() > 0 && metricsActive) updateWhatWouldBeSent(recordsFiltered)
 
                 // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
                 // consider it a successfully consumed batch without further action
