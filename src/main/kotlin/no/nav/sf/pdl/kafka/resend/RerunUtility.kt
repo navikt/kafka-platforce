@@ -9,18 +9,14 @@ object RerunUtility {
 
     const val populateCache: Boolean = true // Currently only active if also no_post set to true
 
-    fun addToCache(records: Iterable<ConsumerRecord<String, String?>>) = records.forEach { cache[it.key()] = it }
-
-    fun filterCache(): List<ConsumerRecord<String, String?>> {
-        val result: MutableList<ConsumerRecord<String, String?>> = mutableListOf()
-        result.addAll(cache.values.filter { hasVergemaalEllerFremtidsfullmakt(it) })
-        return result
+    fun addToCache(records: Iterable<ConsumerRecord<String, String?>>) {
+        records.forEach { cache[it.key()] = Pair(it.offset(), hasVergemaalEllerFremtidsfullmakt(it)) }
     }
 
-    val cache: MutableMap<String, ConsumerRecord<String, String?>> = mutableMapOf()
+    val cache: MutableMap<String, Pair<Long, Boolean>> = mutableMapOf()
 
     fun filterAndReport() {
-        val result = filterCache()
-        log.info { "Cache size ${cache.size}, after filter size ${result.size}" }
+        // val result = filterCache()
+        log.info { "Cache size ${cache.size}, after filter size ${cache.values.filter { it.second }.size}}" }
     }
 }
