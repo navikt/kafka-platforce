@@ -28,7 +28,7 @@ spec:
       memory: 20Gi
     requests:
       cpu: 10m
-      memory: 512Mi
+      memory: 20Gi
   ingresses:
     - "https://sf-pdl-kafka.intern.nav.no"
   accessPolicy:
@@ -46,7 +46,7 @@ spec:
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: KAFKA_POLL_DURATION
-      value: '10000'
+      value: '20000'
     - name: SF_TOKENHOST
       value: https://login.salesforce.com
     - name: WHITELIST_FILE
