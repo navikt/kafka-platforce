@@ -31,3 +31,14 @@ fun hasVergemaalEllerFremtidsfullmakt(record: ConsumerRecord<String, String?>): 
         throw RuntimeException("Unable to parse value for hasVergemaalEllerFremtidsfullmakt filter ${e.message}")
     }
 }
+
+val cherryPickList: List<Long> by lazy { KafkaPosterApplication::class.java.getResource("offsetfile.txt").readText().split("\n").map { it.toLong() } }
+
+fun cherryPickOffsets(record: ConsumerRecord<String, String?>): Boolean {
+    try {
+        return cherryPickList.contains(record.offset())
+    } catch (e: Exception) {
+        File("/tmp/filterCherryPickFail").appendText("$record\nMESSAGE ${e.message}\n\n")
+        throw RuntimeException("Unable to parse value for cherry pick filter ${e.message}")
+    }
+}
