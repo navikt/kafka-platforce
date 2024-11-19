@@ -32,13 +32,13 @@ fun hasVergemaalEllerFremtidsfullmakt(record: ConsumerRecord<String, String?>): 
     }
 }
 
-val cherryPickList: List<Long> by lazy { KafkaPosterApplication::class.java.getResource("/offsetfile.txt").readText().split("\n").map { it.toLong() } }
+val cherryPickList: List<Long> by lazy { KafkaPosterApplication::class.java.getResource("/offsetfile.txt").readText().split("\n").map { it.trim().toLong() } }
 
 fun cherryPickOffsets(record: ConsumerRecord<String, String?>): Boolean {
     try {
         return cherryPickList.contains(record.offset())
     } catch (e: Exception) {
-        File("/tmp/filterCherryPickFail").appendText("$record\nMESSAGE ${e.message}\n\n")
+        File("/tmp/filterCherryPickFail").writeText("$record\nMESSAGE ${e.message}\n\n")
         throw RuntimeException("Unable to parse value for cherry pick filter ${e.message}")
     }
 }
