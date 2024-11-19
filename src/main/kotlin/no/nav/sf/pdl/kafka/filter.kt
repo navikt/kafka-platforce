@@ -32,7 +32,7 @@ fun hasVergemaalEllerFremtidsfullmakt(record: ConsumerRecord<String, String?>): 
     }
 }
 
-val cherryPickList: List<Long> by lazy { KafkaPosterApplication::class.java.getResource("offsetfile.txt").readText().split("\n").map { it.toLong() } }
+val cherryPickList: List<Long> by lazy { KafkaPosterApplication::class.java.getResource("/offsetfile.txt").readText().split("\n").map { it.toLong() } }
 
 fun cherryPickOffsets(record: ConsumerRecord<String, String?>): Boolean {
     try {
