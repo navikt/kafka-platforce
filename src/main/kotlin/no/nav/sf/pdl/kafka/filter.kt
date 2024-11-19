@@ -21,10 +21,12 @@ fun isTombstoneOrSalesforceTagged(record: ConsumerRecord<String, String?>): Bool
 
 fun hasVergemaalEllerFremtidsfullmakt(record: ConsumerRecord<String, String?>): Boolean {
     try {
-        if (record.value() == null) return true // Allow tombstone signal
+        if (record.value() == null) return false // Allow tombstone signal
         val obj = JsonParser.parseString(record.value()) as JsonObject
-        if (obj["vergemaalEllerFremtidsfullmakt"] == null || obj["vergemaalEllerFremtidsfullmakt"] is JsonNull) return false
-        if (obj["vergemaalEllerFremtidsfullmakt"] is JsonArray && (obj["vergemaalEllerFremtidsfullmakt"] as JsonArray).isEmpty) return false
+        if (obj["hentPerson"] == null) return false
+        val hentPerson = obj["hentPerson"] as JsonObject
+        if (hentPerson["vergemaalEllerFremtidsfullmakt"] == null || hentPerson["vergemaalEllerFremtidsfullmakt"] is JsonNull) return false
+        if (hentPerson["vergemaalEllerFremtidsfullmakt"] is JsonArray && (hentPerson["vergemaalEllerFremtidsfullmakt"] as JsonArray).isEmpty) return false
         return true
     } catch (e: Exception) {
         File("/tmp/filterHasVergemaalEllerFremtidsfullmaktFail").appendText("$record\nMESSAGE ${e.message}\n\n")
