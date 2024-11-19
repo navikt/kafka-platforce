@@ -9,7 +9,6 @@ import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.nais.naisAPI
 import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
-import no.nav.sf.pdl.kafka.resend.RerunUtility
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.http4k.server.ApacheServer
 import org.http4k.server.asServer
@@ -47,7 +46,7 @@ class KafkaPosterApplication(
         while (!ShutdownHook.isActive()) {
             try {
                 poster.runWorkSession()
-                RerunUtility.filterAndReport()
+                // RerunUtility.filterAndReport()
             } catch (e: Exception) {
                 log.error { "A work session failed: \n${e.stackTraceToString()}" }
                 WorkSessionStatistics.workSessionExceptionCounter.inc()
