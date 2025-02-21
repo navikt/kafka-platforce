@@ -11,11 +11,11 @@ jobs:
     secrets: inherit
     with:
       DEPLOY_APP: sf-pdl-kafka # sf-pdl-kafka # sf-geografisktilknytning
-      DEPLOY_CLUSTER: prod-gcp
+      DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
       # Note that the consumer will go there each time the pod reboots, so make sure you turn this off once done
-      FLAG_SEEK: true
+      FLAG_SEEK: false
 
       # Where to go if flag seek is set. Will seek to next offset that exists on queue, i.e '0' equals 'from beginning'
       SEEK_OFFSET: '73131885' # '57000000' - use as from beginning
