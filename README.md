@@ -6,7 +6,7 @@ For eksempel:
 * sf-pdl-kafka
 * sf-geografisktilknytning
 
-Kafka-eventer kan filtreres og modifiseres programmatisk per app, se Bootstrap.kt.
+Kafka-eventer kan filtreres og modifiseres programmatisk per app, se [Bootstrap.kt](https://github.com/navikt/sf-pdl-kafka/blob/master/src/main/kotlin/no/nav/sf/pdl/kafka/Bootstrap.kt).
 
 Spesifikk NAIS-konfigurasjon per app ligger under [.nais](https://github.com/navikt/sf-pdl-kafka/tree/master/.nais).
 
