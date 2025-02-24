@@ -8,13 +8,10 @@
     "doedfoedtBarn": null,
     "falskIdentitet": null,
     "familierelasjoner": [],
-    "foedsel": [
+    "foedselsdato": [
       {
         "foedselsaar": 1900,
         "foedselsdato": "1900-02-04",
-        "foedeland": "EST",
-        "foedested": null,
-        "foedekommune": null,
         "metadata": {
           "opplysningsId": "cb0a2050-a9b6-4451-9dc0-ecda8ba8c20d",
           "master": "Freg",
@@ -34,9 +31,6 @@
       {
         "foedselsaar": 1900,
         "foedselsdato": "1900-02-04",
-        "foedeland": "EST",
-        "foedested": null,
-        "foedekommune": null,
         "metadata": {
           "opplysningsId": "65748ea6-803c-41f8-be52-f41851b9a2cd",
           "master": "Freg",
