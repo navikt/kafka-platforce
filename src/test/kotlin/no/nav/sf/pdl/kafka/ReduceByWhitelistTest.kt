@@ -24,7 +24,7 @@ class ReduceByWhitelistTest {
         val whitelist = """
             {
               "hentPerson": {
-                "foedsel": "ALL"
+                "foedselsdato": "ALL"
               }
             }
         """
@@ -36,7 +36,7 @@ class ReduceByWhitelistTest {
         val whitelist = """
             {
               "hentPerson": {
-                "foedsel": "ALL"
+                "foedselsdato": "ALL"
               }
             }
         """
@@ -45,13 +45,10 @@ class ReduceByWhitelistTest {
             """
             {
               "hentPerson": {
-                "foedsel": [
+                "foedselsdato": [
                   {
                     "foedselsaar": 1972,
                     "foedselsdato": "1972-03-07",
-                    "foedeland": "SGP",
-                    "foedested": "Fødested i/på SINGAPORE",
-                    "foedekommune": null,
                     "metadata": {
                       "opplysningsId": "dcf8f038-01c4-4d5d-b2ba-787e6bdf05ed",
                       "master": "FREG",
@@ -94,7 +91,7 @@ class ReduceByWhitelistTest {
                         "husbokstav": "ALL"
                     }
                   },
-                  "foedsel": {
+                  "foedselsdato": {
                     "metadata": {
                         "master": "ALL"
                     }
@@ -115,7 +112,7 @@ class ReduceByWhitelistTest {
                     }
                   }
                 ],
-                "foedsel": [
+                "foedselsdato": [
                   {
                     "metadata": {
                       "master": "FREG"

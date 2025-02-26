@@ -25,7 +25,7 @@ class GuiTest {
                         "husbokstav": "ALL"
                     }
                   },
-                  "foedsel": {
+                  "foedselsdato": {
                     "metadata": {
                         "master": "ALL"
                     }
