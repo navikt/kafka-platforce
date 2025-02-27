@@ -20,7 +20,7 @@ Du finner en visualisering av hvilke felt som blir blokkert pa denne ingress:
 # NB! Deploy vid push styrd av main.yaml
 Merk at statusen til [main.yaml](https://github.com/navikt/sf-pdl-kafka/blob/master/.github/workflows/main.yml) bestemmer hvilken app som blir deployet og hvor ved push.
 
-Hvis du bruker main.yml for kjøringer med flagg satt til TRUE (FLAG_SEEK, FLAG_NO_POST, FLAG_ALT_ID), husk å sette dem tilbake til FALSE når du er ferdig.
+Hvis du bruker main.yml for kjøringer med flagg satt til TRUE (FLAG_SEEK, FLAG_NO_POST, FLAG_ALT_ID), husk å sette dem tilbake til FALSE når du er ferdig. Husk at du likevel må dispatche med flagg satt til FALSE når du er ferdig, med tanke på at restarter av image i miljøet kan inntreffe
 
 Alternativt kan du bruke dispatch-jobben for kjøringer med flagg satt til TRUE, slik at de kun er aktive for den spesifikke deployen.
 
