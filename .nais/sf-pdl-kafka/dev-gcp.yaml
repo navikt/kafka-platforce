@@ -37,6 +37,7 @@ spec:
         - host: test.salesforce.com
         - host: navdialog--preprod.my.salesforce.com
         - host: navdialog--uat.my.salesforce.com
+        - host: navdialog--sit2.my.salesforce.com
   envFrom:
     - secret: sf-pdl-kafka
   kafka:
