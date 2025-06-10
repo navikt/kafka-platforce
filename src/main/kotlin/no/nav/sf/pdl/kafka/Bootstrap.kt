@@ -7,10 +7,9 @@ val application = when (env(config_DEPLOY_APP)) {
         filter = if (devContext) ::isTombstoneOrSalesforceTagged else null,
         modifier = ::reduceByWhitelistAndRemoveHistoricalItems
     )
-    "sf-geografisktilknytning" -> KafkaPosterApplication(
-        filter = null
-    )
+    "sf-geografisktilknytning" -> KafkaPosterApplication()
     "sf-bjorntest" -> KafkaPosterApplication()
+    "sf-skjerming" -> KafkaPosterApplication()
     else -> throw RuntimeException("Attempted to deploy unknown app")
 }
 
