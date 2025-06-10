@@ -1,6 +1,6 @@
 package no.nav.sf.pdl.kafka.salesforce
 
-import org.http4k.client.ApacheClient
+import org.http4k.client.OkHttp
 import org.http4k.core.Headers
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
@@ -11,7 +11,7 @@ import java.io.File
 const val SALESFORCE_VERSION = "v57.0"
 
 class SalesforceClient(
-    private val httpClient: HttpHandler = ApacheClient(),
+    private val httpClient: HttpHandler = OkHttp(),
     private val accessTokenHandler: AccessTokenHandler = DefaultAccessTokenHandler()
 ) {
     fun postRecords(kafkaMessages: Set<KafkaMessage>): Response {

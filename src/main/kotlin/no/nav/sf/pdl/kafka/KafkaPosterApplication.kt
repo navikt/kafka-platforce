@@ -10,7 +10,7 @@ import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.nais.naisAPI
 import no.nav.sf.pdl.kafka.poster.KafkaToSFPoster
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.http4k.server.ApacheServer
+import org.http4k.server.Netty
 import org.http4k.server.asServer
 
 /**
@@ -41,7 +41,7 @@ class KafkaPosterApplication(
                 (if (env(config_FLAG_ALT_ID).toBoolean()) " - ALT_ID" else "")
         }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics
-        naisAPI().asServer(ApacheServer(8080)).start()
+        naisAPI().asServer(Netty(8080)).start()
 
         while (!ShutdownHook.isActive()) {
             try {

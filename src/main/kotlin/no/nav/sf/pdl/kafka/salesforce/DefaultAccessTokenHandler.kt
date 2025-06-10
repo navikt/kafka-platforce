@@ -12,9 +12,7 @@ import no.nav.sf.pdl.kafka.secret_PRIVATE_KEY_ALIAS
 import no.nav.sf.pdl.kafka.secret_PRIVATE_KEY_PASSWORD
 import no.nav.sf.pdl.kafka.secret_SF_CLIENT_ID
 import no.nav.sf.pdl.kafka.secret_SF_USERNAME
-import org.apache.commons.codec.binary.Base64.decodeBase64
-import org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString
-import org.http4k.client.ApacheClient
+import org.http4k.client.OkHttp
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
@@ -23,6 +21,7 @@ import org.http4k.core.body.toBody
 import java.io.File
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.util.Base64
 
 /**
  * A handler for oauth2 access flow to salesforce.
@@ -52,7 +51,7 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
     private val privateKeyAlias = env(secret_PRIVATE_KEY_ALIAS)
     private val privateKeyPassword = env(secret_PRIVATE_KEY_PASSWORD)
 
-    private val client: HttpHandler = ApacheClient()
+    private val client: HttpHandler = OkHttp()
 
     private val gson = Gson()
 
@@ -80,8 +79,9 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
             pkAlias = privateKeyAlias,
             pkPwd = privateKeyPassword
         )
-        val claimWithHeaderJsonUrlSafe = gson.toJson(JWTClaimHeader("RS256")).encodeB64UrlSafe() +
-            "." + gson.toJson(claim).encodeB64UrlSafe()
+
+        val claimWithHeaderJsonUrlSafe = gson.toJson(JWTClaimHeader("RS256")).encodeB64() +
+            "." + gson.toJson(claim).encodeB64()
         val fullClaimSignature = privateKey.sign(claimWithHeaderJsonUrlSafe.toByteArray())
 
         val accessTokenRequest = Request(Method.POST, "$sfTokenHost/services/oauth2/token")
@@ -129,9 +129,12 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
         }
     }
 
-    private fun ByteArray.encodeB64(): String = encodeBase64URLSafeString(this)
-    private fun String.decodeB64(): ByteArray = decodeBase64(this)
-    private fun String.encodeB64UrlSafe(): String = encodeBase64URLSafeString(this.toByteArray())
+//    private fun ByteArray.encodeB64(): String = encodeBase64URLSafeString(this)
+//    private fun String.decodeB64(): ByteArray = decodeBase64(this)
+//    private fun String.encodeB64UrlSafe(): String = encodeBase64URLSafeString(this.toByteArray())
+    private fun ByteArray.encodeB64(): String = String(Base64.getUrlEncoder().encode(this))
+    private fun String.decodeB64(): ByteArray = Base64.getUrlDecoder().decode(this)
+    private fun String.encodeB64(): String = this.toByteArray().encodeB64()
 
     private data class JWTClaim(
         val iss: String,
