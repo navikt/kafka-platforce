@@ -137,9 +137,8 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
     // private fun String.encodeB64(): String = this.toByteArray().encodeB64()
 
     private fun ByteArray.encodeB64(): String = String(java.util.Base64.getUrlEncoder().withoutPadding().encode(this))
-    private fun String.decodeB64(): ByteArray = java.util.Base64.getDecoder().decode(this)
-    private fun String.encodeB64(): String =
-        java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(this.toByteArray(Charsets.UTF_8))
+    private fun String.decodeB64(): ByteArray = java.util.Base64.getMimeDecoder().decode(this)
+    private fun String.encodeB64(): String = this.toByteArray(Charsets.UTF_8).encodeB64()
 
     private data class JWTClaim(
         val iss: String,
