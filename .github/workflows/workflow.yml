@@ -72,8 +72,6 @@ jobs:
         id: docker-push
         with:
           team: teamnks
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
       - name: Create image URL artifact
         run: echo "${{ steps.docker-push.outputs.image }}" > ./imageUrl.txt
       - uses: actions/upload-artifact@v4

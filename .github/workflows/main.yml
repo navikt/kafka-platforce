@@ -10,7 +10,7 @@ jobs:
       contents: write
     secrets: inherit
     with:
-      DEPLOY_APP: sf-pdl-kafka # sf-pdl-kafka # sf-geografisktilknytning # use ALL to deploy all apps in cluster
+      DEPLOY_APP: sf-geografisktilknytning # sf-pdl-kafka # sf-geografisktilknytning # use ALL to deploy all apps in cluster
       DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
