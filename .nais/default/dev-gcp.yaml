@@ -32,21 +32,21 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: login.salesforce.com
-        - host: navdialog.my.salesforce.com
-  envFrom:
-    - secret: sf-pdl-kafka
+        - host: test.salesforce.com
+        - host: navdialog--preprod.my.salesforce.com
+        - host: navdialog--uat.my.salesforce.com
+        - host: navdialog--sit2.my.salesforce.com
   kafka:
-    pool: nav-prod # enum of nav-dev, nav-prod
+    pool: nav-dev # enum of nav-dev, nav-prod
   env:
     - name: KAFKA_TOPIC
-      value: team-dialog.crm-kafka-activity-oppgaver
+      value: 'topic not specified'
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: SF_TOKENHOST
-      value: https://login.salesforce.com
+      value: https://test.salesforce.com
     - name: KAFKA_CLIENT_ID
       value: '{{ DEPLOY_APP }}'
     - name: DEPLOY_APP

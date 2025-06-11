@@ -29,27 +29,22 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
-  ingresses:
-    - "https://sf-bjorntest.intern.dev.nav.no"
   accessPolicy:
     outbound:
       external:
-        - host: test.salesforce.com
-        - host: navdialog--preprod.my.salesforce.com
-        - host: navdialog--uat.my.salesforce.com
-  envFrom:
-    - secret: sf-pdl-kafka
+        - host: login.salesforce.com
+        - host: navdialog.my.salesforce.com
   kafka:
-    pool: nav-dev # enum of nav-dev, nav-prod
+    pool: nav-prod # enum of nav-dev, nav-prod
   env:
     - name: KAFKA_TOPIC
-      value: team-dialog.task
+      value: 'topic not specified'
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: SF_TOKENHOST
-      value: https://test.salesforce.com
+      value: https://login.salesforce.com
     - name: KAFKA_CLIENT_ID
       value: '{{ DEPLOY_APP }}'
     - name: DEPLOY_APP

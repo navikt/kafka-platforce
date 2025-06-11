@@ -74,7 +74,12 @@ sourceSets {
     test.kotlin.srcDirs += 'src/test/kotlin'
 }
 
+apply from: 'gradle/mergeYamlTask.gradle'
+apply from: 'gradle/updateDispatchWorkflow.gradle'
+
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    dependsOn("mergeYamlTask")
+    dependsOn("updateDispatchWorkflow")
     kotlinOptions.jvmTarget = "21"
 }
 
