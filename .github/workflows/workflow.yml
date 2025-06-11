@@ -71,7 +71,7 @@ jobs:
         uses: nais/docker-build-push@v0
         id: docker-push
         with:
-          team: teamnks
+          team: teamcrm
       - name: Create image URL artifact
         run: echo "${{ steps.docker-push.outputs.image }}" > ./imageUrl.txt
       - uses: actions/upload-artifact@v4
