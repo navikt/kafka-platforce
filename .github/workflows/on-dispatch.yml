@@ -84,7 +84,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ARCHIVE_DOWNLOAD_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/kafka-dialog/actions/artifacts?name=imageUrl" | jq -r '.artifacts[0].archive_download_url')
+          ARCHIVE_DOWNLOAD_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/navikt/kafka-platforce/actions/artifacts?name=imageUrl" | jq -r '.artifacts[0].archive_download_url')
           echo "ARCHIVE_DOWNLOAD_URL: $ARCHIVE_DOWNLOAD_URL"
           curl -s -H "Authorization: token $GITHUB_TOKEN" -o artifact.zip -L "$ARCHIVE_DOWNLOAD_URL"
           IMAGE_URL=$(unzip -p artifact.zip)
