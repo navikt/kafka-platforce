@@ -10,7 +10,7 @@ jobs:
       contents: write
     secrets: inherit
     with:
-      DEPLOY_APP: sf-geografisktilknytning # sf-pdl-kafka # sf-geografisktilknytning
+      DEPLOY_APP: sf-pdl-kafka # sf-pdl-kafka # sf-geografisktilknytning
       DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
