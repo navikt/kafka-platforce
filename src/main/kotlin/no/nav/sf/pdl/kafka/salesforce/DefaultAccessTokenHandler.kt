@@ -129,13 +129,6 @@ class DefaultAccessTokenHandler : AccessTokenHandler {
         }
     }
 
-//    private fun ByteArray.encodeB64(): String = encodeBase64URLSafeString(this)
-//    private fun String.decodeB64(): ByteArray = decodeBase64(this)
-//    private fun String.encodeB64UrlSafe(): String = encodeBase64URLSafeString(this.toByteArray())
-    // private fun ByteArray.encodeB64(): String = String(Base64.getUrlEncoder().encode(this))
-    // private fun String.decodeB64(): ByteArray = Base64.getDecoder().decode(this)
-    // private fun String.encodeB64(): String = this.toByteArray().encodeB64()
-
     private fun ByteArray.encodeB64(): String = String(java.util.Base64.getUrlEncoder().withoutPadding().encode(this))
     private fun String.decodeB64(): ByteArray = java.util.Base64.getMimeDecoder().decode(this)
     private fun String.encodeB64(): String = this.toByteArray(Charsets.UTF_8).encodeB64()
