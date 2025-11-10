@@ -8,7 +8,7 @@ import java.io.File
 object RerunUtility {
     private val log = KotlinLogging.logger { }
 
-    const val populateCache: Boolean = false // Currently only active if also no_post set to true
+    const val POPULATE_CACHE: Boolean = false // Currently only active if also no_post set to true
 
     fun addToCache(records: Iterable<ConsumerRecord<String, String?>>) {
         records.forEach { cache[it.key()] = Pair(it.offset(), hasVergemaalEllerFremtidsfullmakt(it)) }

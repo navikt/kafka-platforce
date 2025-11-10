@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:filename", "ktlint:standard:property-naming")
+
 package no.nav.sf.pdl.kafka
 
 /**
@@ -14,7 +16,6 @@ package no.nav.sf.pdl.kafka
  * - secret: Denotes an environment variable loaded from a Kubernetes secret.
  */
 
-// Config environment variables set in yaml file
 const val config_DEPLOY_APP = "DEPLOY_APP"
 const val config_DEPLOY_CLUSTER = "DEPLOY_CLUSTER"
 const val config_KAFKA_TOPIC = "KAFKA_TOPIC"

@@ -76,7 +76,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
+            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat(),
         )
     }
 
@@ -122,7 +122,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
+            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat(),
         )
     }
 
@@ -153,7 +153,7 @@ class ReduceByWhitelistTest {
               }
             }
             """.trimIndent(),
-            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat()
+            reduceByWhitelistAndRemoveHistoricalItems(exampleWithSalesforceTagRecord, whitelist)?.toPrettyFormat(),
         )
     }
 }

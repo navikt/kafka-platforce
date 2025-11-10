@@ -18,7 +18,9 @@ class ValidateWhitelistTest {
     }
 
     private fun containsOnlyJsonObjectOrAllValue(element: JsonElement): Boolean {
-        if (element is JsonPrimitive) { return element.asString == "ALL" }
+        if (element is JsonPrimitive) {
+            return element.asString == "ALL"
+        }
         if (element is JsonObject) {
             return element.entrySet().all { containsOnlyJsonObjectOrAllValue(it.value) }
         }

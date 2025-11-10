@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class GuiTest {
-
     private val exampleWithSalesforceTagRecord = readResourceFile("/exampleWithSalesforceTag.json").asRecordValue()
 
     private fun String?.asRecordValue() = ConsumerRecord("topic", 0, 0L, "key", this)

@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package no.nav.sf.pdl.kafka.poster
 
 import com.google.gson.Gson
@@ -30,9 +32,8 @@ class KafkaToSFPosterTest {
     private fun String?.asRecordValue(offset: Long = 1L) = ConsumerRecord("topic", 0, offset, "key", this)
 
     // Helper function to create an instance of ConsumerRecords from list of consumer records
-    private fun List<ConsumerRecord<String, String?>>.toConsumerRecords(): ConsumerRecords<String, String?> {
-        return ConsumerRecords<String, String?>(mapOf(TopicPartition("topic", 0) to this))
-    }
+    private fun List<ConsumerRecord<String, String?>>.toConsumerRecords(): ConsumerRecords<String, String?> =
+        ConsumerRecords<String, String?>(mapOf(TopicPartition("topic", 0) to this))
 
     private val gson = Gson()
 
@@ -55,7 +56,11 @@ class KafkaToSFPosterTest {
         setUp()
     }
 
-    private fun setUp(flagSeek: Boolean = false, numberOfSamples: Int = 0, flagNoPost: Boolean = false) {
+    private fun setUp(
+        flagSeek: Boolean = false,
+        numberOfSamples: Int = 0,
+        flagNoPost: Boolean = false,
+    ) {
         every { kafkaConsumerFactoryMock.createConsumer() } returns kafkaConsumerMock
         every { kafkaConsumerMock.partitionsFor(any()) } returns listOf(partitionInfoMock)
         every { partitionInfoMock.topic() } returns "topic"
@@ -66,18 +71,19 @@ class KafkaToSFPosterTest {
         every { kafkaConsumerMock.commitSync() } returns Unit
         every { kafkaConsumerMock.close() } returns Unit
 
-        kafkaToSFPoster = KafkaToSFPoster(
-            filter = filter,
-            modifier = modifier,
-            sfClient = sfClientMock,
-            kafkaConsumerFactory = kafkaConsumerFactoryMock,
-            kafkaTopic = "topic",
-            kafkaPollDuration = 10L,
-            flagSeek = flagSeek,
-            seekOffset = 0L,
-            numberOfSamples = numberOfSamples,
-            flagNoPost = flagNoPost
-        )
+        kafkaToSFPoster =
+            KafkaToSFPoster(
+                filter = filter,
+                modifier = modifier,
+                sfClient = sfClientMock,
+                kafkaConsumerFactory = kafkaConsumerFactoryMock,
+                kafkaTopic = "topic",
+                kafkaPollDuration = 10L,
+                flagSeek = flagSeek,
+                seekOffset = 0L,
+                numberOfSamples = numberOfSamples,
+                flagNoPost = flagNoPost,
+            )
     }
 
     @AfterEach
@@ -101,10 +107,11 @@ class KafkaToSFPosterTest {
             sfClientMock.postRecords(
                 setOf(
                     KafkaMessage(
-                        CRM_Topic__c = "topic", CRM_Key__c = "key",
-                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray())
-                    )
-                )
+                        CRM_Topic__c = "topic",
+                        CRM_Key__c = "key",
+                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray()),
+                    ),
+                ),
             )
         }
         verify { kafkaConsumerMock.commitSync() }
@@ -123,10 +130,11 @@ class KafkaToSFPosterTest {
             sfClientMock.postRecords(
                 setOf(
                     KafkaMessage(
-                        CRM_Topic__c = "topic", CRM_Key__c = "key",
-                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray())
-                    )
-                )
+                        CRM_Topic__c = "topic",
+                        CRM_Key__c = "key",
+                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray()),
+                    ),
+                ),
             )
         }
         verify { kafkaConsumerMock.commitSync() }
@@ -183,10 +191,11 @@ class KafkaToSFPosterTest {
             sfClientMock.postRecords(
                 setOf(
                     KafkaMessage(
-                        CRM_Topic__c = "topic", CRM_Key__c = "key",
-                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray())
-                    )
-                )
+                        CRM_Topic__c = "topic",
+                        CRM_Key__c = "key",
+                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray()),
+                    ),
+                ),
             )
         }
         verify { kafkaConsumerMock.commitSync() }
@@ -214,10 +223,11 @@ class KafkaToSFPosterTest {
             sfClientMock.postRecords(
                 setOf(
                     KafkaMessage(
-                        CRM_Topic__c = "topic", CRM_Key__c = "key",
-                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray())
-                    )
-                )
+                        CRM_Topic__c = "topic",
+                        CRM_Key__c = "key",
+                        CRM_Value__c = Base64.getEncoder().encodeToString(readResourceFile("/exampleWithSalesforceTag.json").toByteArray()),
+                    ),
+                ),
             )
         }
         verify(exactly = 2) { kafkaConsumerMock.commitSync() }
@@ -245,10 +255,17 @@ class KafkaToSFPosterTest {
             sfClientMock.postRecords(
                 setOf(
                     KafkaMessage(
-                        CRM_Topic__c = "topic", CRM_Key__c = "key",
-                        CRM_Value__c = Base64.getEncoder().encodeToString((readResourceFile("/exampleWithSalesforceTag.json") + "-modification").toByteArray())
-                    )
-                )
+                        CRM_Topic__c = "topic",
+                        CRM_Key__c = "key",
+                        CRM_Value__c =
+                            Base64.getEncoder().encodeToString(
+                                (
+                                    readResourceFile("/exampleWithSalesforceTag.json") +
+                                        "-modification"
+                                ).toByteArray(),
+                            ),
+                    ),
+                ),
             )
         }
         verify { kafkaConsumerMock.commitSync() }

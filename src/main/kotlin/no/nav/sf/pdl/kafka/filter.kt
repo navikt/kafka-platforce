@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:filename")
+
 package no.nav.sf.pdl.kafka
 
 import com.google.gson.JsonArray
@@ -26,7 +28,11 @@ fun hasVergemaalEllerFremtidsfullmakt(record: ConsumerRecord<String, String?>): 
         if (obj["hentPerson"] == null) return false
         val hentPerson = obj["hentPerson"] as JsonObject
         if (hentPerson["vergemaalEllerFremtidsfullmakt"] == null || hentPerson["vergemaalEllerFremtidsfullmakt"] is JsonNull) return false
-        if (hentPerson["vergemaalEllerFremtidsfullmakt"] is JsonArray && (hentPerson["vergemaalEllerFremtidsfullmakt"] as JsonArray).isEmpty) return false
+        if (hentPerson["vergemaalEllerFremtidsfullmakt"] is JsonArray &&
+            (hentPerson["vergemaalEllerFremtidsfullmakt"] as JsonArray).isEmpty
+        ) {
+            return false
+        }
         return true
     } catch (e: Exception) {
         File("/tmp/filterHasVergemaalEllerFremtidsfullmaktFail").appendText("$record\nMESSAGE ${e.message}\n\n")
@@ -34,7 +40,13 @@ fun hasVergemaalEllerFremtidsfullmakt(record: ConsumerRecord<String, String?>): 
     }
 }
 
-val cherryPickList: List<Long> by lazy { KafkaPosterApplication::class.java.getResource("/offsetfile.txt").readText().split("\n").map { it.trim().toLong() } }
+val cherryPickList: List<Long> by lazy {
+    KafkaPosterApplication::class.java
+        .getResource("/offsetfile.txt")
+        .readText()
+        .split("\n")
+        .map { it.trim().toLong() }
+}
 
 fun cherryPickOffsets(record: ConsumerRecord<String, String?>): Boolean {
     try {

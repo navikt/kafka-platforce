@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class RemoveHistoricalItemsTest {
-
     private fun String.toPrettyFormat(): String {
         val json: JsonObject = JsonParser.parseString(this).asJsonObject
         val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
@@ -48,31 +47,31 @@ class RemoveHistoricalItemsTest {
         println(updatedJson.toPrettyFormat())
         Assertions.assertEquals(
             """
-        {
-          "hentPerson": {
-            "navn": [
-              {
-                "fornavn": "Jane",
-                "metadata": {
-                  "historisk": false
-                }
+            {
+              "hentPerson": {
+                "navn": [
+                  {
+                    "fornavn": "Jane",
+                    "metadata": {
+                      "historisk": false
+                    }
+                  }
+                ],
+                "inntekt": [
+                  {
+                    "belop": 600000
+                  },
+                  {
+                    "belop": 700000,
+                    "metadata": {
+                      "historisk": false
+                    }
+                  }
+                ]
               }
-            ],
-            "inntekt": [
-              {
-                "belop": 600000
-              },
-              {
-                "belop": 700000,
-                "metadata": {
-                  "historisk": false
-                }
-              }
-            ]
-          }
-        }
+            }
             """.trimIndent(),
-            removeHistoricalItems(jsonString).toPrettyFormat()
+            removeHistoricalItems(jsonString).toPrettyFormat(),
         )
     }
 }

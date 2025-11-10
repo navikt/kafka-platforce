@@ -47,7 +47,12 @@ object Gui {
      * markRemovedFields - a recursive function that takes a message model and a remove model as json objects
      * and produces a marked message model where fields to be removed are marked with a '!' prefix, i.e "!tags"
      */
-    private fun markRemovedFields(message: JsonObject, removeObject: JsonObject, resultHolder: JsonObject = JsonObject(), mark: Boolean = false): JsonObject {
+    private fun markRemovedFields(
+        message: JsonObject,
+        removeObject: JsonObject,
+        resultHolder: JsonObject = JsonObject(),
+        mark: Boolean = false,
+    ): JsonObject {
         for ((key, value) in message.entrySet()) {
             if (value is JsonObject) {
                 val obj = JsonObject()
@@ -73,8 +78,8 @@ object Gui {
         return wrapWithHTMLPage(buildHTMLContentFromJsonLines(jsonLines))
     }
 
-    private fun wrapWithHTMLPage(content: String): String {
-        return """
+    private fun wrapWithHTMLPage(content: String): String =
+        """
         <html>
         <head>
         <style>
@@ -86,7 +91,6 @@ object Gui {
         </body>
         </html>
         """.trimIndent()
-    }
 
     private fun buildHTMLContentFromJsonLines(jsonLines: List<String>): String {
         val htmlContent = StringBuilder()

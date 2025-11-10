@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:filename")
+
 package no.nav.sf.pdl.kafka
 
 import com.google.gson.JsonArray
@@ -19,7 +21,7 @@ val whitelistText: String by lazy {
 
 fun reduceByWhitelistAndRemoveHistoricalItems(
     record: ConsumerRecord<String, String?>,
-    whitelist: String = whitelistText
+    whitelist: String = whitelistText,
 ): String? {
     if (record.value() == null) {
         File("/tmp/tombstones").appendText("${record.key()} at $currentTimeTag\n")
@@ -32,7 +34,7 @@ fun reduceByWhitelistAndRemoveHistoricalItems(
         val removeList = findNonWhitelistedFields(whitelistObject, messageObject)
 
         File("/tmp/latestDroppedPdlFields").writeText(
-            removeList.map { it.joinToString(".") }.joinToString("\n")
+            removeList.map { it.joinToString(".") }.joinToString("\n"),
         )
 
         val allList = listAllFields(messageObject)
@@ -69,9 +71,12 @@ private fun findNonWhitelistedFields(
 ): Set<List<String>> {
     val whitelistEntrySet = (whitelistElement as JsonObject).entrySet()
 
-    val messageEntrySet = if (messageElement is JsonArray) {
-        messageElement.map { it as JsonObject }.flatMap { it.entrySet() }.toSet()
-    } else { (messageElement as JsonObject).entrySet() }
+    val messageEntrySet =
+        if (messageElement is JsonArray) {
+            messageElement.map { it as JsonObject }.flatMap { it.entrySet() }.toSet()
+        } else {
+            (messageElement as JsonObject).entrySet()
+        }
 
     // Whitelist field with primitive value (typically "ALL") means allow field plus any subfields
     val whitelistPrimitives = whitelistEntrySet.filter { it.value is JsonPrimitive }.map { it.key }.toList()
@@ -80,16 +85,18 @@ private fun findNonWhitelistedFields(
     // describe what parts to allow for any subfields
     val whitelistObjects = whitelistEntrySet.filter { it.value is JsonObject }.map { it.key }.toList()
 
-    val removeList = messageEntrySet.filter { entry ->
-        // Never remove if fields is whitelisted as "ALL"
-        if (whitelistPrimitives.contains(entry.key)) return@filter false
+    val removeList =
+        messageEntrySet
+            .filter { entry ->
+                // Never remove if fields is whitelisted as "ALL"
+                if (whitelistPrimitives.contains(entry.key)) return@filter false
 
-        // If not whitelisted as "ALL", remove any primitives and null
-        if (entry.value is JsonPrimitive || entry.value is JsonNull) return@filter true
+                // If not whitelisted as "ALL", remove any primitives and null
+                if (entry.value is JsonPrimitive || entry.value is JsonNull) return@filter true
 
-        // If field is object or array, only keep it if member of object whitelist
-        !whitelistObjects.contains(entry.key)
-    }.map { parents + it.key }
+                // If field is object or array, only keep it if member of object whitelist
+                !whitelistObjects.contains(entry.key)
+            }.map { parents + it.key }
 
     resultHolder.addAll(removeList)
 
@@ -122,9 +129,10 @@ private fun JsonElement.removeFields(fieldTree: List<String>) {
     if (fieldTree.size == 1) {
         when (this) {
             is JsonObject -> this.remove(fieldTree.first())
-            is JsonArray -> this.forEach {
-                (it as JsonObject).remove(fieldTree.first())
-            }
+            is JsonArray ->
+                this.forEach {
+                    (it as JsonObject).remove(fieldTree.first())
+                }
             else -> {
                 throw IllegalStateException("JsonElement.removeFieldRecurse attempted removing a primitive or null")
             }
@@ -132,9 +140,10 @@ private fun JsonElement.removeFields(fieldTree: List<String>) {
     } else {
         when (this) {
             is JsonObject -> this.get(fieldTree.first()).removeFields(fieldTree.subList(1, fieldTree.size))
-            is JsonArray -> this.forEach {
-                (it as JsonObject).get(fieldTree.first()).removeFields(fieldTree.subList(1, fieldTree.size))
-            }
+            is JsonArray ->
+                this.forEach {
+                    (it as JsonObject).get(fieldTree.first()).removeFields(fieldTree.subList(1, fieldTree.size))
+                }
             else -> {
                 throw IllegalStateException("JsonElement.removeFieldRecurse attempted stepping into a primitive or null")
             }
@@ -149,13 +158,14 @@ private fun JsonElement.removeFields(fieldTree: List<String>) {
 private fun listAllFields(
     messageElement: JsonElement,
     resultHolder: MutableSet<List<String>> = mutableSetOf(),
-    parents: List<String> = listOf()
+    parents: List<String> = listOf(),
 ): Set<List<String>> {
-    val messageEntrySet = if (messageElement is JsonArray) {
-        messageElement.filterIsInstance<JsonObject>().flatMap { it.entrySet() }.toSet()
-    } else {
-        (messageElement as JsonObject).entrySet()
-    }
+    val messageEntrySet =
+        if (messageElement is JsonArray) {
+            messageElement.filterIsInstance<JsonObject>().flatMap { it.entrySet() }.toSet()
+        } else {
+            (messageElement as JsonObject).entrySet()
+        }
 
     val list = messageEntrySet.map { parents + it.key }
 
@@ -167,7 +177,7 @@ private fun listAllFields(
             listAllFields(
                 it.value,
                 resultHolder,
-                parents.toList() + it.key
+                parents.toList() + it.key,
             )
         }
     return resultHolder

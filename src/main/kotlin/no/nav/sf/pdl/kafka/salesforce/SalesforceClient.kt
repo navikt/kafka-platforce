@@ -12,10 +12,9 @@ const val SALESFORCE_VERSION = "v57.0"
 
 class SalesforceClient(
     private val httpClient: HttpHandler = OkHttp(),
-    private val accessTokenHandler: AccessTokenHandler = DefaultAccessTokenHandler()
+    private val accessTokenHandler: AccessTokenHandler = DefaultAccessTokenHandler(),
 ) {
     fun postRecords(kafkaMessages: Set<KafkaMessage>): Response {
-
         val requestBody = SFsObjectRest(records = kafkaMessages).toJson()
 
         val dstUrl = "${accessTokenHandler.instanceUrl}/services/data/$SALESFORCE_VERSION/composite/sobjects"
@@ -23,7 +22,7 @@ class SalesforceClient(
         val headers: Headers =
             listOf(
                 "Authorization" to "Bearer ${accessTokenHandler.accessToken}",
-                "Content-Type" to "application/json;charset=UTF-8"
+                "Content-Type" to "application/json;charset=UTF-8",
             )
 
         val request = Request(Method.POST, dstUrl).headers(headers).body(requestBody)

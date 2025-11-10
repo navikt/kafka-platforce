@@ -36,9 +36,11 @@ object Investigate {
                         (
                             if ((env(config_DEPLOY_APP) == "sf-pdl-kafka") && (env(config_DEPLOY_CLUSTER) == "prod-gcp")) {
                                 "(Ref: sf-pdl-kafka prod offset 72043224 corresponds with 2024-09-18 00:00)\n"
-                            } else ""
-                            ) +
-                        report()
+                            } else {
+                                ""
+                            }
+                        ) +
+                        report(),
                 )
             } else {
                 WorkSessionStatistics.investigateConsumedCounter.clear()
@@ -47,15 +49,16 @@ object Investigate {
                 investigateInProgress = true
                 lastOffsetSearch = offset
                 Thread {
-                    val investigatePoster = KafkaToSFPoster(
-                        filter = createInvestigateFilter(ids),
-                        kafkaConsumerFactory = InvestigateConsumerFactory(),
-                        flagSeek = true,
-                        seekOffset = offset,
-                        numberOfSamples = 0,
-                        flagNoPost = true,
-                        metricsActive = false
-                    )
+                    val investigatePoster =
+                        KafkaToSFPoster(
+                            filter = createInvestigateFilter(ids),
+                            kafkaConsumerFactory = InvestigateConsumerFactory(),
+                            flagSeek = true,
+                            seekOffset = offset,
+                            numberOfSamples = 0,
+                            flagNoPost = true,
+                            metricsActive = false,
+                        )
 
                     try {
                         investigatePoster.runWorkSession()
@@ -68,14 +71,14 @@ object Investigate {
                 Response(Status.OK).body(
                     "Will trigger search for these: " + ids.joinToString(" ") +
                         (if (timeSpentLastInvestigate > 0) ", last finished took ${formatDuration(timeSpentLastInvestigate)}" else "") +
-                        (if (offset > 0) ", from offset $offset" else "")
+                        (if (offset > 0) ", from offset $offset" else ""),
                 )
             }
         }
     }
 
-    private fun createInvestigateFilter(ids: List<String>): ((ConsumerRecord<String, String?>) -> Boolean) {
-        return { record: ConsumerRecord<String, String?> ->
+    private fun createInvestigateFilter(ids: List<String>): ((ConsumerRecord<String, String?>) -> Boolean) =
+        { record: ConsumerRecord<String, String?> ->
             // Check if the key of the record matches any ID in the list
             if (ids.contains(record.key())) {
                 WorkSessionStatistics.investigateHitCounter.inc()
@@ -83,19 +86,17 @@ object Investigate {
             }
             true // Always return true
         }
-    }
 
     private fun formatDuration(durationInMillis: Long): String {
         val duration = durationInMillis.toDuration(DurationUnit.MILLISECONDS)
         return "${duration.inWholeMinutes}m ${duration.inWholeSeconds % 60}s"
     }
 
-    private fun report(): String {
-        return "Current investigate count: ${
-        WorkSessionStatistics.investigateConsumedCounter.get().toInt()
+    private fun report(): String =
+        "Current investigate count: ${
+            WorkSessionStatistics.investigateConsumedCounter.get().toInt()
         }, hits: ${
-        WorkSessionStatistics.investigateHitCounter.get().toInt()
+            WorkSessionStatistics.investigateHitCounter.get().toInt()
         }" + (if (timeSpentLastInvestigate > 0) ", last finished took ${formatDuration(timeSpentLastInvestigate)}" else "") +
             (if (lastOffsetSearch > 0) " from offset $lastOffsetSearch" else "")
-    }
 }

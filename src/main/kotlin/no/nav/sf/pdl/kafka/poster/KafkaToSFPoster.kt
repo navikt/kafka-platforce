@@ -39,7 +39,7 @@ class KafkaToSFPoster(
     private val seekOffset: Long = env(config_SEEK_OFFSET).toLong(),
     numberOfSamples: Int = env(config_NUMBER_OF_SAMPLES).toInt(),
     private val flagNoPost: Boolean = env(config_FLAG_NO_POST).toBoolean(),
-    private val metricsActive: Boolean = true
+    private val metricsActive: Boolean = true,
 ) {
     private enum class ConsumeResult { SUCCESSFULLY_CONSUMED_BATCH, NO_MORE_RECORDS, FAIL }
 
@@ -64,8 +64,8 @@ class KafkaToSFPoster(
         kafkaConsumer.close()
     }
 
-    private fun setupKafkaConsumer(kafkaTopic: String): KafkaConsumer<String, String?> {
-        return kafkaConsumerFactory.createConsumer().apply {
+    private fun setupKafkaConsumer(kafkaTopic: String): KafkaConsumer<String, String?> =
+        kafkaConsumerFactory.createConsumer().apply {
             // Using assign rather than subscribe since we need the ability to seek to a particular offset
             val topicPartitions = partitionsFor(kafkaTopic).map { TopicPartition(it.topic(), it.partition()) }
             assign(topicPartitions)
@@ -79,11 +79,11 @@ class KafkaToSFPoster(
                 }
             }
         }
-    }
 
     private tailrec fun pollAndConsume(kafkaConsumer: KafkaConsumer<String, String?>) {
-        val records = kafkaConsumer.poll(Duration.ofMillis(kafkaPollDuration))
-            as ConsumerRecords<String, String?>
+        val records =
+            kafkaConsumer.poll(Duration.ofMillis(kafkaPollDuration))
+                as ConsumerRecords<String, String?>
 
         if (consumeRecords(records) == ConsumeResult.SUCCESSFULLY_CONSUMED_BATCH) {
             kafkaConsumer.commitSync() // Will update position of kafka consumer in kafka cluster
@@ -97,10 +97,14 @@ class KafkaToSFPoster(
                 if (!stats.hasConsumed()) {
                     WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.clear()
                     WorkSessionStatistics.workSessionsWithoutEventsCounter.inc()
-                    log.info { "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}" }
+                    log.info {
+                        "Finished work session without consuming. Number of work sessions without events during lifetime of app: ${WorkSessionStatistics.workSessionsWithoutEventsCounter.get().toInt()}"
+                    }
                 } else {
                     WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.inc()
-                    log.info { "Finished work session with activity (subsequent ${WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.get().toInt()}). $stats" }
+                    log.info {
+                        "Finished work session with activity (subsequent ${WorkSessionStatistics.subsequentWorkSessionsWithEventsCounter.get().toInt()}). $stats"
+                    }
                 }
             }
             ConsumeResult.NO_MORE_RECORDS
@@ -117,7 +121,7 @@ class KafkaToSFPoster(
             if (samplesLeft > 0) sampleRecords(recordsFiltered)
 
             if (recordsFiltered.count() == 0 || flagNoPost) {
-                if (RerunUtility.populateCache) RerunUtility.addToCache(recordsFiltered)
+                if (RerunUtility.POPULATE_CACHE) RerunUtility.addToCache(recordsFiltered)
                 // if (recordsFiltered.count() > 0 && metricsActive) updateWhatWouldBeSent(recordsFiltered)
 
                 // Either we have set a flag to not post to salesforce, or the filter ate all candidates -
@@ -137,8 +141,11 @@ class KafkaToSFPoster(
 
     // For testdata:
     private var whatWouldBeSentBatch = 1
+
     private fun updateWhatWouldBeSent(recordsFiltered: Iterable<ConsumerRecord<String, String?>>) {
-        File("/tmp/whatwouldbesent").appendText("BATCH ${whatWouldBeSentBatch++}\n${recordsFiltered.toKafkaMessagesSet().joinToString("\n")}\n\n")
+        File(
+            "/tmp/whatwouldbesent",
+        ).appendText("BATCH ${whatWouldBeSentBatch++}\n${recordsFiltered.toKafkaMessagesSet().joinToString("\n")}\n\n")
     }
 
     private fun filterRecords(records: ConsumerRecords<String, String?>): Iterable<ConsumerRecord<String, String?>> {
@@ -148,13 +155,14 @@ class KafkaToSFPoster(
     }
 
     private fun Iterable<ConsumerRecord<String, String?>>.toKafkaMessagesSet(): Set<KafkaMessage> {
-        val kafkaMessages = this.map {
-            KafkaMessage(
-                CRM_Topic__c = it.topic(),
-                CRM_Key__c = it.key(),
-                CRM_Value__c = (modifier?.run { invoke(it) } ?: it.value())?.encodeB64()
-            )
-        }
+        val kafkaMessages =
+            this.map {
+                KafkaMessage(
+                    CRM_Topic__c = it.topic(),
+                    CRM_Key__c = it.key(),
+                    CRM_Value__c = (modifier?.run { invoke(it) } ?: it.value())?.encodeB64(),
+                )
+            }
 
         val uniqueKafkaMessages = kafkaMessages.toSet()
         val uniqueValueCount = uniqueKafkaMessages.count()
@@ -167,9 +175,13 @@ class KafkaToSFPoster(
     private fun sampleRecords(records: Iterable<ConsumerRecord<String, String?>>) {
         records.forEach {
             if (samplesLeft-- > 0) {
-                File("/tmp/samplesFromTopic").appendText("OFFSET: ${it.partition()} ${it.offset()}\nKEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
+                File(
+                    "/tmp/samplesFromTopic",
+                ).appendText("OFFSET: ${it.partition()} ${it.offset()}\nKEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
                 if (modifier != null) {
-                    File("/tmp/samplesAfterModifier").appendText("OFFSET: ${it.partition()} ${it.offset()}\nKEY: ${it.key()}\nVALUE: ${modifier.invoke(it)}\n\n")
+                    File(
+                        "/tmp/samplesAfterModifier",
+                    ).appendText("OFFSET: ${it.partition()} ${it.offset()}\nKEY: ${it.key()}\nVALUE: ${modifier.invoke(it)}\n\n")
                 }
                 log.info { "Saved sample. Samples left: $samplesLeft" }
             }

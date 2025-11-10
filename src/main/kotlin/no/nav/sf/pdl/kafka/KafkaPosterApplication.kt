@@ -63,20 +63,22 @@ class KafkaPosterApplication(
         runBlocking {
             log.debug { "Will wait $ms ms" }
 
-            val waitJob = launch {
-                runCatching { delay(ms) }
-                    .onSuccess { log.info { "waiting completed" } }
-                    .onFailure { log.info { "waiting interrupted" } }
-            }
-
-            tailrec suspend fun loop(): Unit = when {
-                waitJob.isCompleted -> Unit
-                ShutdownHook.isActive() -> waitJob.cancel()
-                else -> {
-                    delay(250L)
-                    loop()
+            val waitJob =
+                launch {
+                    runCatching { delay(ms) }
+                        .onSuccess { log.info { "waiting completed" } }
+                        .onFailure { log.info { "waiting interrupted" } }
                 }
-            }
+
+            tailrec suspend fun loop(): Unit =
+                when {
+                    waitJob.isCompleted -> Unit
+                    ShutdownHook.isActive() -> waitJob.cancel()
+                    else -> {
+                        delay(250L)
+                        loop()
+                    }
+                }
             loop()
             waitJob.join()
         }

@@ -13,25 +13,26 @@ import org.http4k.routing.routes
 
 private val log = KotlinLogging.logger { }
 
-fun naisAPI(): HttpHandler = routes(
-    "/internal/isAlive" bind Method.GET to { Response(Status.OK) },
-    "/internal/isReady" bind Method.GET to { Response(Status.OK) },
-    "/internal/metrics" bind Method.GET to {
-        try {
-            val result = Prometheus.metricsAsText
-            if (result.isEmpty()) {
-                Response(Status.NO_CONTENT)
-            } else {
-                Response(Status.OK).body(result)
+fun naisAPI(): HttpHandler =
+    routes(
+        "/internal/isAlive" bind Method.GET to { Response(Status.OK) },
+        "/internal/isReady" bind Method.GET to { Response(Status.OK) },
+        "/internal/metrics" bind Method.GET to {
+            try {
+                val result = Prometheus.metricsAsText
+                if (result.isEmpty()) {
+                    Response(Status.NO_CONTENT)
+                } else {
+                    Response(Status.OK).body(result)
+                }
+            } catch (e: Exception) {
+                log.error { "/prometheus failed writing metrics - ${e.message}" }
+                Response(Status.INTERNAL_SERVER_ERROR)
             }
-        } catch (e: Exception) {
-            log.error { "/prometheus failed writing metrics - ${e.message}" }
-            Response(Status.INTERNAL_SERVER_ERROR)
-        }
-    },
-    "/internal/gui" bind Method.GET to Gui.guiHandler,
-    "/internal/investigate" bind Method.GET to Investigate.investigateHandler
-)
+        },
+        "/internal/gui" bind Method.GET to Gui.guiHandler,
+        "/internal/investigate" bind Method.GET to Investigate.investigateHandler,
+    )
 
 object ShutdownHook {
     private val log = KotlinLogging.logger { }
@@ -42,7 +43,8 @@ object ShutdownHook {
 
     init {
         log.info { "Installing shutdown hook" }
-        Runtime.getRuntime()
+        Runtime
+            .getRuntime()
             .addShutdownHook(
                 object : Thread() {
                     override fun run() {
@@ -51,7 +53,8 @@ object ShutdownHook {
 
                         mainThread.join()
                     }
-                })
+                },
+            )
     }
 
     fun isActive() = shutdownhookActive
