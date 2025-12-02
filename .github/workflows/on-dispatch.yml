@@ -90,14 +90,14 @@ jobs:
           IMAGE_URL=$(unzip -p artifact.zip)
           echo "IMAGE_URL: $IMAGE_URL"
           echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout v5.0.1
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
       - name: Merge YAML
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew mergeYamlTask
       - name: Deploy ${{ matrix.target.app }} to ${{ github.event.inputs.DEPLOY_CLUSTER }}
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@21af204a4d63d1c10d149916d96669d5c2fa6f76 # v2
         env:
           CLUSTER: ${{ github.event.inputs.DEPLOY_CLUSTER }}
           RESOURCE: .nais/${{ matrix.target.app }}/target/${{ github.event.inputs.DEPLOY_CLUSTER }}.yaml
