@@ -1,6 +1,6 @@
 spec:
   envFrom:
-    - secret: sf-skjerming-secret
+    - secret: sf-skjerming
   env:
     - name: KAFKA_TOPIC
       value: nom.skjermede-personer-v1

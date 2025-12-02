@@ -2,7 +2,7 @@ spec:
   ingresses:
     - "https://sf-pdl-kafka.intern.nav.no"
   envFrom:
-    - secret: sf-pdl-kafka
+    - secret: kafka-platforce
   env:
     - name: KAFKA_TOPIC
       value: pdl.pdl-persondokument-v1
