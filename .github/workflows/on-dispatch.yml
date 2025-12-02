@@ -51,6 +51,8 @@ run-name: >- # Used as run-name on dispatch:
 jobs:
   setup-matrix:
     name: Set up matrix for deployment
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout v5.0.1
