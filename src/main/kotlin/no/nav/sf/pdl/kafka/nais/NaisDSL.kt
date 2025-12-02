@@ -26,7 +26,7 @@ fun naisAPI(): HttpHandler =
                     Response(Status.OK).body(result)
                 }
             } catch (e: Exception) {
-                log.error { "/prometheus failed writing metrics - ${e.message}" }
+                log.error { "/prometheus failed writing metrics -  ${e.message}" }
                 Response(Status.INTERNAL_SERVER_ERROR)
             }
         },
