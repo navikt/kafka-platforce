@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.application
 import no.nav.sf.pdl.kafka.config_DEPLOY_APP
+import no.nav.sf.pdl.kafka.devContext
 import no.nav.sf.pdl.kafka.env
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -19,8 +20,9 @@ class PostgresDatabase {
     private val log = KotlinLogging.logger { }
 
     val appName = env(config_DEPLOY_APP).uppercase().replace('-', '_')
+    val contextLabel = if (devContext) "DEV" else "PROD"
 
-    private val dbJdbcUrl = env("NAIS_DATABASE_${appName}_${appName}_${application.context}_JDBC_URL")
+    private val dbJdbcUrl = env("NAIS_DATABASE_${appName}_${appName}_${contextLabel}_JDBC_URL")
 
     // Note: exposed Database connect prepares for connections but does not actually open connections
     // That is handled via transaction {} ensuring connections are opened and closed properly

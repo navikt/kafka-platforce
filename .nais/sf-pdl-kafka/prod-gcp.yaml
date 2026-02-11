@@ -14,3 +14,5 @@ spec:
       value: pdl.pdl-persondokument-v1
     - name: WHITELIST_FILE
       value: '/whitelist/prod.json'
+    - name: USE_DB_OFFSET_FALLBACK
+      value: 'true'

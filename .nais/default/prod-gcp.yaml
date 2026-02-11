@@ -47,7 +47,7 @@ spec:
       value: '10000'
     - name: SF_TOKENHOST
       value: https://login.salesforce.com
-    - name: USE_DB_OFFSET_FALLBACK # Empty (default) means do not use db offset storage
+    - name: USE_DB_OFFSET_FALLBACK
       value: 'false'
     - name: KAFKA_CLIENT_ID
       value: '{{ DEPLOY_APP }}'

@@ -27,8 +27,6 @@ class KafkaPosterApplication(
 ) {
     private val poster = KafkaToSFPoster(filter, modifier)
 
-    val context = env(config_CONTEXT)
-
     private val msBetweenWork = env(config_MS_BETWEEN_WORK).toLong()
 
     private val log = KotlinLogging.logger { }
