@@ -4,7 +4,7 @@ spec:
       - type: POSTGRES_17
         tier: db-f1-micro
         databases:
-          - name: sf-pdl-kafka-prod
+          - name: sf-pdl-kafka-prod # Follow name convention <app-name>-<context>
   ingresses:
     - "https://sf-pdl-kafka.intern.nav.no"
   envFrom:
