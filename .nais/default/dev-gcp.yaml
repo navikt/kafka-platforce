@@ -41,12 +41,16 @@ spec:
   env:
     - name: KAFKA_TOPIC
       value: 'topic not specified'
+    - name: CONTEXT
+      value: "DEV"
     - name: MS_BETWEEN_WORK
       value: '180000'
     - name: KAFKA_POLL_DURATION
       value: '10000'
     - name: SF_TOKENHOST
       value: https://test.salesforce.com
+    - name: USE_DB_OFFSET_FALLBACK # Empty (default) means do not use db offset storage
+      value: 'false'
     - name: KAFKA_CLIENT_ID
       value: '{{ DEPLOY_APP }}'
     - name: DEPLOY_APP
