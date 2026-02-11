@@ -8,22 +8,17 @@ import no.nav.sf.pdl.kafka.config_DEPLOY_APP
 import no.nav.sf.pdl.kafka.env
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.upsert
+import java.time.Instant
 
-// const val NAIS_DB_PREFIX = "NAIS_DATABASE_SF_KEYTOOL_SF_KEYTOOL_"
-
-class PostgresDatabase(
-    naisDbPrefix: String,
-) {
+class PostgresDatabase {
     private val log = KotlinLogging.logger { }
 
     val appName = env(config_DEPLOY_APP).uppercase().replace('-', '_')
-    val naisDbPrefix = "NAIS_DATABASE_${appName}_${appName}_${application.context}_JDBC_URL"
 
     private val dbJdbcUrl = env("NAIS_DATABASE_${appName}_${appName}_${application.context}_JDBC_URL")
 
@@ -45,45 +40,60 @@ class PostgresDatabase(
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"
         }
 
-//    fun createCertMetadataTable(dropFirst: Boolean = false) {
-//        transaction {
-//            if (dropFirst) {
-//                log.info { "Dropping table $CERT_METADATA" }
-//                val dropStatement =
-//                    TransactionManager.current().connection.prepareStatement("DROP TABLE $CERT_METADATA", false)
-//                dropStatement.executeUpdate()
-//                log.info { "Drop performed" }
-//            }
-//
-//            log.info { "Creating table $CERT_METADATA" }
-//            SchemaUtils.create(CertMetadataTable)
-//        }
-//    }
-//
-//    fun upsertCertMetadata(certMetadata: CertMetadata): CertMetadata? =
-//        transaction {
-//            CertMetadataTable.upsert(
-//                keys = arrayOf(CertMetadataTable.cn), // Perform update if there is a conflict here
-//            ) {
-//                it[CertMetadataTable.cn] = certMetadata.cn
-//                it[CertMetadataTable.expiresAt] = certMetadata.expiresAt
-//                it[CertMetadataTable.sfUsername] = certMetadata.sfUsername
-//                it[CertMetadataTable.sfClientId] = certMetadata.sfClientId
-//            }
-//        }.resultedValues?.firstOrNull()?.toCertMetadata()
-//
-//    fun deleteCertMetadata(cn: String) {
-//        transaction {
-//            CertMetadataTable.deleteWhere {
-//                (CertMetadataTable.cn eq cn)
-//            }
-//        }
-//    }
-//
-//    fun retrieveCertMetadata(): List<CertMetadata> =
-//        transaction {
-//            CertMetadataTable
-//                .selectAll()
-//                .map { it.toCertMetadata() }
-//        }.toList()
+    fun createKafkaOffsetTable(dropFirst: Boolean = false) {
+        transaction {
+            if (dropFirst) {
+                log.info { "Dropping table $KAFKA_OFFSETS" }
+                val dropStatement =
+                    TransactionManager.current().connection.prepareStatement("DROP TABLE $KAFKA_OFFSETS", false)
+                dropStatement.executeUpdate()
+                log.info { "Drop performed" }
+            }
+
+            log.info { "Creating table $KAFKA_OFFSETS" }
+            SchemaUtils.create(KafkaOffsets)
+        }
+    }
+
+    fun saveOffset(
+        topic: String,
+        partition: Int,
+        offset: Long,
+    ) {
+        transaction {
+            KafkaOffsets.upsert(
+                KafkaOffsets.topic,
+                KafkaOffsets.partition,
+            ) {
+                it[KafkaOffsets.topic] = topic
+                it[KafkaOffsets.partition] = partition
+                it[KafkaOffsets.offset] = offset
+                it[updatedAt] = Instant.now()
+            }
+        }
+    }
+
+    fun loadOffset(
+        topic: String,
+        partition: Int,
+    ): Long? =
+        transaction {
+            KafkaOffsets
+                .selectAll()
+                .where {
+                    (KafkaOffsets.topic eq topic) and
+                        (KafkaOffsets.partition eq partition)
+                }.map { it[KafkaOffsets.offset] }
+                .singleOrNull()
+        }
+
+    fun loadOffsets(topicName: String): Map<Int, Long> =
+        transaction {
+            KafkaOffsets
+                .selectAll()
+                .where { KafkaOffsets.topic eq topicName }
+                .associate { row ->
+                    row[KafkaOffsets.partition] to row[KafkaOffsets.offset]
+                }
+        }
 }

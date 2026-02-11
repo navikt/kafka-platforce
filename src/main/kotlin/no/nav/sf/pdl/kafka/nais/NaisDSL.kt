@@ -1,6 +1,7 @@
 package no.nav.sf.pdl.kafka.nais
 
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.application
 import no.nav.sf.pdl.kafka.gui.Gui
 import no.nav.sf.pdl.kafka.investigate.Investigate
 import no.nav.sf.pdl.kafka.metrics.Prometheus
@@ -8,6 +9,7 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
 import org.http4k.core.Status
+import org.http4k.core.Status.Companion.OK
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 
@@ -32,6 +34,8 @@ fun naisAPI(): HttpHandler =
         },
         "/internal/gui" bind Method.GET to Gui.guiHandler,
         "/internal/investigate" bind Method.GET to Investigate.investigateHandler,
+        "/internal/clearDb" bind Method.GET to clearDbHandler,
+        "/internal/initDb" bind Method.GET to initDbHandler,
     )
 
 object ShutdownHook {
@@ -58,4 +62,22 @@ object ShutdownHook {
     }
 
     fun isActive() = shutdownhookActive
+}
+
+private val clearDbHandler: HttpHandler = {
+    if (application.db != null) {
+        application.db!!.createKafkaOffsetTable(true)
+        Response(OK).body("Table recreated")
+    } else {
+        Response(OK).body("There is no active database connection")
+    }
+}
+
+private val initDbHandler: HttpHandler = {
+    if (application.db != null) {
+        application.db!!.createKafkaOffsetTable(false)
+        Response(OK).body("Table created")
+    } else {
+        Response(OK).body("There is no active database connection")
+    }
 }

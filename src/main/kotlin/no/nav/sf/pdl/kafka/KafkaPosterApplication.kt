@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.db.PostgresDatabase
 import no.nav.sf.pdl.kafka.metrics.WorkSessionStatistics
 import no.nav.sf.pdl.kafka.nais.ShutdownHook
 import no.nav.sf.pdl.kafka.nais.naisAPI
@@ -34,15 +35,23 @@ class KafkaPosterApplication(
 
     private var runOnce = false
 
+    private val useDbOffsetFallback = env(config_USE_DB_OFFSET_FALLBACK).toBoolean()
+
+    var db: PostgresDatabase? = null
+
     fun start() {
         log.info {
             "Starting app ${env(
                 config_DEPLOY_APP,
-            )} - devContext $devContext - USE_DB_OFFSET_FALLBACK ${env(config_USE_DB_OFFSET_FALLBACK).toBoolean()} - " +
+            )} - devContext $devContext - USE_DB_OFFSET_FALLBACK ${env(config_USE_DB_OFFSET_FALLBACK).toBoolean()}" +
                 (if (env(config_FLAG_SEEK).toBoolean()) " - SEEK ${env(config_SEEK_OFFSET).toLong()}" else "") +
                 (if (env(config_NUMBER_OF_SAMPLES).toInt() > 0) " - SAMPLE ${env(config_NUMBER_OF_SAMPLES)}" else "") +
                 (if (env(config_FLAG_NO_POST).toBoolean()) " - NO_POST" else "") +
                 (if (env(config_FLAG_ALT_ID).toBoolean()) " - ALT_ID" else "")
+        }
+
+        if (useDbOffsetFallback) {
+            db = PostgresDatabase()
         }
         DefaultExports.initialize() // Instantiate Prometheus standard metrics
         naisAPI().asServer(Netty(8080)).start()
