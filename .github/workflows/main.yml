@@ -1,6 +1,9 @@
 name: Preconfigured run on push
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - 'chore/**'
 
 jobs:
   build-deploy:
