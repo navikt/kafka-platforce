@@ -29,18 +29,13 @@ import java.security.PrivateKey
  * Fetches and caches access token, also retrieves instance url
  */
 
-class DefaultAccessTokenHandler : AccessTokenHandler {
+class DefaultAccessTokenHandler(
+    override val tenantId: String = "",
+) : AccessTokenHandler {
     override val accessToken get() = fetchAccessTokenAndInstanceUrl().first
     override val instanceUrl get() = fetchAccessTokenAndInstanceUrl().second
 
     fun testAccess(): Boolean = fetchAccessTokenAndInstanceUrl(true).first != ""
-
-    override fun refreshToken() {
-        if ((expireTime - System.currentTimeMillis()) / 60000 < 30) { // Refresh if expireTime within 30 min
-            log.info { "Refreshing access token" }
-            accessToken
-        }
-    }
 
     private val log = KotlinLogging.logger { }
 

@@ -2,10 +2,14 @@ package no.nav.sf.pdl.kafka.nais
 
 import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.application
+import no.nav.sf.pdl.kafka.env
 import no.nav.sf.pdl.kafka.gui.Gui
 import no.nav.sf.pdl.kafka.investigate.Investigate
 import no.nav.sf.pdl.kafka.metrics.Prometheus
 import no.nav.sf.pdl.kafka.salesforce.DefaultAccessTokenHandler
+import no.nav.sf.pdl.kafka.salesforce.MigratingAccessTokenHandler
+import no.nav.sf.pdl.kafka.salesforce.NewAccessTokenHandler
+import no.nav.sf.pdl.kafka.secret_SF_VALIDATION_CLIENT_ID
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
@@ -37,7 +41,10 @@ fun naisAPI(): HttpHandler =
         "/internal/investigate" bind Method.GET to Investigate.investigateHandler,
         "/internal/clearDb" bind Method.GET to clearDbHandler,
         "/internal/initDb" bind Method.GET to initDbHandler,
-        "/internal/testaccess" bind Method.GET to testAccessHandler,
+        "/internal/testAccess/old" bind Method.GET to testAccessHandlerOld,
+        "/internal/testAccess/new" bind Method.GET to testAccessHandlerNew,
+        "/internal/testAccess/validation" bind Method.GET to testAccessHandlerValidation,
+        "/internal/testAccess/migration" bind Method.GET to testAccessHandlerMigration,
     )
 
 object ShutdownHook {
@@ -84,7 +91,23 @@ private val initDbHandler: HttpHandler = {
     }
 }
 
-private val testAccessHandler: HttpHandler = {
+private val testAccessHandlerOld: HttpHandler = {
     val defaultAccessTokenHandler = DefaultAccessTokenHandler()
-    Response(OK).body("Test access successful: " + defaultAccessTokenHandler.testAccess())
+    Response(OK).body("Test access (old) successful: " + defaultAccessTokenHandler.testAccess())
+}
+
+private val testAccessHandlerNew: HttpHandler = {
+    val newAccessTokenHandler = NewAccessTokenHandler()
+    Response(OK).body("Test access (new) successful: " + newAccessTokenHandler.testAccess())
+}
+
+private val testAccessHandlerValidation: HttpHandler = {
+    val newAccessTokenHandlerAgainstValidation = NewAccessTokenHandler(sfClientId = env(secret_SF_VALIDATION_CLIENT_ID))
+    Response(OK).body("Test access (validation) successful: " + newAccessTokenHandlerAgainstValidation.testAccess())
+}
+
+private val testAccessHandlerMigration: HttpHandler = {
+    val migrationTokenHandler =
+        MigratingAccessTokenHandler(old = DefaultAccessTokenHandler(), new = NewAccessTokenHandler())
+    Response(OK).body("Test access (validation) successful: " + migrationTokenHandler.accessToken.isNotBlank())
 }

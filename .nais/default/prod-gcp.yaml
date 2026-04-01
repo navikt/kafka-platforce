@@ -36,6 +36,8 @@ spec:
         - host: navdialog.my.salesforce.com
   kafka:
     pool: nav-prod # enum of nav-dev, nav-prod
+  envFrom:
+    - configmap: salesforce-common
   env:
     - name: KAFKA_TOPIC
       value: 'topic not specified'
