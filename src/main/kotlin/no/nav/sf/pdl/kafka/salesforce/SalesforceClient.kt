@@ -1,5 +1,6 @@
 package no.nav.sf.pdl.kafka.salesforce
 
+import no.nav.sf.pdl.kafka.devContext
 import org.http4k.client.OkHttp
 import org.http4k.core.Headers
 import org.http4k.core.HttpHandler
@@ -12,7 +13,8 @@ const val SALESFORCE_VERSION = "v57.0"
 
 class SalesforceClient(
     private val httpClient: HttpHandler = OkHttp(),
-    private val accessTokenHandler: AccessTokenHandler = DefaultAccessTokenHandler(),
+    private val accessTokenHandler: AccessTokenHandler =
+        if (devContext) MigratingAccessTokenHandler(DefaultAccessTokenHandler(), NewAccessTokenHandler()) else DefaultAccessTokenHandler(),
 ) {
     fun postRecords(kafkaMessages: Set<KafkaMessage>): Response {
         val requestBody = SFsObjectRest(records = kafkaMessages).toJson()
