@@ -5,6 +5,7 @@ import no.nav.sf.pdl.kafka.application
 import no.nav.sf.pdl.kafka.gui.Gui
 import no.nav.sf.pdl.kafka.investigate.Investigate
 import no.nav.sf.pdl.kafka.metrics.Prometheus
+import no.nav.sf.pdl.kafka.salesforce.DefaultAccessTokenHandler
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
@@ -36,6 +37,7 @@ fun naisAPI(): HttpHandler =
         "/internal/investigate" bind Method.GET to Investigate.investigateHandler,
         "/internal/clearDb" bind Method.GET to clearDbHandler,
         "/internal/initDb" bind Method.GET to initDbHandler,
+        "/internal/testaccess" bind Method.GET to testAccessHandler,
     )
 
 object ShutdownHook {
@@ -80,4 +82,9 @@ private val initDbHandler: HttpHandler = {
     } else {
         Response(OK).body("There is no active database connection")
     }
+}
+
+private val testAccessHandler: HttpHandler = {
+    val defaultAccessTokenHandler = DefaultAccessTokenHandler()
+    Response(OK).body("Test access successful: " + defaultAccessTokenHandler.testAccess())
 }
