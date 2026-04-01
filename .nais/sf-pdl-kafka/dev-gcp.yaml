@@ -9,7 +9,6 @@ spec:
     - "https://sf-pdl-kafka.intern.dev.nav.no"
   envFrom:
     - configmap: sf-pdl-kafka
-    - secret: migration
     - secret: sf-pdl-kafka
   env:
     - name: KAFKA_TOPIC
