@@ -1,6 +1,9 @@
 package no.nav.sf.pdl.kafka.salesforce
 
+import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.config_DEPLOY_APP
 import no.nav.sf.pdl.kafka.devContext
+import no.nav.sf.pdl.kafka.env
 import org.http4k.client.OkHttp
 import org.http4k.core.Headers
 import org.http4k.core.HttpHandler
@@ -11,10 +14,22 @@ import java.io.File
 
 const val SALESFORCE_VERSION = "v57.0"
 
+private val log = KotlinLogging.logger { }
+
 class SalesforceClient(
     private val httpClient: HttpHandler = OkHttp(),
     private val accessTokenHandler: AccessTokenHandler =
-        if (devContext) MigratingAccessTokenHandler(DefaultAccessTokenHandler(), NewAccessTokenHandler()) else DefaultAccessTokenHandler(),
+        if (devContext) {
+            if (env(config_DEPLOY_APP) == "sf-pdl-kafka" || env(config_DEPLOY_APP) == "sf-geografisktilknytning") {
+                log.info("Using new access token handler")
+                NewAccessTokenHandler()
+            } else {
+                log.info("Using old access token handler")
+                DefaultAccessTokenHandler()
+            }
+        } else {
+            DefaultAccessTokenHandler()
+        },
 ) {
     fun postRecords(kafkaMessages: Set<KafkaMessage>): Response {
         val requestBody = SFsObjectRest(records = kafkaMessages).toJson()
