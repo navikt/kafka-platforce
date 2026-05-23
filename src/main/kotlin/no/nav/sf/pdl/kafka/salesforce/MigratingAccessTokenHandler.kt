@@ -1,12 +1,31 @@
-package no.nav.sf.pdl.kafka.salesforce
+package no.nav.sf.pubsub.token
 
 import mu.KotlinLogging
+import no.nav.sf.pdl.kafka.salesforce.AccessTokenHandler
+import no.nav.sf.pdl.kafka.salesforce.DefaultAccessTokenHandler
+import no.nav.sf.pdl.kafka.salesforce.NewAccessTokenHandler
 
 class MigratingAccessTokenHandler(
     val old: DefaultAccessTokenHandler,
     val new: NewAccessTokenHandler,
 ) : AccessTokenHandler {
     private val log = KotlinLogging.logger {}
+
+    fun testAccess(): String =
+        try {
+            if (new.testAccess()) {
+                "Retrieved access token via new (migrated)"
+            } else {
+                "Unknown state"
+            }
+        } catch (e: Exception) {
+            if (old.testAccess()) {
+                "Retrieved access token via old (not yet migrated)"
+            } else {
+                "Unknown state, last exception message:" + e.message
+            }
+            // Will give exception if old do not work either
+        }
 
     override val accessToken: String
         get() {

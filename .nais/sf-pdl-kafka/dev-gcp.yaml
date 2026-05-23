@@ -8,8 +8,7 @@ spec:
   ingresses:
     - "https://sf-pdl-kafka.intern.dev.nav.no"
   envFrom:
-    - configmap: sf-pdl-kafka
-    - secret: sf-pdl-kafka
+    - secret: sf-pdl-kafka-sit2
   env:
     - name: KAFKA_TOPIC
       value: pdl.pdl-persondokument-tagged-v1

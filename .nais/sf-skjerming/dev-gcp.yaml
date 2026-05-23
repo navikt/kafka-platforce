@@ -1,5 +1,7 @@
 spec:
   envFrom:
+    - configmap: sf-skjerming
+    - secret: migration
     - secret: sf-skjerming
   env:
     - name: KAFKA_TOPIC

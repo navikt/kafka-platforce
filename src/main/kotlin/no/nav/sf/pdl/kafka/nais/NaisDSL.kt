@@ -7,9 +7,9 @@ import no.nav.sf.pdl.kafka.gui.Gui
 import no.nav.sf.pdl.kafka.investigate.Investigate
 import no.nav.sf.pdl.kafka.metrics.Prometheus
 import no.nav.sf.pdl.kafka.salesforce.DefaultAccessTokenHandler
-import no.nav.sf.pdl.kafka.salesforce.MigratingAccessTokenHandler
 import no.nav.sf.pdl.kafka.salesforce.NewAccessTokenHandler
 import no.nav.sf.pdl.kafka.secret_SF_VALIDATION_CLIENT_ID
+import no.nav.sf.pubsub.token.MigratingAccessTokenHandler
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
@@ -17,6 +17,8 @@ import org.http4k.core.Status
 import org.http4k.core.Status.Companion.OK
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private val log = KotlinLogging.logger { }
 
@@ -106,8 +108,10 @@ private val testAccessHandlerValidation: HttpHandler = {
     Response(OK).body("Test access (validation) successful: " + newAccessTokenHandlerAgainstValidation.testAccess())
 }
 
+val currentTimeStamp: String get() = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+
 private val testAccessHandlerMigration: HttpHandler = {
     val migrationTokenHandler =
         MigratingAccessTokenHandler(old = DefaultAccessTokenHandler(), new = NewAccessTokenHandler())
-    Response(OK).body("Test access (validation) successful: " + migrationTokenHandler.accessToken.isNotBlank())
+    Response(OK).body("$currentTimeStamp\nTest access (migration) result: " + migrationTokenHandler.testAccess())
 }
