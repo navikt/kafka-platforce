@@ -1,6 +1,8 @@
 spec:
   envFrom:
     - secret: sf-skjerming-prod
+  ingresses:
+    - "https://sf-skjerming.intern.nav.no"
   env:
     - name: KAFKA_TOPIC
       value: nom.skjermede-personer-v1
