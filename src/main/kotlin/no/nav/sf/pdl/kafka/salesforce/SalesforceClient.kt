@@ -18,14 +18,7 @@ private val log = KotlinLogging.logger { }
 
 class SalesforceClient(
     private val httpClient: HttpHandler = OkHttp(),
-    private val accessTokenHandler: AccessTokenHandler =
-        if (env(config_DEPLOY_APP) == "sf-pdl-kafka" || env(config_DEPLOY_APP) == "sf-geografisktilknytning") {
-            log.info("Using new access token handler")
-            NewAccessTokenHandler()
-        } else {
-            log.info("Using old access token handler")
-            DefaultAccessTokenHandler()
-        },
+    private val accessTokenHandler: AccessTokenHandler = NewAccessTokenHandler(),
 ) {
     fun postRecords(kafkaMessages: Set<KafkaMessage>): Response {
         val requestBody = SFsObjectRest(records = kafkaMessages).toJson()
