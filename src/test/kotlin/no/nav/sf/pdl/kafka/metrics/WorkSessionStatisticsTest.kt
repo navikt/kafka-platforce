@@ -15,6 +15,8 @@ class WorkSessionStatisticsTest {
             "WorkSessionStatistics(consumed=0, blockedByFilter=0, posted=0, consumedOffsets=NONE, postedOffsets=NONE)",
             workSessionStatistics.toString(),
         )
+
+        println(Prometheus.metricsAsText)
         assertTrue(Prometheus.metricsAsText.contains("consumed 0.0"))
 
         val listOf1 =
