@@ -86,10 +86,10 @@ object Investigate {
 
     private fun createInvestigateFilter(ids: List<String>): ((ConsumerRecord<String, String?>) -> Boolean) =
         { record: ConsumerRecord<String, String?> ->
-            log.info {
-                "INVESTIGATE consumed partition=${record.partition()} offset=${record.offset()} " +
-                    "timestamp=${record.timestamp()} valueSize=${record.value()?.length ?: -1}"
-            }
+//            log.info {
+//                "INVESTIGATE consumed partition=${record.partition()} offset=${record.offset()} " +
+//                    "timestamp=${record.timestamp()} valueSize=${record.value()?.length ?: -1}"
+//            }
             // Check if the key of the record matches any ID in the list
             if (ids.contains(record.key())) {
                 WorkSessionStatistics.investigateHitCounter.inc()
