@@ -1,5 +1,6 @@
 package no.nav.sf.pdl.kafka.investigate
 
+import mu.KotlinLogging
 import no.nav.sf.pdl.kafka.config_DEPLOY_APP
 import no.nav.sf.pdl.kafka.config_DEPLOY_CLUSTER
 import no.nav.sf.pdl.kafka.env
@@ -15,6 +16,8 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 object Investigate {
+    private val log = KotlinLogging.logger { }
+
     @Volatile
     var investigateInProgress = false
 
@@ -61,7 +64,11 @@ object Investigate {
                         )
 
                     try {
+                        log.info { "INVESTIGATE starting work session from offset $offset" }
                         investigatePoster.runWorkSession()
+                        log.info { "INVESTIGATE finished work session" }
+                    } catch (e: Throwable) {
+                        log.error { "INVESTIGATE work session failed: \n${e.stackTraceToString()}" }
                     } finally {
                         timeSpentLastInvestigate = System.currentTimeMillis() - startTime
                         investigateInProgress = false
@@ -79,6 +86,10 @@ object Investigate {
 
     private fun createInvestigateFilter(ids: List<String>): ((ConsumerRecord<String, String?>) -> Boolean) =
         { record: ConsumerRecord<String, String?> ->
+            log.info {
+                "INVESTIGATE consumed partition=${record.partition()} offset=${record.offset()} " +
+                    "timestamp=${record.timestamp()} valueSize=${record.value()?.length ?: -1}"
+            }
             // Check if the key of the record matches any ID in the list
             if (ids.contains(record.key())) {
                 WorkSessionStatistics.investigateHitCounter.inc()
