@@ -33,7 +33,7 @@ class KafkaPosterApplication(
 
     private var runOnce = false
 
-    private val useDbOffsetFallback = env(config_USE_DB_OFFSET_FALLBACK).toBoolean()
+    private val useDbOffsetFallback = false // env(config_USE_DB_OFFSET_FALLBACK).toBoolean()
 
     var db: PostgresDatabase? = null
 
