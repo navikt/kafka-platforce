@@ -3,7 +3,7 @@ plugins {
 
     id 'org.jetbrains.kotlin.jvm' version '2.4.21'
     id 'org.jmailen.kotlinter' version '5.2.0'
-    id 'com.gradleup.shadow' version '8.3.1'
+    id 'com.gradleup.shadow' version '9.2.1'
 }
 
 group 'no.nav.sf.pdl.kafka'
@@ -21,7 +21,7 @@ shadowJar {
 }
 
 application {
-    mainClassName = 'no.nav.sf.pdl.kafka.BootstrapKt'
+    mainClass = 'no.nav.sf.pdl.kafka.BootstrapKt'
 }
 
 repositories {
@@ -71,6 +71,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
     testImplementation 'io.mockk:mockk:1.14.11'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
 }
 
 test {
